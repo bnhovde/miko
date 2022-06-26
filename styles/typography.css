@@ -39,7 +39,7 @@ p {
 a,
 .link {
   cursor: pointer;
-  color: var(--col-dark);
+  color: var(--col-text);
   text-decoration: underline;
 }
 

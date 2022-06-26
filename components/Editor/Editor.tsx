@@ -1,6 +1,5 @@
-import React, { useContext } from "react";
+import React from "react";
 import classNames from "classnames";
-import { InputEvent } from "types/input";
 
 import styles from "./Editor.module.css";
 import Timeline from "components/Timeline";
@@ -8,20 +7,8 @@ import ColorPicker from "components/ColorPicker";
 import Canvas from "components/Canvas";
 import SpritePlayer from "components/SpritePlayer";
 import ToolPicker from "components/ToolPicker";
-import EditorContext from "context/EditorContext";
 
 const Editor: React.FC = () => {
-  const {
-    state,
-    onAddFrame,
-    onChangeFrame,
-    onDeleteFrame,
-    onDrawStart,
-    onDrawChange,
-    onSelectColor,
-    onSelectTool,
-  } = useContext(EditorContext);
-
   const editorClass = classNames({
     [styles["editor"]]: true,
   });
