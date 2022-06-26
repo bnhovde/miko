@@ -1,7 +1,7 @@
 import { Sprite } from "./sprite";
 
 export type EditorState = {
-  spriteData: Sprite;
+  spriteData?: Sprite;
   colors: string[];
   undoHistory: string[];
   isDrawing: boolean;

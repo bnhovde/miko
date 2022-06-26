@@ -21,10 +21,26 @@ const get = (key: string): string | null => {
   return null;
 };
 
+const getAll = (match: string): string[] | null => {
+  if (isSupported()) {
+    let matches = [];
+    for (var key in localStorage) {
+      if (key.indexOf(match) === 0) {
+        const value = localStorage.getItem(key);
+        if (value) {
+          matches.push(value);
+        }
+      }
+    }
+    return matches;
+  }
+  return null;
+};
+
 const remove = (key: string): void => {
   if (isSupported()) {
     localStorage.removeItem(key);
   }
 };
 
-export { isSupported, set, get, remove };
+export { isSupported, set, get, getAll, remove };

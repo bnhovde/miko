@@ -35,8 +35,8 @@ const Home: NextPage = () => {
 
       <Header
         action={{
-          text: "What is this?",
-          url: "/about",
+          text: "My creations",
+          url: "/app/my-creations",
         }}
       />
 
@@ -50,7 +50,7 @@ const Home: NextPage = () => {
           <SpritePreview
             hash={hashArray.hash}
             title="Random"
-            author={{ id: "123", name: "Intendo87" }}
+            author={{ id: "123", name: "Miko" }}
           />
         </div>
       </Main>

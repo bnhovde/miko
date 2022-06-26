@@ -1,5 +1,5 @@
 const localStorageKeys = {
-  SPRITES: "@@miko-sprites",
+  SPRITE: "@@miko-sprite",
 };
 
 export default localStorageKeys;

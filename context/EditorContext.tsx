@@ -8,12 +8,14 @@ import guid from "utils/guid";
 
 import { getDefaultHash } from "utils/hash";
 import { InputEvent } from "types/input";
+import { Sprite } from "types/sprite";
 
 /**
  * Reducer
  */
 
 enum EditorActionTypes {
+  LOAD_SPRITE = "LOAD_SPRITE",
   ADD_FRAME = "ADD_FRAME",
   DELETE_FRAME = "DELETE_FRAME",
   CHANGE_FRAME = "CHANGE_FRAME",
@@ -30,6 +32,7 @@ type UiActionPayload = {
   active?: boolean;
   frames?: string[];
   newHistory?: string[];
+  sprite?: Sprite;
 };
 
 type UiAction = {
@@ -46,11 +49,18 @@ export const uiReducer = (
   action: UiAction
 ): EditorState => {
   switch (action.type) {
+    case EditorActionTypes.LOAD_SPRITE:
+      return {
+        ...initialState.state,
+        spriteData: action.payload?.sprite,
+        currentHash: action.payload?.sprite?.frames[0] || "",
+      };
     case EditorActionTypes.CHANGE_FRAME:
       return {
         ...state,
         currentFrame: action.payload?.index || 0,
-        currentHash: state?.spriteData?.frames[action.payload?.index || 0],
+        currentHash:
+          state?.spriteData?.frames[action.payload?.index || 0] || "",
         unsavedHash: "",
         undoHistory: [],
         undoHistoryIndex: 0,
@@ -58,16 +68,18 @@ export const uiReducer = (
     case EditorActionTypes.ADD_FRAME:
       return {
         ...state,
-        spriteData: {
-          ...state.spriteData,
-          frames: [
-            ...(state.spriteData?.frames || []),
-            action.payload?.value || getDefaultHash(),
-          ],
-        },
-        currentFrame: state.spriteData?.frames.length,
+        spriteData: state.spriteData
+          ? {
+              ...state.spriteData,
+              frames: [
+                ...(state.spriteData?.frames || []),
+                action.payload?.value || getDefaultHash(),
+              ],
+            }
+          : undefined,
+        currentFrame: state.spriteData?.frames.length || 0,
         currentHash:
-          state?.spriteData?.frames[state.spriteData?.frames.length || 0],
+          state?.spriteData?.frames[state.spriteData?.frames.length || 0] || "",
         unsavedHash: "",
         undoHistory: [],
         undoHistoryIndex: 0,
@@ -75,16 +87,18 @@ export const uiReducer = (
     case EditorActionTypes.DELETE_FRAME:
       return {
         ...state,
-        spriteData: {
-          ...state.spriteData,
-          frames: [
-            ...(state.spriteData?.frames || []).filter(
-              (f) => (_hash: string, index: number) =>
-                index !== action.payload?.index
-            ),
-          ],
-        },
-        currentFrame: state.spriteData?.frames.length,
+        spriteData: state.spriteData
+          ? {
+              ...state.spriteData,
+              frames: [
+                ...(state.spriteData?.frames || []).filter(
+                  (f) => (_hash: string, index: number) =>
+                    index !== action.payload?.index
+                ),
+              ],
+            }
+          : undefined,
+        currentFrame: state.spriteData?.frames.length || 0,
         unsavedHash: "",
         undoHistory: [],
         undoHistoryIndex: 0,
@@ -114,10 +128,12 @@ export const uiReducer = (
       return {
         ...state,
         isDrawing: false,
-        spriteData: {
-          ...state.spriteData,
-          frames: action?.payload?.frames || [],
-        },
+        spriteData: state.spriteData
+          ? {
+              ...state.spriteData,
+              frames: action?.payload?.frames || [],
+            }
+          : undefined,
         undoHistory: action.payload?.newHistory || [],
         undoHistoryIndex: (action.payload?.newHistory || []).length,
         currentHash: state.unsavedHash,
@@ -134,6 +150,7 @@ export const uiReducer = (
 
 type ContextProps = {
   state: EditorState;
+  loadSprite: (sprite: Sprite) => void;
   onAddFrame: (frameHash?: string) => void;
   onChangeFrame: (frame: number) => void;
   onDeleteFrame: (frame: number) => void;
@@ -142,14 +159,6 @@ type ContextProps = {
   onDrawStart: (e: InputEvent) => void;
   onDrawEnd: (e: InputEvent) => void;
   onDrawChange?: (hash: string) => void;
-};
-
-const blankSprite = {
-  id: "example",
-  name: "Example sprite",
-  description: "This is an example sprite",
-  size: 11,
-  frames: [],
 };
 
 const defaultColors = [
@@ -165,7 +174,7 @@ const defaultColors = [
 
 const initialState: ContextProps = {
   state: {
-    spriteData: blankSprite,
+    spriteData: undefined,
     colors: defaultColors,
     isDrawing: false,
     currentFrame: 0,
@@ -176,6 +185,7 @@ const initialState: ContextProps = {
     currentHash: getDefaultHash(),
     unsavedHash: "",
   },
+  loadSprite: () => null,
   onAddFrame: () => null,
   onChangeFrame: () => null,
   onDeleteFrame: () => null,
@@ -204,7 +214,7 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
   };
 
   const getUpdatedFrames = (editedIndex: number, newHash: string) => {
-    const hasFrames = state.spriteData?.frames?.length > 0;
+    const hasFrames = state.spriteData && state.spriteData?.frames?.length > 0;
 
     if (hasFrames) {
       return state.spriteData?.frames.map((frame: string, index: number) => {
@@ -218,6 +228,14 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
       return [newHash];
     }
   };
+
+  const loadSprite = (sprite: Sprite) =>
+    dispatch({
+      type: EditorActionTypes.LOAD_SPRITE,
+      payload: {
+        sprite,
+      },
+    });
 
   const onAddFrame = (frameHash?: string) =>
     dispatch({
@@ -312,6 +330,15 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
       ];
     }
 
+    // Store sprite in localstorage
+    set(
+      `${localStorageKeys.SPRITE}-${state.spriteData?.id}`,
+      JSON.stringify({
+        ...state.spriteData,
+        frames: getUpdatedFrames(state.currentFrame, state.unsavedHash),
+      })
+    );
+
     dispatch({
       type: EditorActionTypes.COMMIT_DRAWING,
       payload: {
@@ -325,6 +352,7 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
     <EditorContext.Provider
       value={{
         state,
+        loadSprite,
         onAddFrame,
         onDeleteFrame,
         onChangeFrame,

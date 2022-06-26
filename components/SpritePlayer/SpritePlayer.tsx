@@ -21,11 +21,17 @@ const SpritePlayer: React.FC<Props> = ({ autoPlay, preview }) => {
   const [isPlaying, setIsPlaying] = useState(autoPlay);
   const [delay] = useState<number>(100);
 
+  console.log("state.spriteData: ", state.spriteData);
+
   useInterval(
     () => {
-      setLocalFrame(
-        localFrame >= state.spriteData.frames?.length - 1 ? 0 : localFrame + 1
-      );
+      if (state.spriteData) {
+        setLocalFrame(
+          localFrame >= state.spriteData?.frames?.length - 1
+            ? 0
+            : localFrame + 1
+        );
+      }
     },
     // Delay in milliseconds or null to stop it
     isPlaying ? delay : null
@@ -44,7 +50,7 @@ const SpritePlayer: React.FC<Props> = ({ autoPlay, preview }) => {
         <div className={styles["player-inner"]}>
           <Frame
             hash={
-              state.spriteData.frames[
+              state.spriteData?.frames[
                 isPlaying ? localFrame : state.currentFrame || 0
               ]
             }
@@ -60,7 +66,7 @@ const SpritePlayer: React.FC<Props> = ({ autoPlay, preview }) => {
             }}
             onClick={() => setIsPlaying(!isPlaying)}
             isActive={isPlaying}
-            disabled={!state.spriteData.frames}
+            disabled={!state.spriteData?.frames}
           />
         </div>
       )}

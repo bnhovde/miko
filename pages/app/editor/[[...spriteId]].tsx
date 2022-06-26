@@ -11,13 +11,41 @@ import EditorContext from "context/EditorContext";
 
 import { getDefaultHash, getRandomHash } from "utils/hash";
 import dynamic from "next/dynamic";
-import { useContext, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import Timeline from "components/Timeline";
 import Editor from "components/Editor";
 import sprites from "data/sprite";
+import guid from "utils/guid";
+import { useRouter } from "next/router";
+import { get } from "utils/localStorage";
+import localStorageKeys from "constants/localStorageKeys";
+import { Sprite } from "types/sprite";
 
 const Home: NextPage = () => {
-  const { onDrawEnd } = useContext(EditorContext);
+  const { query } = useRouter();
+  const { onDrawEnd, loadSprite } = useContext(EditorContext);
+
+  const blankSprite = {
+    id: guid(),
+    name: "Blank sprite",
+    description: "This is an example sprite",
+    size: 11,
+    frames: [
+      "#fff0;#000;0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    ],
+  };
+
+  useEffect(() => {
+    if (query.spriteId) {
+      const spriteData = get(`${localStorageKeys.SPRITE}-${query.spriteId}`);
+      if (spriteData) {
+        const parsed = JSON.parse(spriteData) as Sprite;
+        loadSprite(parsed);
+      }
+    } else {
+      loadSprite(blankSprite);
+    }
+  }, [query]);
 
   return (
     <div
@@ -38,7 +66,7 @@ const Home: NextPage = () => {
 
         <Header
           title="New Sprite"
-          backUrl="/"
+          backUrl={query.spriteId ? "/app/my-creations" : "/"}
           action={{
             text: "Settings",
             url: "/about",
