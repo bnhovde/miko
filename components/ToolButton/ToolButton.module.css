@@ -1,0 +1,36 @@
+.button {
+  position: relative;
+  display: block;
+  height: 7.8rem;
+  width: 7.8rem;
+  color: black;
+  background-color: var(--col-bg);
+  border: 1px solid var(--col-dark);
+  transition: all var(--transition);
+}
+
+.button:active {
+  opacity: 0.8;
+  transform: scale(0.95);
+}
+
+.-active {
+  background-color: white;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: var(--block-size-medium);
+}
+
+.icon > svg {
+  width: 100%;
+}

@@ -1,0 +1,13 @@
+.footer {
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: var(--block-size) var(--gutter-size);
+}
+
+.shortcuts {
+  display: flex;
+  justify-content: flex-start;
+  gap: var(--block-size);
+}

@@ -1,0 +1,40 @@
+.button {
+  position: relative;
+  display: inline-block;
+  height: 6.8rem;
+  min-width: 20.2rem;
+  pointer-events: auto;
+  cursor: pointer;
+  border: 0.4rem solid white;
+  padding: 1.5rem 3rem;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family);
+  font-size: var(--base-font-size);
+  background: white;
+  text-transform: uppercase;
+  text-align: center;
+  border-radius: var(--border-radius-card);
+  transition: all var(--transition);
+}
+.button:hover {
+  border-color: var(--col-1);
+  text-decoration: underline;
+}
+.button:active {
+  background-color: var(--col-1);
+  transform: scale(0.98);
+}
+
+/* Modifiers */
+
+.-full {
+  display: block;
+  width: 100%;
+  text-align: center;
+  margin-left: 0;
+}
+
+.-secondary > span {
+  background-color: #eafee7;
+}

@@ -1,0 +1,93 @@
+/**
+* Global variables.
+*/
+
+:root {
+  /**
+ * Core settings.
+ */
+  --base-font-size: 2rem; /* Base font size = 16px */
+  --font-size-small: 1.2rem;
+  
+  --block-size: 3.6rem;
+  --block-size-small: 1.2rem;
+  --block-size-medium: 1.6rem;
+  
+  --gutter-size: 6.3rem;
+
+  --canvas-max-size: 48rem;
+
+  /**
+ * Colors.
+ */
+  --col-bg: #E9E9E9;
+  --col-1: #FFC8DD;
+
+  --col-gray: #79828D;
+  --col-dark: #646464;
+
+  /**
+ * Spacing.
+ */
+
+  --spacing-1: 8px;
+  --spacing-2: 12px;
+  --spacing-3: 16px;
+  --spacing-4: 24px;
+  --spacing-5: 32px;
+  --spacing-6: 40px;
+  --spacing-7: 48px;
+
+  /**
+ * General.
+ */
+
+  --transition: 0.1s cubic-bezier(0, 0, 0.3, 0.9);
+  --border-radius: 0.7rem;
+  --border-radius-card: 2rem;
+
+  --page-width-contents: 800px;
+  --page-width-wide: 1560px;
+  --page-width-regular: 1300px;
+  --page-width-narrow: 750px;
+  --page-width-min: 480px;
+
+  --layout-two-columns: minmax(32rem, 1fr) 6fr;
+  --layout-three-columns: minmax(32rem, 1fr) 4fr 2fr;
+  --layout-four-columns: minmax(32rem, 1fr) 4fr 2fr 4fr;
+
+  --font-family: 'Sen', sans-serif;
+  --font-family-alt: "Raleway", sans-serif;
+
+  /**
+ * Breakpoints
+ */
+
+  --small: "(min-width: 20em)" /* from 320px to X */;
+  --medium: "(min-width: 48em)" /* from 768px to X */;
+  --large: "(min-width: 67.5em)" /* from 1080px to X */;
+  --xlarge: "(min-width: 83em)" /* from 1328px to X */;
+
+  --max-small: "(max-width: 19.938em)" /* from 0 to 320px */;
+  --max-medium: "(max-width: 47.938em)" /* from 0 to 768px */;
+  --max-large: "(max-width: 67.438em)" /* from 0 to 1080px */;
+  --max-xlarge: "(max-width: 82.938em)"; /* from 0 to 1328px */
+}
+
+/**
+ * Responsive variables.
+ */
+
+:root {
+  --page-gutters-responsive: 1rem;
+}
+@media (min-width: 48em) {
+  :root {
+    --page-gutters-responsive: 2rem;
+  }
+}
+@media (min-width: 67.5em) {
+  :root {
+    --page-gutters-responsive: 4rem;
+  }
+}

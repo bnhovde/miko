@@ -1,0 +1,102 @@
+html {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  vertical-align: baseline;
+  font-size: 62.5%;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Safari viewport bug fix */
+  height: -webkit-fill-available;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  vertical-align: baseline;
+  font-weight: normal;
+  font-family: var(--font-family);
+  color: var(--col-text);
+  font-size: var(--base-font-size);
+  background-color: var(--col-bg);
+
+  min-height: 100vh; /* Fill entire height of page */
+  min-height: -webkit-fill-available; /* Safari viewport bug fix */
+}
+
+/* Global prefill styling for webkit (remove yellow fill) */
+:-webkit-autofill,
+:-webkit-autofill:hover,
+:-webkit-autofill:focus {
+  -webkit-text-fill-color: black;
+  -webkit-box-shadow: 0 0 0 1000px white inset;
+}
+
+h1,
+h2,
+h3,
+h4,
+strong,
+blockquote,
+p,
+a {
+  margin: 0;
+  font-weight: 300;
+}
+
+ul,
+li {
+  margin: 0;
+  padding: 0;
+}
+
+button {
+  margin: 0;
+  padding: 0;
+}
+
+form,
+fieldset {
+  margin: 0;
+  padding: 0;
+}
+
+hr {
+  margin: var(--spacing-2) auto;
+  color: black;
+  max-width: 10rem;
+}
+
+/* Accessibility styles (when not using keyboard) */
+:focus {
+  outline: 0;
+  box-shadow: none;
+}
+
+::-moz-focus-inner {
+  border: 0;
+}
+
+/* Accessibility styles (when using keyboard) */
+.body--a11y *:focus {
+  outline: 2px solid var(--col-focus);
+  outline-offset: -2px;
+}
+
+/* Text selection */
+::selection {
+  background: var(--col-1);
+}
+
+/* Modal and drawer helper class */
+.body--frozen {
+  overscroll-behavior: none;
+}
+
+/* Prevent animations on load */
+.body--preload * {
+  transition: none !important;
+}

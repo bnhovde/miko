@@ -1,0 +1,37 @@
+.button {
+  display: block;
+  position: relative;
+  width: 7.5rem;
+  height: 7.5rem;
+  border: 0;
+  transition: all 0.1s ease;
+}
+
+.button:after {
+  content: '';
+  display: block;
+  width: 4.5rem;
+  height: 4.5rem;
+  position: absolute;
+  background: var(--col-bg);
+  border-radius: 50%;
+  top: calc(50% - 2.25rem);
+  left: calc(50% - 2.25rem);
+  transform: scale(0);
+  transition: all var(--transition);
+}
+
+.button:active {
+  opacity: 0.8;
+  transform: scale(0.95);
+}
+
+.inner {
+  display: none;
+}
+
+/* Modifiers */
+
+.-active:after {
+  transform: scale(1);
+}

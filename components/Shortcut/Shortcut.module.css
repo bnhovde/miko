@@ -1,0 +1,41 @@
+.shortcut {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--font-size-small);
+  border: 0;
+}
+.shortcut:hover .badge {
+  background-color: var(--col-1);
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  height: 2.6rem;
+  color: var(--col-text);
+  padding: 0 1rem;
+  font-weight: bold;
+  border-radius: var(--border-radius);
+  transition: transform 0.3s cubic-bezier(0.7, 0, 0.2, 1);
+}
+
+.text{
+  margin-left: 1.2rem;
+  text-transform: uppercase;
+}
+
+/* Modifiers */
+
+.-active .badge {
+  background-color: var(--col-1);
+}
+
+.-disabled {
+ cursor: not-allowed;
+}
+
+.-disabled .badge {
+  background-color: var(--col-gray);
+}

@@ -1,0 +1,34 @@
+.header {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  padding: var(--block-size) var(--gutter-size);
+}
+
+.left {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.right {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.title {
+  display: flex;
+  justify-content: center;
+  text-transform: uppercase;
+}
+
+.text {
+  display: flex;
+  font-size: var(--base-font-size);
+  gap: var(--block-size-small);
+  text-transform: uppercase;
+}
+
+
+.header > a {
+  text-decoration: none;
+}

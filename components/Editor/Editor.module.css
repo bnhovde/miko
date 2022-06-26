@@ -1,0 +1,32 @@
+.editor {
+  display: block;
+}
+
+.timeline {
+  display: block;
+}
+
+.body {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  margin-top: var(--block-size);
+}
+
+.toolbar {
+  margin-top: var(--block-size);
+}
+
+.colors-inner {
+  width: 100%;
+  max-width: 16.6rem;
+}
+
+.preview {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.preview-inner {
+  width: 100%;
+  max-width: 26rem;
+}

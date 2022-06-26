@@ -1,0 +1,82 @@
+h1,
+.h1 {
+  font-family: var(--font-family);
+  font-size: 2rem;
+  font-weight: 300;
+  line-height: 1.2;
+}
+
+h2,
+.h2 {
+  font-family: var(--font-family);
+  font-size: 2rem;
+  font-weight: 300;
+  line-height: 1.3;
+}
+
+h3,
+.h3 {
+  font-family: var(--font-family);
+  font-size: 1.6rem;
+  font-weight: 300;
+  line-height: 1.3;
+}
+
+strong {
+  font-weight: bold;
+}
+
+small,
+.small {
+  display: inline-block;
+  font-size: 1.4rem;
+}
+
+p {
+  font-size: 2rem;
+}
+
+a,
+.link {
+  cursor: pointer;
+  color: var(--col-dark);
+  text-decoration: underline;
+}
+
+a:hover,
+.link:hover {
+  color: #FFC8DD;
+}
+
+a:active,
+.link:active {
+  color: var(--col-link);
+}
+
+.label {
+  font-size: 1.4rem;
+  color: var(--col-gray);
+  text-transform: uppercase;
+}
+
+/* Screenreaders */
+.sr {
+  position: absolute;
+  border: 0;
+  clip: rect(1px, 1px, 1px, 1px);
+  clip-path: inset(50%);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  width: 1px;
+  word-wrap: normal !important;
+}
+
+/* No-break text */
+.nb {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin-right: var(--spacing-2);
+}
