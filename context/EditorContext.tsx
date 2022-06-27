@@ -77,34 +77,29 @@ export const uiReducer = (
               ],
             }
           : undefined,
-        currentFrame: state.spriteData?.frames.length || 0,
-        currentHash:
-          state?.spriteData?.frames[state.spriteData?.frames.length || 0] || "",
+        currentFrame: action.payload?.index || 0 + 1,
+        currentHash: action.payload?.value || getDefaultHash(),
         unsavedHash: "",
         undoHistory: [],
         undoHistoryIndex: 0,
       };
     case EditorActionTypes.DELETE_FRAME:
-      const test = (state.spriteData?.frames || []).filter(
-        (f) => (_hash: string, index: number) => index !== action.payload?.index
-      );
-
-      console.log(test);
-
+      const newFrames = [
+        ...(state.spriteData?.frames || []).filter(
+          (_hash: string, index: number) => index !== action.payload?.index
+        ),
+      ];
       return {
         ...state,
         spriteData: state.spriteData
           ? {
               ...state.spriteData,
-              frames: [
-                ...(state.spriteData?.frames || []).filter(
-                  (f) => (_hash: string, index: number) =>
-                    index !== action.payload?.index
-                ),
-              ],
+              frames: newFrames,
             }
           : undefined,
-        currentFrame: state.spriteData?.frames.length || 0 - 1,
+        currentFrame: (newFrames.length || 0) - 1,
+        currentHash:
+          state?.spriteData?.frames[(newFrames.length || 0) - 1] || "",
         unsavedHash: "",
         undoHistory: [],
         undoHistoryIndex: 0,
@@ -157,7 +152,7 @@ export const uiReducer = (
 type ContextProps = {
   state: EditorState;
   loadSprite: (sprite: Sprite) => void;
-  onAddFrame: (frameHash?: string) => void;
+  onAddFrame: (frameIndex: number, frameHash?: string) => void;
   onChangeFrame: (frame: number) => void;
   onDeleteFrame: (frame: number) => void;
   onSelectColor: (newColor?: string) => void;
@@ -245,11 +240,12 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
       },
     });
 
-  const onAddFrame = (frameHash?: string) =>
+  const onAddFrame = (frameIndex: number, frameHash?: string) =>
     dispatch({
       type: EditorActionTypes.ADD_FRAME,
       payload: {
         value: frameHash,
+        index: frameIndex,
       },
     });
 

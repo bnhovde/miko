@@ -14,11 +14,13 @@ const Timeline: React.FC = () => {
   const cmdDown = useKeyPressed((ev: KeyboardEvent) => ev.metaKey);
   const shiftDown = useKeyPressed((ev: KeyboardEvent) => ev.shiftKey);
 
+  const onlyOneFrame =
+    state.spriteData?.frames && state.spriteData?.frames?.length < 2;
+
   const onFrameClickHandler = (frame: number) => {
-    onChangeFrame(frame);
     if (cmdDown) {
-      onAddFrame(state.spriteData?.frames[frame]);
-    } else if (shiftDown) {
+      onAddFrame(frame, state.spriteData?.frames[frame]);
+    } else if (shiftDown && !onlyOneFrame) {
       onDeleteFrame(frame);
     } else {
       onChangeFrame(frame);
@@ -28,9 +30,9 @@ const Timeline: React.FC = () => {
   const onAddFrameHandler = () => {
     const lastFrame = state.spriteData?.frames[frames.length - 1];
     if (shiftDown) {
-      onAddFrame(lastFrame);
+      onAddFrame(frames.length - 1, lastFrame);
     } else {
-      onAddFrame();
+      onAddFrame(frames.length - 1);
     }
   };
 
@@ -53,7 +55,7 @@ const Timeline: React.FC = () => {
               </button>
               <div
                 className={styles.overlay}
-                data-visible={shiftDown || cmdDown}
+                data-visible={(shiftDown && !onlyOneFrame) || cmdDown}
               >
                 <>{cmdDown && <FiCopy />}</>
                 <>{shiftDown && <FiTrash2 />}</>
