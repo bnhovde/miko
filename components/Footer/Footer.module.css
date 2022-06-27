@@ -9,5 +9,6 @@
 .shortcuts {
   display: flex;
   justify-content: flex-start;
+  align-items: center;
   gap: var(--block-size);
 }

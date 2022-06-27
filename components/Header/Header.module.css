@@ -7,17 +7,20 @@
 
 .left {
   display: flex;
+  align-items: center;
   justify-content: flex-start;
 }
 
 .right {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
 }
 
 .title {
   display: flex;
   justify-content: center;
+  align-items: center;
   text-transform: uppercase;
 }
 

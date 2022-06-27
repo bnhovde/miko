@@ -6,7 +6,7 @@ import { getDefaultHash, getHashArray, updateHash } from "utils/hash";
 import styles from "./Canvas.module.css";
 
 const Canvas: React.FC = () => {
-  const { state, onDrawStart, onDrawChange, onSelectColor } =
+  const { state, onDrawStart, onTouchStart, onDrawChange, onSelectColor } =
     useContext(EditorContext);
 
   const hash = state.unsavedHash || state.currentHash;
@@ -16,9 +16,12 @@ const Canvas: React.FC = () => {
   const onMouseOver = (
     index: number,
     event: InputEvent,
-    isFirstClick?: boolean
+    isFirstClick?: boolean,
+    isTouch?: boolean
   ) => {
-    event.preventDefault();
+    if (!isTouch) {
+      event.preventDefault();
+    }
 
     // Skip action for right click
     if ("button" in event && event.button === 2) {
@@ -51,7 +54,7 @@ const Canvas: React.FC = () => {
         <div
           className={styles.canvas}
           onMouseDown={onDrawStart}
-          onTouchStart={onDrawStart}
+          onTouchStart={onTouchStart}
         >
           {hashArray.map((hex, index) => (
             <button
@@ -60,8 +63,9 @@ const Canvas: React.FC = () => {
               onContextMenu={(event) => onContextMenu(event, hex)}
               onMouseOver={(event) => onMouseOver(index, event)}
               onFocus={(event) => onMouseOver(index, event)}
+              onTouchMove={(event) => onMouseOver(index, event, false, true)}
               onMouseDown={(event) => onMouseOver(index, event, true)}
-              onTouchStart={(event) => onMouseOver(index, event, true)}
+              onTouchStart={(event) => onMouseOver(index, event, true, true)}
               style={{ background: `${hex}` }}
             >
               {/* {onionHashArray[index] && (

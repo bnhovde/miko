@@ -2,6 +2,7 @@ import React from "react";
 import classNames from "classnames";
 
 import styles from "./Shortcut.module.css";
+import useKeyPressed from "hooks/useKey";
 
 type Props = {
   data: {
@@ -14,9 +15,11 @@ type Props = {
 };
 
 const Shortcut: React.FC<Props> = ({ data, isActive, disabled, onClick }) => {
+  const cmdDown = useKeyPressed((ev: KeyboardEvent) => ev.metaKey);
+
   const shortcutClass = classNames({
     [styles["shortcut"]]: true,
-    [styles["-active"]]: isActive,
+    [styles["-active"]]: cmdDown || isActive,
     [styles["-disabled"]]: disabled,
   });
 

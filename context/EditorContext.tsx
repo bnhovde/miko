@@ -85,6 +85,12 @@ export const uiReducer = (
         undoHistoryIndex: 0,
       };
     case EditorActionTypes.DELETE_FRAME:
+      const test = (state.spriteData?.frames || []).filter(
+        (f) => (_hash: string, index: number) => index !== action.payload?.index
+      );
+
+      console.log(test);
+
       return {
         ...state,
         spriteData: state.spriteData
@@ -98,7 +104,7 @@ export const uiReducer = (
               ],
             }
           : undefined,
-        currentFrame: state.spriteData?.frames.length || 0,
+        currentFrame: state.spriteData?.frames.length || 0 - 1,
         unsavedHash: "",
         undoHistory: [],
         undoHistoryIndex: 0,
@@ -157,6 +163,7 @@ type ContextProps = {
   onSelectColor: (newColor?: string) => void;
   onSelectTool: (newTool: string) => void;
   onDrawStart: (e: InputEvent) => void;
+  onTouchStart: (e: InputEvent) => void;
   onDrawEnd: (e: InputEvent) => void;
   onDrawChange?: (hash: string) => void;
 };
@@ -191,6 +198,7 @@ const initialState: ContextProps = {
   onDeleteFrame: () => null,
   onSelectColor: () => null,
   onSelectTool: () => null,
+  onTouchStart: () => null,
   onDrawStart: () => null,
   onDrawEnd: () => null,
   onDrawChange: () => null,
@@ -277,6 +285,15 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
       },
     });
 
+  const onTouchStart = (event: InputEvent) => {
+    dispatch({
+      type: EditorActionTypes.START_DRAWING,
+      payload: {
+        active: true,
+      },
+    });
+  };
+
   const onDrawStart = (event: InputEvent) => {
     event.preventDefault();
 
@@ -284,8 +301,6 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
     if ("button" in event && event.button === 2) {
       return;
     }
-
-    console.log("onDrawStart");
 
     dispatch({
       type: EditorActionTypes.START_DRAWING,
@@ -358,6 +373,7 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
         onChangeFrame,
         onSelectColor,
         onSelectTool,
+        onTouchStart,
         onDrawStart,
         onDrawChange,
         onDrawEnd,

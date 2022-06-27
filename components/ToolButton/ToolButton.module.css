@@ -1,11 +1,11 @@
 .button {
   position: relative;
   display: block;
-  height: 7.8rem;
-  width: 7.8rem;
+  height: var(--button-size);
+  width: var(--button-size);
   color: black;
   background-color: var(--col-bg);
-  border: 1px solid var(--col-dark);
+  border: 1px solid var(--col-line);
   transition: all var(--transition);
 }
 
@@ -33,4 +33,8 @@
 
 .icon > svg {
   width: 100%;
+}
+
+.-disabled .icon > svg {
+  opacity: 0.2;
 }

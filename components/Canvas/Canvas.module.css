@@ -4,6 +4,8 @@
   flex-direction: column;
   align-items: center;
   gap: var(--block-size-small);
+  max-width: min(var(--canvas-max-size), 50vh);
+  margin: 0 auto;
 }
 
 .editor {
@@ -24,6 +26,7 @@
   grid-template-columns: repeat(11, 1fr);
   grid-template-rows: repeat(11, 1fr);
   border: 1px solid #a8a8a81c;
+  touch-action: none;
 }
 
 .pixel {

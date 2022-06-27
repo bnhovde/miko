@@ -16,6 +16,7 @@
   --gutter-size: 6.3rem;
 
   --canvas-max-size: 48rem;
+  --button-size: 7.5rem;
 
   /**
  * Colors.
@@ -26,6 +27,7 @@
   --col-gray: #79828D;
   --col-dark: #646464;
   --col-text: black;
+  --col-line: rgba(0, 0, 0, 0.1);
 
   /**
  * Spacing.
@@ -80,15 +82,22 @@
  */
 
 :root {
-  --page-gutters-responsive: 1rem;
+  --block-size: 1.6rem;
+  --block-size-small: 1.2rem;
+  --block-size-medium: 1.6rem;
+  --gutter-size: 1.6rem;
+  --timeline-height: 7.5rem;
+}
+@media (min-height: 60rem) {
+  :root {
+    --block-size: 3.6rem;
+    --block-size-small: 1.2rem;
+    --block-size-medium: 1.6rem;
+    --timeline-height: 7.5rem;
+  }
 }
 @media (min-width: 48em) {
   :root {
-    --page-gutters-responsive: 2rem;
-  }
-}
-@media (min-width: 67.5em) {
-  :root {
-    --page-gutters-responsive: 4rem;
+    --gutter-size: 6.3rem;
   }
 }

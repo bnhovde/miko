@@ -21,8 +21,6 @@ const SpritePlayer: React.FC<Props> = ({ autoPlay, preview }) => {
   const [isPlaying, setIsPlaying] = useState(autoPlay);
   const [delay] = useState<number>(100);
 
-  console.log("state.spriteData: ", state.spriteData);
-
   useInterval(
     () => {
       if (state.spriteData) {
