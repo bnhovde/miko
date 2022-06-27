@@ -17,9 +17,13 @@ type Props = {
     text: string;
     url: string;
   };
+  button?: {
+    text: string;
+    onClick: () => void;
+  };
 };
 
-const Footer: React.FC<Props> = ({ shortcuts, action }) => {
+const Footer: React.FC<Props> = ({ shortcuts, action, button }) => {
   const footerClass = classNames({
     [styles["footer"]]: true,
   });
@@ -38,6 +42,7 @@ const Footer: React.FC<Props> = ({ shortcuts, action }) => {
         )}
       </>
 
+      <>{button && <Button onClick={button.onClick}>{button.text}</Button>}</>
       <>{action && <ButtonLink href={action.url}>{action.text}</ButtonLink>}</>
     </footer>
   );

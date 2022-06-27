@@ -8,6 +8,7 @@ type Props = {
   full?: boolean;
   secondary?: boolean;
   disabled?: boolean;
+  small?: boolean;
   type?: "button" | "submit" | "reset";
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
 };
@@ -15,6 +16,7 @@ type Props = {
 const Button: React.FC<Props> = ({
   children,
   full,
+  small,
   secondary,
   onClick,
   ...props
@@ -23,6 +25,7 @@ const Button: React.FC<Props> = ({
     [styles["button"]]: true,
     [styles["-secondary"]]: secondary,
     [styles["-full"]]: full,
+    [styles["-small"]]: small,
   });
 
   return (

@@ -35,6 +35,11 @@
   margin-left: 0;
 }
 
+.-small {
+  height: 4.2rem;
+  min-width: 14.2rem;
+}
+
 .-secondary > span {
   background-color: #eafee7;
 }

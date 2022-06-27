@@ -107,7 +107,7 @@ export const uiReducer = (
     case EditorActionTypes.CHANGE_COLOR:
       return {
         ...state,
-        currentColor: action.payload?.value || "#fff0",
+        currentColor: action.payload?.value || "fff0",
         currentTool: "pencil",
       };
     case EditorActionTypes.CHANGE_TOOL:
@@ -164,14 +164,14 @@ type ContextProps = {
 };
 
 const defaultColors = [
-  "#FCE288",
-  "#6FCF97",
-  "#2D9CDB",
-  "#56CCF2",
-  "#219653",
-  "#F2994A",
-  "#EB5757",
-  "#FCE288",
+  "FCE288",
+  "6FCF97",
+  "2D9CDB",
+  "56CCF2",
+  "219653",
+  "F2994A",
+  "EB5757",
+  "FCE288",
 ];
 
 const initialState: ContextProps = {
@@ -180,7 +180,7 @@ const initialState: ContextProps = {
     colors: defaultColors,
     isDrawing: false,
     currentFrame: 0,
-    currentColor: "#000",
+    currentColor: "000",
     undoHistory: [],
     undoHistoryIndex: 0,
     currentTool: "pencil",

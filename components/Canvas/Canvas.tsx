@@ -66,7 +66,7 @@ const Canvas: React.FC = () => {
               onTouchMove={(event) => onMouseOver(index, event, false, true)}
               onMouseDown={(event) => onMouseOver(index, event, true)}
               onTouchStart={(event) => onMouseOver(index, event, true, true)}
-              style={{ background: `${hex}` }}
+              style={{ background: `#${hex}` }}
             >
               {/* {onionHashArray[index] && (
                 <div

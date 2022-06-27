@@ -23,7 +23,7 @@ const SpritePreview: React.FC<Props> = ({ title, hash, author, small }) => {
             <div
               className={styles.pixel}
               key={index}
-              style={{ background: `${hex}` }}
+              style={{ background: `#${hex}` }}
             />
           ))}
         </div>

@@ -16,14 +16,14 @@ import Timeline from "components/Timeline";
 import Editor from "components/Editor";
 import sprites from "data/sprite";
 import guid from "utils/guid";
-import { useRouter } from "next/router";
+import Router, { useRouter } from "next/router";
 import { get } from "utils/localStorage";
 import localStorageKeys from "constants/localStorageKeys";
 import { Sprite } from "types/sprite";
 
 const Home: NextPage = () => {
-  const { query } = useRouter();
-  const { onDrawEnd, loadSprite } = useContext(EditorContext);
+  const { query, push } = useRouter();
+  const { state, onDrawEnd, loadSprite } = useContext(EditorContext);
 
   const blankSprite = {
     id: guid(),
@@ -31,7 +31,7 @@ const Home: NextPage = () => {
     description: "This is an example sprite",
     size: 11,
     frames: [
-      "#fff0;#000;0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "fff0;000;0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
     ],
   };
 
@@ -40,12 +40,25 @@ const Home: NextPage = () => {
       const spriteData = get(`${localStorageKeys.SPRITE}-${query.spriteId}`);
       if (spriteData) {
         const parsed = JSON.parse(spriteData) as Sprite;
-        loadSprite(parsed);
+        const TEMP_cleanParsed = {
+          ...parsed,
+          frames: parsed.frames.map((frame) => {
+            return frame.replace(/#/gi, "");
+          }),
+        };
+        loadSprite(TEMP_cleanParsed);
       }
     } else {
       loadSprite(blankSprite);
     }
   }, [query]);
+
+  const onShare = () => {
+    const params = `?id=${state.spriteData?.id}&name=${
+      state.spriteData?.name
+    }&frames=${state.spriteData?.frames.join("_")}'`;
+    window.open(`/app/share${params}`, "_blank");
+  };
 
   return (
     <div
@@ -82,6 +95,10 @@ const Home: NextPage = () => {
             { key: "N", label: "New frame" },
             { key: "D", label: "Duplicate frame" },
           ]}
+          button={{
+            text: "Share",
+            onClick: () => onShare(),
+          }}
         />
       </Screen>
     </div>

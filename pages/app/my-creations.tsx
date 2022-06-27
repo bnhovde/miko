@@ -25,7 +25,13 @@ const Home: NextPage = () => {
     const items = getAll(localStorageKeys.SPRITE);
     const sprites = items?.map((item) => JSON.parse(item)) as Sprite[];
     if (sprites) {
-      setSprites(sprites);
+      const TEMP_cleanSprites = sprites.map((sprite) => ({
+        ...sprite,
+        frames: sprite.frames.map((frame) => {
+          return frame.replace(/#/gi, "");
+        }),
+      }));
+      setSprites(TEMP_cleanSprites);
     }
   }, []);
 

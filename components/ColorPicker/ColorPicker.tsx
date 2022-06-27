@@ -14,15 +14,15 @@ const ColorPicker: React.FC = () => {
       <ul className={styles.items}>
         <li className={styles.item}>
           <ColorButton
-            hex={"#000"}
-            active={state.currentColor === "#000"}
+            hex={"000"}
+            active={state.currentColor === "000"}
             onClick={onSelectColor}
           />
         </li>
         <li className={styles.item}>
           <ColorButton
-            hex={"#fff"}
-            active={state.currentColor === "#fff"}
+            hex={"fff"}
+            active={state.currentColor === "fff"}
             onClick={onSelectColor}
           />
         </li>

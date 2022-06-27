@@ -18,7 +18,7 @@ const Frame: React.FC<Props> = ({ hash }) => {
           <div
             className={styles.pixel}
             key={index}
-            style={{ background: `${hex}` }}
+            style={{ background: `#${hex}` }}
           />
         ))}
       </figure>

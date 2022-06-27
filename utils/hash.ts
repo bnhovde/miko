@@ -1,5 +1,5 @@
 const getRandomColor = () =>
-  `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+  `${Math.floor(Math.random() * 16777215).toString(16)}`;
 
 const getRandomHash = (gridSize?: number): string => {
   const cellCount = (gridSize || 11) * (gridSize || 11);
@@ -9,7 +9,7 @@ const getRandomHash = (gridSize?: number): string => {
     cells.push(String.fromCharCode(Math.floor(Math.random() * 10) + 97));
   }
 
-  return `#fff0;${getRandomColor()},${getRandomColor()},${getRandomColor()},${getRandomColor()},${getRandomColor()},${getRandomColor()};${cells.join(
+  return `fff0;${getRandomColor()},${getRandomColor()},${getRandomColor()},${getRandomColor()},${getRandomColor()},${getRandomColor()};${cells.join(
     ""
   )}`;
 };
@@ -17,7 +17,7 @@ const getRandomHash = (gridSize?: number): string => {
 const getDefaultHash = (gridSize?: number): string => {
   const cellCount = (gridSize || 11) * (gridSize || 11);
   const cells = new Array(cellCount + 1).join("0");
-  return `#fff0;#000;${cells}`;
+  return `fff0;000;${cells}`;
 };
 
 const getHashArray = (hash: string): string[] => {
