@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { FaPause, FaPlay } from "react-icons/fa";
+import { RiSpace } from "react-icons/ri";
 import classNames from "classnames";
 
 import Frame from "components/Frame";
@@ -58,14 +58,13 @@ const SpritePlayer: React.FC<Props> = ({ autoPlay, preview }) => {
       {!preview && (
         <div className={styles.actions}>
           <Shortcut
-            data={{
-              key: "v",
-              label: "play/pause",
-            }}
+            label="play/pause"
             onClick={() => setIsPlaying(!isPlaying)}
             isActive={isPlaying}
             disabled={!state.spriteData?.frames}
-          />
+          >
+            <RiSpace />
+          </Shortcut>
         </div>
       )}
     </div>

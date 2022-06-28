@@ -13,7 +13,9 @@
   align-items: center;
   justify-content: center;
   background: white;
+  border: 0.2rem solid white;
   height: 2.6rem;
+  min-width: 4.6rem;
   color: var(--col-text);
   padding: 0 1rem;
   font-weight: bold;
@@ -29,7 +31,11 @@
 /* Modifiers */
 
 .-active .badge {
-  background-color: var(--col-1);
+  border-color: var(--col-1);
+}
+
+.-active .text {
+  text-decoration: underline;
 }
 
 .-disabled {

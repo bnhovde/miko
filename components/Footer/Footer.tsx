@@ -10,7 +10,7 @@ import ButtonLink from "components/ButtonLink";
 
 type Props = {
   shortcuts?: {
-    key: string;
+    children: JSX.Element[] | JSX.Element | string;
     label: string;
   }[];
   action?: {
@@ -34,8 +34,8 @@ const Footer: React.FC<Props> = ({ shortcuts, action, button }) => {
         {shortcuts && (
           <ul className={styles.shortcuts}>
             {shortcuts.map((s) => (
-              <li key={s.key}>
-                <Shortcut data={s} />
+              <li key={s.label}>
+                <Shortcut label={s.label}>{s.children}</Shortcut>
               </li>
             ))}
           </ul>

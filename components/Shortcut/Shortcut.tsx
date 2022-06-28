@@ -5,21 +5,25 @@ import styles from "./Shortcut.module.css";
 import useKeyPressed from "hooks/useKey";
 
 type Props = {
-  data: {
-    key: string;
-    label: string;
-  };
+  children: JSX.Element[] | JSX.Element | string;
+  label: string;
   isActive?: boolean;
   disabled?: boolean;
   onClick?: () => void;
 };
 
-const Shortcut: React.FC<Props> = ({ data, isActive, disabled, onClick }) => {
-  const cmdDown = useKeyPressed((ev: KeyboardEvent) => ev.metaKey);
+const Shortcut: React.FC<Props> = ({
+  children,
+  label,
+  isActive,
+  disabled,
+  onClick,
+}) => {
+  // const cmdDown = useKeyPressed((ev: KeyboardEvent) => ev.metaKey);
 
   const shortcutClass = classNames({
     [styles["shortcut"]]: true,
-    [styles["-active"]]: cmdDown || isActive,
+    [styles["-active"]]: isActive,
     [styles["-disabled"]]: disabled,
   });
 
@@ -33,8 +37,8 @@ const Shortcut: React.FC<Props> = ({ data, isActive, disabled, onClick }) => {
       onClick={onClickHandler}
       disabled={disabled}
     >
-      <span className={styles.badge}>⌘ + {data.key}</span>
-      <span className={styles.text}>{data.label}</span>
+      <span className={styles.badge}>{children}</span>
+      <span className={styles.text}>{label}</span>
     </button>
   );
 };

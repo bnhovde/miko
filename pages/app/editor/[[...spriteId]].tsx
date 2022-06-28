@@ -92,8 +92,8 @@ const Home: NextPage = () => {
 
         <Footer
           shortcuts={[
-            { key: "N", label: "New frame" },
-            { key: "D", label: "Duplicate frame" },
+            { children: "⌘ + N", label: "New frame" },
+            { children: "⌘ + D", label: "Duplicate frame" },
           ]}
           button={{
             text: "Share",

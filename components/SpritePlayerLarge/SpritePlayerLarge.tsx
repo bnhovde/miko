@@ -9,6 +9,7 @@ import styles from "./SpritePlayerLarge.module.css";
 import Shortcut from "components/Shortcut";
 import EditorContext from "context/EditorContext";
 import { Sprite } from "types/sprite";
+import { RiSpace } from "react-icons/ri";
 
 type Props = {
   spriteData?: Sprite;
@@ -47,14 +48,13 @@ const SpritePlayerLarge: React.FC<Props> = ({ spriteData }) => {
 
       <div className={styles.actions}>
         <Shortcut
-          data={{
-            key: "v",
-            label: "play/pause",
-          }}
+          label="play/pause"
           onClick={() => setIsPlaying(!isPlaying)}
           isActive={isPlaying}
           disabled={!spriteData?.frames}
-        />
+        >
+          <RiSpace />
+        </Shortcut>
       </div>
     </div>
   );

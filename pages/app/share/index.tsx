@@ -59,8 +59,8 @@ const Home: NextPage = () => {
 
       <Footer
         shortcuts={[
-          { key: "L", label: "Login" },
-          { key: "D", label: "Draw" },
+          { children: "⌘ + L", label: "Login" },
+          { children: "⌘ + D", label: "Draw" },
         ]}
         action={{ text: "Let me try!", url: "/app/editor" }}
       />
