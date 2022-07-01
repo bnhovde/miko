@@ -9,6 +9,8 @@ export const defaultColors = [
   "c0c0c0",
 ];
 
+const trending = [["90f1ef", "ffd6e0", "ffef9f", "c1fba4", "7bf1a8"]];
+
 const allSets = [defaultColors];
 
 export default allSets;

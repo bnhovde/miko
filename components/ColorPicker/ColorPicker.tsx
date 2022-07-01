@@ -4,22 +4,19 @@ import ColorButton from "components/ColorButton";
 import styles from "./ColorPicker.module.css";
 import EditorContext from "context/EditorContext";
 import Shortcut from "components/Shortcut";
+import Palette from "utils/colors";
+import { defaultColors } from "data/palettes";
 import { getRandomColor } from "utils/hash";
 
 const ColorPicker: React.FC = () => {
   const { state, onSelectColor, onReplacePalette } = useContext(EditorContext);
 
   const onNewPalette = () => {
-    const newPalette = [
-      getRandomColor(),
-      getRandomColor(),
-      getRandomColor(),
-      getRandomColor(),
-      getRandomColor(),
-      getRandomColor(),
-      getRandomColor(),
-      getRandomColor(),
-    ];
+    const newPalette = Palette.randomHexColors({
+      numColors: 8,
+      hRange: undefined,
+      sRange: [0, 0.6],
+    }) as string[];
 
     onReplacePalette(newPalette);
   };
