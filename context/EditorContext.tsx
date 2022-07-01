@@ -9,6 +9,7 @@ import guid from "utils/guid";
 import { getDefaultHash } from "utils/hash";
 import { InputEvent } from "types/input";
 import { Sprite } from "types/sprite";
+import { defaultColors } from "data/palettes";
 
 /**
  * Reducer
@@ -24,6 +25,7 @@ enum EditorActionTypes {
   START_DRAWING = "START_DRAWING",
   DRAG_DRAWING = "DRAG_DRAWING",
   COMMIT_DRAWING = "COMMIT_DRAWING",
+  REPLACE_PALETTE = "REPLACE_PALETTE",
 }
 
 type UiActionPayload = {
@@ -31,6 +33,7 @@ type UiActionPayload = {
   index?: number;
   active?: boolean;
   frames?: string[];
+  palette?: string[];
   newHistory?: string[];
   sprite?: Sprite;
 };
@@ -140,6 +143,11 @@ export const uiReducer = (
         currentHash: state.unsavedHash,
         unsavedHash: "",
       };
+    case EditorActionTypes.REPLACE_PALETTE:
+      return {
+        ...state,
+        colors: action.payload?.palette || defaultColors,
+      };
     default:
       return state;
   }
@@ -161,18 +169,8 @@ type ContextProps = {
   onTouchStart: (e: InputEvent) => void;
   onDrawEnd: (e: InputEvent) => void;
   onDrawChange?: (hash: string) => void;
+  onReplacePalette: (newPalette: string[]) => void;
 };
-
-const defaultColors = [
-  "FCE288",
-  "6FCF97",
-  "2D9CDB",
-  "56CCF2",
-  "219653",
-  "F2994A",
-  "EB5757",
-  "FCE288",
-];
 
 const initialState: ContextProps = {
   state: {
@@ -197,6 +195,7 @@ const initialState: ContextProps = {
   onDrawStart: () => null,
   onDrawEnd: () => null,
   onDrawChange: () => null,
+  onReplacePalette: () => null,
 };
 
 const EditorContext = React.createContext<ContextProps>(initialState);
@@ -359,6 +358,15 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
     });
   };
 
+  const onReplacePalette = (newPalette: string[]) => {
+    dispatch({
+      type: EditorActionTypes.REPLACE_PALETTE,
+      payload: {
+        palette: newPalette,
+      },
+    });
+  };
+
   return (
     <EditorContext.Provider
       value={{
@@ -373,6 +381,7 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
         onDrawStart,
         onDrawChange,
         onDrawEnd,
+        onReplacePalette,
       }}
     >
       {children}

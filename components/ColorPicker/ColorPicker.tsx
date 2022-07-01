@@ -1,12 +1,28 @@
 import React, { useContext } from "react";
-
 import ColorButton from "components/ColorButton";
 
 import styles from "./ColorPicker.module.css";
 import EditorContext from "context/EditorContext";
+import Shortcut from "components/Shortcut";
+import { getRandomColor } from "utils/hash";
 
 const ColorPicker: React.FC = () => {
-  const { state, onSelectColor } = useContext(EditorContext);
+  const { state, onSelectColor, onReplacePalette } = useContext(EditorContext);
+
+  const onNewPalette = () => {
+    const newPalette = [
+      getRandomColor(),
+      getRandomColor(),
+      getRandomColor(),
+      getRandomColor(),
+      getRandomColor(),
+      getRandomColor(),
+      getRandomColor(),
+      getRandomColor(),
+    ];
+
+    onReplacePalette(newPalette);
+  };
 
   return (
     <div className={styles.wrapper}>
@@ -36,6 +52,11 @@ const ColorPicker: React.FC = () => {
           </li>
         ))}
       </ul>
+      <div className={styles.footer}>
+        <Shortcut label="randomize" onClick={onNewPalette}>
+          ⌘ + C
+        </Shortcut>
+      </div>
     </div>
   );
 };
