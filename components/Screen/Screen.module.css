@@ -5,3 +5,8 @@
   height: 100vh;
   overflow: hidden;
 }
+
+.-scrolling {
+  overflow: visible;
+  height: auto;
+}

@@ -10,6 +10,7 @@ import { getDefaultHash } from "utils/hash";
 import { InputEvent } from "types/input";
 import { Sprite } from "types/sprite";
 import { defaultColors } from "data/palettes";
+import { insertAtIndex, moveToIndex } from "utils/array";
 
 /**
  * Reducer
@@ -26,11 +27,13 @@ enum EditorActionTypes {
   DRAG_DRAWING = "DRAG_DRAWING",
   COMMIT_DRAWING = "COMMIT_DRAWING",
   REPLACE_PALETTE = "REPLACE_PALETTE",
+  REORDER_FRAMES = "REORDER_FRAMES",
 }
 
 type UiActionPayload = {
   value?: string;
   index?: number;
+  oldIndex?: number;
   active?: boolean;
   frames?: string[];
   palette?: string[];
@@ -74,13 +77,19 @@ export const uiReducer = (
         spriteData: state.spriteData
           ? {
               ...state.spriteData,
-              frames: [
-                ...(state.spriteData?.frames || []),
-                action.payload?.value || getDefaultHash(),
-              ],
+              frames: insertAtIndex<string>(
+                state.spriteData?.frames || [],
+                (action.payload?.index !== undefined
+                  ? action.payload?.index
+                  : state.spriteData?.frames?.length || 0) + 1,
+                action.payload?.value || getDefaultHash()
+              ),
             }
           : undefined,
-        currentFrame: action.payload?.index || 0 + 1,
+        currentFrame:
+          (action.payload?.index !== undefined
+            ? action.payload?.index
+            : state.spriteData?.frames?.length || 0) + 1,
         currentHash: action.payload?.value || getDefaultHash(),
         unsavedHash: "",
         undoHistory: [],
@@ -148,6 +157,36 @@ export const uiReducer = (
         ...state,
         colors: action.payload?.palette || defaultColors,
       };
+    case EditorActionTypes.REORDER_FRAMES:
+      const newIndex =
+        action.payload?.index !== undefined
+          ? action.payload?.index
+          : state.spriteData?.frames?.length || 0;
+
+      const oldIndex =
+        action.payload?.oldIndex !== undefined
+          ? action.payload?.oldIndex
+          : state.spriteData?.frames?.length || 0;
+
+      const reorderedFrames = moveToIndex<string>(
+        state.spriteData?.frames || [],
+        oldIndex,
+        newIndex
+      );
+      return {
+        ...state,
+        spriteData: state.spriteData
+          ? {
+              ...state.spriteData,
+              frames: reorderedFrames,
+            }
+          : undefined,
+        currentFrame: newIndex,
+        currentHash: reorderedFrames[newIndex],
+        unsavedHash: "",
+        undoHistory: [],
+        undoHistoryIndex: 0,
+      };
     default:
       return state;
   }
@@ -170,6 +209,7 @@ type ContextProps = {
   onDrawEnd: (e: InputEvent) => void;
   onDrawChange?: (hash: string) => void;
   onReplacePalette: (newPalette: string[]) => void;
+  onReorderFrames: (oldIndex: number, newIndex: number) => void;
 };
 
 const initialState: ContextProps = {
@@ -196,6 +236,7 @@ const initialState: ContextProps = {
   onDrawEnd: () => null,
   onDrawChange: () => null,
   onReplacePalette: () => null,
+  onReorderFrames: () => null,
 };
 
 const EditorContext = React.createContext<ContextProps>(initialState);
@@ -367,6 +408,16 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
     });
   };
 
+  const onReorderFrames = (oldIndex: number, newIndex: number) => {
+    dispatch({
+      type: EditorActionTypes.REORDER_FRAMES,
+      payload: {
+        index: newIndex,
+        oldIndex,
+      },
+    });
+  };
+
   return (
     <EditorContext.Provider
       value={{
@@ -382,6 +433,7 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
         onDrawChange,
         onDrawEnd,
         onReplacePalette,
+        onReorderFrames,
       }}
     >
       {children}

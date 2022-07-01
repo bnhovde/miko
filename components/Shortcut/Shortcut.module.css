@@ -20,7 +20,7 @@
   padding: 0 1rem;
   font-weight: bold;
   border-radius: var(--border-radius);
-  transition: transform 0.3s cubic-bezier(0.7, 0, 0.2, 1);
+  transition: all 0.1s cubic-bezier(0.7, 0, 0.2, 1);
 }
 
 .text{
@@ -38,10 +38,18 @@
   text-decoration: underline;
 }
 
+.-flashing .badge {
+  background-color: var(--col-1);
+  transform: scale(0.98);
+}
+
 .-disabled {
  cursor: not-allowed;
 }
 
 .-disabled .badge {
-  background-color: var(--col-gray);
+  opacity: 0.5;
+}
+.-disabled:hover .badge {
+  background: white;
 }

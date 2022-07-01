@@ -12,6 +12,9 @@ type Props = {
   shortcuts?: {
     children: JSX.Element[] | JSX.Element | string;
     label: string;
+    hotKeys: string;
+    disabled?: boolean;
+    onToggle?: (newState: boolean) => void;
   }[];
   action?: {
     text: string;
@@ -35,7 +38,14 @@ const Footer: React.FC<Props> = ({ shortcuts, action, button }) => {
           <ul className={styles.shortcuts}>
             {shortcuts.map((s) => (
               <li key={s.label}>
-                <Shortcut label={s.label}>{s.children}</Shortcut>
+                <Shortcut
+                  label={s.label}
+                  hotKeys={s.hotKeys}
+                  disabled={s.disabled}
+                  onToggle={s.onToggle}
+                >
+                  {s.children}
+                </Shortcut>
               </li>
             ))}
           </ul>

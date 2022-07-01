@@ -14,8 +14,11 @@ const SpritePreview = dynamic(() => import("../components/SpritePreview"), {
 import { getRandomHash } from "utils/hash";
 import dynamic from "next/dynamic";
 import { useMemo } from "react";
+import { useRouter } from "next/router";
 
 const Home: NextPage = () => {
+  const router = useRouter();
+
   const hashArray = useMemo(
     () => ({
       hash: getRandomHash(),
@@ -55,8 +58,18 @@ const Home: NextPage = () => {
 
       <Footer
         shortcuts={[
-          { children: "⌘ + L", label: "Login" },
-          { children: "⌘ + D", label: "Draw" },
+          {
+            children: "L",
+            label: "Login",
+            hotKeys: "l",
+            onToggle: () => router.push("/app/login"),
+          },
+          {
+            children: "⏎",
+            label: "Draw",
+            hotKeys: "enter",
+            onToggle: () => router.push("/app/editor"),
+          },
         ]}
         action={{ text: "Draw!", url: "/app/editor" }}
       />

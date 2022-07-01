@@ -1,15 +1,40 @@
-import React, { useContext } from "react";
-import { FiPlus, FiCopy, FiTrash2 } from "react-icons/fi";
-
-import Frame from "components/Frame";
+import React, { useContext, useRef, useState } from "react";
+import { FiPlus } from "react-icons/fi";
 
 import styles from "./Timeline.module.css";
 import EditorContext from "context/EditorContext";
 import useKeyPressed from "hooks/useKey";
+import Item from "./Item";
+import useDrop from "hooks/useDrop";
 
 const Timeline: React.FC = () => {
-  const { state, onAddFrame, onChangeFrame, onDeleteFrame } =
+  const { state, onAddFrame, onChangeFrame, onDeleteFrame, onReorderFrames } =
     useContext(EditorContext);
+
+  const dropRef = useRef<HTMLUListElement>(null);
+  const [draggedIndex, setDraggedIndex] = useState(-1);
+  const [draggedOverIndex, setDraggedOverIndex] = useState(-1);
+
+  const onDrop = () => {
+    onReorderFrames(draggedIndex, draggedOverIndex);
+
+    console.log(
+      "draggedIndex, draggedOverIndex: ",
+      draggedIndex,
+      draggedOverIndex
+    );
+    onDragEnd();
+  };
+
+  const onDragEnd = () => {
+    setDraggedIndex(-1);
+    setDraggedOverIndex(-1);
+  };
+
+  const { isZoneActive } = useDrop({
+    ref: dropRef,
+    onDrop,
+  });
 
   const cmdDown = useKeyPressed((ev: KeyboardEvent) => ev.metaKey);
   const shiftDown = useKeyPressed((ev: KeyboardEvent) => ev.shiftKey);
@@ -28,39 +53,34 @@ const Timeline: React.FC = () => {
   };
 
   const onAddFrameHandler = () => {
-    const lastFrame = state.spriteData?.frames[frames.length - 1];
-    if (shiftDown) {
-      onAddFrame(frames.length - 1, lastFrame);
-    } else {
-      onAddFrame(frames.length - 1);
-    }
+    onAddFrame(
+      state.spriteData?.frames?.length !== undefined
+        ? state.spriteData?.frames?.length - 1
+        : 0
+    );
   };
 
   return (
     <div className={styles.wrapper}>
       <div className={styles.inner}>
         <span className={styles.line} aria-hidden />
-        <ul className={styles.timeline}>
+        <ul className={styles.timeline} ref={dropRef}>
           {state.spriteData?.frames.map((f, i) => (
-            <li
+            <Item
               key={`${i}-${f}`}
-              className={styles.item}
-              data-active={state.currentFrame === i}
-            >
-              <button
-                className={styles.button}
-                onClick={() => onFrameClickHandler(i)}
-              >
-                <Frame hash={f} />
-              </button>
-              <div
-                className={styles.overlay}
-                data-visible={(shiftDown && !onlyOneFrame) || cmdDown}
-              >
-                <>{cmdDown && <FiCopy />}</>
-                <>{shiftDown && <FiTrash2 />}</>
-              </div>
-            </li>
+              order={i}
+              hash={f}
+              isActive={isZoneActive}
+              isSelected={state.currentFrame === i}
+              shiftDown={shiftDown}
+              cmdDown={cmdDown}
+              draggedIndex={draggedIndex}
+              draggedOverIndex={draggedOverIndex}
+              onDragStart={() => setDraggedIndex(i)}
+              onDragOver={() => setDraggedOverIndex(i)}
+              onDragEnd={onDragEnd}
+              onClick={onFrameClickHandler}
+            />
           ))}
           <li className={styles.item} data-empty>
             <button

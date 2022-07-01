@@ -50,7 +50,7 @@ const ColorPicker: React.FC = () => {
         ))}
       </ul>
       <div className={styles.footer}>
-        <Shortcut label="randomize" onClick={onNewPalette}>
+        <Shortcut label="randomize" hotKeys="cmd+c" onToggle={onNewPalette}>
           ⌘ + C
         </Shortcut>
       </div>

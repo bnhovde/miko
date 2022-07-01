@@ -49,7 +49,8 @@ const SpritePlayerLarge: React.FC<Props> = ({ spriteData }) => {
       <div className={styles.actions}>
         <Shortcut
           label="play/pause"
-          onClick={() => setIsPlaying(!isPlaying)}
+          hotKeys="space"
+          onToggle={(newState) => setIsPlaying(newState)}
           isActive={isPlaying}
           disabled={!spriteData?.frames}
         >

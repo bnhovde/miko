@@ -21,7 +21,8 @@ import { useRouter } from "next/router";
 import { Sprite } from "types/sprite";
 
 const Home: NextPage = () => {
-  const { query } = useRouter();
+  const router = useRouter();
+  const { query } = router;
 
   const spriteData = {
     id: query.id,
@@ -59,8 +60,18 @@ const Home: NextPage = () => {
 
       <Footer
         shortcuts={[
-          { children: "⌘ + L", label: "Login" },
-          { children: "⌘ + D", label: "Draw" },
+          {
+            children: "L",
+            label: "Login",
+            hotKeys: "l",
+            onToggle: () => router.push("/app/login"),
+          },
+          {
+            children: "⏎",
+            label: "Draw",
+            hotKeys: "enter",
+            onToggle: () => router.push("/app/editor"),
+          },
         ]}
         action={{ text: "Let me try!", url: "/app/editor" }}
       />

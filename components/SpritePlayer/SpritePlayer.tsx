@@ -59,7 +59,8 @@ const SpritePlayer: React.FC<Props> = ({ autoPlay, preview }) => {
         <div className={styles.actions}>
           <Shortcut
             label="play/pause"
-            onClick={() => setIsPlaying(!isPlaying)}
+            hotKeys="space"
+            onToggle={(newState) => setIsPlaying(newState)}
             isActive={isPlaying}
             disabled={!state.spriteData?.frames}
           >

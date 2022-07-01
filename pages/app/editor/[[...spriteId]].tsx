@@ -23,7 +23,8 @@ import { Sprite } from "types/sprite";
 
 const Home: NextPage = () => {
   const { query, push } = useRouter();
-  const { state, onDrawEnd, loadSprite } = useContext(EditorContext);
+  const { state, onDrawEnd, loadSprite, onChangeFrame, onAddFrame } =
+    useContext(EditorContext);
 
   const blankSprite = {
     id: guid(),
@@ -92,8 +93,53 @@ const Home: NextPage = () => {
 
         <Footer
           shortcuts={[
-            { children: "⌘ + N", label: "New frame" },
-            { children: "⌘ + D", label: "Duplicate frame" },
+            {
+              children: "←",
+              label: "Previous",
+              hotKeys: "left",
+              disabled: state.currentFrame === 0,
+              onToggle: () => onChangeFrame(state.currentFrame - 1),
+            },
+            {
+              children: "→",
+              label: "Next",
+              hotKeys: "right",
+              disabled:
+                state.spriteData &&
+                state.currentFrame === state?.spriteData?.frames.length - 1,
+              onToggle: () => onChangeFrame(state.currentFrame + 1),
+            },
+            {
+              children: "⌘ + D",
+              label: "Duplicate",
+              hotKeys: "cmd+d",
+              onToggle: () =>
+                onAddFrame(
+                  state.currentFrame,
+                  state.spriteData?.frames[state.currentFrame]
+                ),
+            },
+            {
+              children: "⌘ + F",
+              label: "Add blank",
+              hotKeys: "cmd+f",
+              onToggle: () =>
+                state.spriteData?.frames && onAddFrame(state.currentFrame),
+            },
+            // {
+            //   children: "⇧ + ←",
+            //   label: "Shift left",
+            //   hotKeys: "shift+left",
+            //   disabled: !state.currentHash,
+            //   onToggle: () => onChangeFrame(state.currentFrame - 1),
+            // },
+            // {
+            //   children: "⇧ + →",
+            //   label: "Shift right",
+            //   hotKeys: "shift+right",
+            //   disabled: !state.currentHash,
+            //   onToggle: () => onChangeFrame(state.currentFrame + 1),
+            // },
           ]}
           button={{
             text: "Share",
