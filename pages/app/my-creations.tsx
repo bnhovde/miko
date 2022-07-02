@@ -6,7 +6,7 @@ import Head from "next/head";
 import Main from "components/Main";
 import Footer from "components/Footer";
 import { useEffect, useState } from "react";
-import { getAll, set } from "utils/localStorage";
+import { getAll, remove, set } from "utils/localStorage";
 import localStorageKeys from "constants/localStorageKeys";
 import { LegacySprite, Sprite } from "types/sprite";
 import { useRouter } from "next/router";
@@ -58,6 +58,9 @@ const Home: NextPage = () => {
             palette: sprite.palette,
           })
         );
+
+        // Delete old legacy sprite
+        remove(`${localStorageKeys.LEGACY_SPRITES}-${sprite?.id}`);
 
         return sprite;
       });
