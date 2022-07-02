@@ -1,5 +1,5 @@
 const localStorageKeys = {
-  SPRITE: "@@miko-sprite-v2",
+  SPRITE: "@@miko/sprite",
   LEGACY_SPRITES: "@@miko-sprite",
 };
 

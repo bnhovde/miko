@@ -29,7 +29,7 @@ const Home: NextPage = () => {
   const blankSprite = {
     id: guid(),
     version: "2.0.0",
-    name: "Blank sprite",
+    name: "Untitled",
     description: "This is an example sprite",
     palette: ["fff0"],
     size: 11,

@@ -56,8 +56,6 @@ const decodeUrlSprite = (urlSprite: URLSprite): Sprite => {
     const frameArray = frame.match(reg) || [];
     const frameResults = [];
 
-    console.log(frameArray);
-
     for (var i = 0; i < frameArray.length; i++) {
       const match = frameArray[i];
       if (match.match(/[0-9.]+/)) {
@@ -88,36 +86,8 @@ const decodeUrlSprite = (urlSprite: URLSprite): Sprite => {
 const encodeUrlSprite = (sprite: Sprite): URLSprite => {
   const { name, palette, author, size, frames, fps } = sprite;
 
-  const allColors = [] as string[];
-
-  // Pick out colors in use
-  for (const frame of frames) {
-    for (const pixel of frame) {
-      const colorIndex = pixel.charCodeAt(0) - 97;
-      allColors.push(palette[colorIndex]);
-    }
-  }
-
-  const uniqueColorsSortedByUse = [] as string[];
-  for (const color of allColors) {
-    if (uniqueColorsSortedByUse.indexOf(color) === -1) {
-      uniqueColorsSortedByUse.push(color);
-    }
-  }
-
-  uniqueColorsSortedByUse.sort((a, b) => {
-    const aCount = allColors.filter((c) => c === a).length;
-    const bCount = allColors.filter((c) => c === b).length;
-    return bCount - aCount;
-  });
-
   const compressedFrames = frames.reduce((sum, frame) => {
     const compressedPixels = frame.split("").reduce((sum, pixel) => {
-      const oldColorIndex = pixel.charCodeAt(0) - 97;
-      const oldColor = palette[oldColorIndex];
-      const newColorIndex = uniqueColorsSortedByUse.indexOf(oldColor);
-      const newCharacter = String.fromCharCode(newColorIndex + 97);
-
       const prevVal = sum[sum.length - 1];
       const twoPrevVal = sum[sum.length - 2];
 
@@ -135,7 +105,7 @@ const encodeUrlSprite = (sprite: Sprite): URLSprite => {
 
         // Add new color
       } else {
-        return [...sum, newCharacter];
+        return [...sum, pixel];
       }
     }, [] as (string | number)[]);
 
@@ -156,7 +126,7 @@ const encodeUrlSprite = (sprite: Sprite): URLSprite => {
     a: author?.name || "Anonymous",
     s: size,
     d: fps || 10,
-    p: uniqueColorsSortedByUse,
+    p: palette,
     f: compressedFrames,
   };
 };
@@ -179,17 +149,6 @@ const updateHash = (
     newPalette.push(newColor);
   }
 
-  // const allColors = getHashArray(hash, newPalette);
-
-  // // Sort palette by use
-  // newPalette.sort((a, b) => {
-  //   const aCount = allColors.filter((c) => c === a).length;
-  //   const bCount = allColors.filter((c) => c === b).length;
-  //   return bCount - aCount;
-  // });
-
-  // console.log("newPalette: ", newPalette);
-
   // Update pixel at index
   for (var i = 0; i < hash.length; i++) {
     newHash +=
@@ -201,6 +160,37 @@ const updateHash = (
   }
 
   return { newHash, newPalette };
+};
+
+const optimiseFrames = (frames: string[], spritePalette: string[]) => {
+  const newPalette = [...spritePalette] as string[];
+
+  const allColors = frames.reduce(
+    (sum, frame) => [...sum, ...getHashArray(frame, spritePalette)],
+    [] as string[]
+  );
+
+  // Sort palette by use
+  newPalette.sort((a, b) => {
+    const aCount = allColors.filter((c) => c === a).length;
+    const bCount = allColors.filter((c) => c === b).length;
+    return bCount - aCount;
+  });
+
+  const newFrames = frames.map((frame) => {
+    let newFrameHash = "";
+    for (var i = 0; i < frame.length; i++) {
+      const oldColorIndex = frame.charCodeAt(i) - 97;
+      const oldColor = spritePalette[oldColorIndex];
+      const newColorIndex = newPalette.indexOf(oldColor);
+      const newCharacter = String.fromCharCode(newColorIndex + 97);
+
+      newFrameHash += newCharacter;
+    }
+    return newFrameHash;
+  });
+
+  return { newFrames, newPalette };
 };
 
 // const floodFill = (pixels: string, pixelIndex: number, newColor: string) => {
@@ -226,4 +216,5 @@ export {
   updateHash,
   encodeUrlSprite,
   decodeUrlSprite,
+  optimiseFrames,
 };

@@ -13,26 +13,73 @@ const SpritePreview = dynamic(() => import("components/SpritePreview"), {
 
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
-import { getAll } from "utils/localStorage";
+import { getAll, set } from "utils/localStorage";
 import localStorageKeys from "constants/localStorageKeys";
-import { Sprite } from "types/sprite";
+import { LegacySprite, Sprite } from "types/sprite";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import SpriteGrid from "components/SpriteGrid";
 
 const Home: NextPage = () => {
   const router = useRouter();
   const [sprites, setSprites] = useState<Sprite[]>([]);
-  const [legacyItemCount, setLegacyItemCount] = useState<number>(0);
+  const [legacySprites, setLegacySprites] = useState<Sprite[]>([]);
+
+  useEffect(() => {
+    const legacyItems = getAll(localStorageKeys.LEGACY_SPRITES);
+    const legacySpritesUnprocessed = legacyItems?.map((item) =>
+      JSON.parse(item)
+    ) as LegacySprite[];
+
+    if (legacySpritesUnprocessed) {
+      const processed = legacySpritesUnprocessed.map((legacy) => {
+        const sprite = {
+          id: legacy.id,
+          version: "2.0.0",
+          name: legacy.name,
+          description: legacy.description,
+          palette: [
+            legacy.frames?.[0].split(";")[0],
+            ...legacy.frames?.[0].split(";")[1]?.split(","),
+          ],
+          size: legacy.size,
+          fps: 10,
+          frames: legacy.frames?.map((frame) =>
+            frame
+              .split(";")[2]
+              ?.split("")
+              ?.map((pixel) =>
+                pixel === "0"
+                  ? "a"
+                  : String.fromCharCode(pixel.charCodeAt(0) + 1)
+              )
+              .join("")
+          ),
+        } as Sprite;
+
+        // Store sprite in localstorage
+        set(
+          `${localStorageKeys.SPRITE}-${sprite?.id}`,
+          JSON.stringify({
+            ...sprite,
+            frames: sprite.frames,
+            palette: sprite.palette,
+          })
+        );
+
+        return sprite;
+      });
+
+      setLegacySprites(processed);
+    }
+  }, []);
 
   useEffect(() => {
     const items = getAll(localStorageKeys.SPRITE);
-    const legacyItems = getAll(localStorageKeys.LEGACY_SPRITES);
     const sprites = items?.map((item) => JSON.parse(item)) as Sprite[];
+
     if (sprites) {
       setSprites(sprites);
-    }
-    if (legacyItems) {
-      setLegacyItemCount(legacyItems.length);
     }
   }, []);
 
@@ -45,44 +92,15 @@ const Home: NextPage = () => {
       </Head>
 
       <Header
+        title="My Creations"
         action={{
-          text: "My creations",
-          url: "/app/my-creations",
+          text: "Edit",
+          url: "/app/my-creations?edit=true",
         }}
       />
 
       <Main centered padded>
-        <ul
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(6, 1fr)",
-            gap: "var(--spacing-2)",
-            width: "100%",
-          }}
-        >
-          {sprites.map((sprite) => (
-            <li key={sprite.id}>
-              <Link href={`/app/editor/${sprite.id}`}>
-                <a>
-                  <SpritePreview
-                    hash={sprite.frames[0]}
-                    palette={sprite.palette}
-                    title={sprite.name}
-                    author={{ id: "123", name: "You!" }}
-                  />
-                </a>
-              </Link>
-            </li>
-          ))}
-        </ul>
-        <>
-          {legacyItemCount > 0 && (
-            <p style={{ paddingTop: "4rem" }}>
-              PS: You have {legacyItemCount} legacy sprites. I am working on
-              letting you import these..
-            </p>
-          )}
-        </>
+        <SpriteGrid sprites={sprites} />
       </Main>
       <Footer
         shortcuts={[

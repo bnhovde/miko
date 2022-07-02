@@ -6,7 +6,12 @@ import localStorageKeys from "constants/localStorageKeys";
 import { get, set } from "utils/localStorage";
 import guid from "utils/guid";
 
-import { getDefaultHash, getHashArray, updateHash } from "utils/hash";
+import {
+  getDefaultHash,
+  getHashArray,
+  optimiseFrames,
+  updateHash,
+} from "utils/hash";
 import { InputEvent } from "types/input";
 import { Sprite } from "types/sprite";
 import { defaultColors } from "data/palettes";
@@ -151,11 +156,13 @@ export const uiReducer = (
           ? {
               ...state.spriteData,
               frames: action?.payload?.frames || [],
+              palette: action?.payload?.palette || [],
             }
           : undefined,
         undoHistory: action.payload?.newHistory || [],
         undoHistoryIndex: (action.payload?.newHistory || []).length,
-        currentHash: state.unsavedHash,
+        currentHash:
+          (action?.payload?.frames || [])[state.currentFrame || 0] || "",
         unsavedHash: "",
       };
     case EditorActionTypes.REPLACE_PALETTE:
@@ -396,11 +403,13 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
       ];
     }
 
-    // TO-DO: Update palette and hashes by most used colors
+    const updatedFrames =
+      getUpdatedSpriteFrames(state.currentFrame, state.unsavedHash) || [];
 
-    const newFrames = getUpdatedSpriteFrames(
-      state.currentFrame,
-      state.unsavedHash
+    // TO-DO: Update palette and hashes by most used colors
+    const { newFrames, newPalette } = optimiseFrames(
+      updatedFrames,
+      state.spriteData?.palette || []
     );
 
     // Store sprite in localstorage
@@ -409,6 +418,7 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
       JSON.stringify({
         ...state.spriteData,
         frames: newFrames,
+        palette: newPalette,
       })
     );
 
@@ -417,6 +427,7 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
       payload: {
         newHistory,
         frames: newFrames,
+        palette: newPalette,
       },
     });
   };
