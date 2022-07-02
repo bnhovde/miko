@@ -3,20 +3,12 @@ import type { NextPage } from "next";
 import Header from "components/Header";
 import Screen from "components/Screen";
 import Head from "next/head";
-import Image from "next/image";
 import Main from "components/Main";
 import Footer from "components/Footer";
-
-const SpritePreview = dynamic(() => import("components/SpritePreview"), {
-  ssr: false,
-});
-
-import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { getAll, set } from "utils/localStorage";
 import localStorageKeys from "constants/localStorageKeys";
 import { LegacySprite, Sprite } from "types/sprite";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import SpriteGrid from "components/SpriteGrid";
 

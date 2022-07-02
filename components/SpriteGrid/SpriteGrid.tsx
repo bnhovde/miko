@@ -2,8 +2,11 @@ import React from "react";
 import classNames from "classnames";
 import Link from "next/link";
 import { Sprite } from "types/sprite";
+import dynamic from "next/dynamic";
 
-import SpritePreview from "components/SpritePreview";
+const SpritePreview = dynamic(() => import("components/SpritePreview"), {
+  ssr: false,
+});
 
 import styles from "./SpriteGrid.module.css";
 
