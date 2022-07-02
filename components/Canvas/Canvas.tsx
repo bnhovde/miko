@@ -31,14 +31,7 @@ const Canvas: React.FC = () => {
     }
 
     if (state.isDrawing || isFirstClick) {
-      const { newHash, newPalette } = updateHash(
-        hash || getDefaultHash(),
-        spritePalette,
-        index,
-        state.currentColor || "",
-        state.currentTool || ""
-      );
-      onDrawChange && onDrawChange(newHash, newPalette);
+      onDrawChange && onDrawChange(index);
     }
   };
 

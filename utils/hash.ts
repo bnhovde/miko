@@ -162,9 +162,9 @@ const encodeUrlSprite = (sprite: Sprite): URLSprite => {
 };
 
 const updateHash = (
+  pixelIndex: number,
   hash: string,
   spritePalette: string[],
-  pixelIndex: number,
   newColor: string,
   selectedTool: string
 ) => {
@@ -178,6 +178,17 @@ const updateHash = (
   if (newPalette.indexOf(newColor) === -1) {
     newPalette.push(newColor);
   }
+
+  // const allColors = getHashArray(hash, newPalette);
+
+  // // Sort palette by use
+  // newPalette.sort((a, b) => {
+  //   const aCount = allColors.filter((c) => c === a).length;
+  //   const bCount = allColors.filter((c) => c === b).length;
+  //   return bCount - aCount;
+  // });
+
+  // console.log("newPalette: ", newPalette);
 
   // Update pixel at index
   for (var i = 0; i < hash.length; i++) {

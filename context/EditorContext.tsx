@@ -6,7 +6,7 @@ import localStorageKeys from "constants/localStorageKeys";
 import { get, set } from "utils/localStorage";
 import guid from "utils/guid";
 
-import { getDefaultHash, getHashArray } from "utils/hash";
+import { getDefaultHash, getHashArray, updateHash } from "utils/hash";
 import { InputEvent } from "types/input";
 import { Sprite } from "types/sprite";
 import { defaultColors } from "data/palettes";
@@ -214,7 +214,7 @@ type ContextProps = {
   onDrawStart: (e: InputEvent) => void;
   onTouchStart: (e: InputEvent) => void;
   onDrawEnd: (e: InputEvent) => void;
-  onDrawChange?: (hash: string, newPalette: string[]) => void;
+  onDrawChange: (frameIndex: number) => void;
   onReplacePalette: (newPalette: string[]) => void;
   onReorderFrames: (oldIndex: number, newIndex: number) => void;
 };
@@ -354,8 +354,14 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
     });
   };
 
-  const onDrawChange = (newHash: string, newPalette: []) => {
-    console.log("onDrawChange");
+  const onDrawChange = (frameIndex: number) => {
+    const { newHash, newPalette } = updateHash(
+      frameIndex,
+      state.unsavedHash || state.currentHash || getDefaultHash(),
+      state.spriteData?.palette || [],
+      state.currentColor || "",
+      state.currentTool || ""
+    );
 
     dispatch({
       type: EditorActionTypes.DRAG_DRAWING,
@@ -389,6 +395,8 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
         state.unsavedHash,
       ];
     }
+
+    // TO-DO: Update palette and hashes by most used colors
 
     const newFrames = getUpdatedSpriteFrames(
       state.currentFrame,
