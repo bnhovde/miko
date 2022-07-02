@@ -10,7 +10,8 @@ const Canvas: React.FC = () => {
     useContext(EditorContext);
 
   const hash = state.unsavedHash || state.currentHash;
-  const hashArray = getHashArray(hash || getDefaultHash());
+  const spritePalette = state.spriteData?.palette || [];
+  const hashArray = getHashArray(hash || getDefaultHash(), spritePalette);
   // const onionHashArray = onionskinHash ? getHashArray(onionskinHash) : [];
 
   const onMouseOver = (
@@ -30,13 +31,14 @@ const Canvas: React.FC = () => {
     }
 
     if (state.isDrawing || isFirstClick) {
-      const newHash = updateHash(
+      const { newHash, newPalette } = updateHash(
         hash || getDefaultHash(),
+        spritePalette,
         index,
         state.currentColor || "",
         state.currentTool || ""
       );
-      onDrawChange && onDrawChange(newHash);
+      onDrawChange && onDrawChange(newHash, newPalette);
     }
   };
 
@@ -68,6 +70,11 @@ const Canvas: React.FC = () => {
               onTouchStart={(event) => onMouseOver(index, event, true, true)}
               style={{ background: `#${hex}` }}
             >
+              <>
+                {state.debug && (
+                  <span className={styles["debug-pixel"]}>{hash[index]}</span>
+                )}
+              </>
               {/* {onionHashArray[index] && (
                 <div
                   className={styles["onion-skin"]}

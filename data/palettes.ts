@@ -1,4 +1,7 @@
 export const defaultColors = [
+  "fff0",
+  "000",
+  "fff",
   "FCE288",
   "6FCF97",
   "2D9CDB",

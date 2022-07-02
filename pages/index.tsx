@@ -11,7 +11,7 @@ const SpritePreview = dynamic(() => import("../components/SpritePreview"), {
   ssr: false,
 });
 
-import { getRandomHash } from "utils/hash";
+import { getRandomHash, getRandomPalette } from "utils/hash";
 import dynamic from "next/dynamic";
 import { useMemo } from "react";
 import { useRouter } from "next/router";
@@ -19,9 +19,10 @@ import { useRouter } from "next/router";
 const Home: NextPage = () => {
   const router = useRouter();
 
-  const hashArray = useMemo(
+  const randomSprite = useMemo(
     () => ({
       hash: getRandomHash(),
+      palette: getRandomPalette(),
     }),
     []
   );
@@ -49,7 +50,8 @@ const Home: NextPage = () => {
           }}
         >
           <SpritePreview
-            hash={hashArray.hash}
+            hash={randomSprite.hash}
+            palette={randomSprite.palette}
             title="Random"
             author={{ id: "123", name: "Miko" }}
           />

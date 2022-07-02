@@ -6,7 +6,7 @@ import localStorageKeys from "constants/localStorageKeys";
 import { get, set } from "utils/localStorage";
 import guid from "utils/guid";
 
-import { getDefaultHash } from "utils/hash";
+import { getDefaultHash, getHashArray } from "utils/hash";
 import { InputEvent } from "types/input";
 import { Sprite } from "types/sprite";
 import { defaultColors } from "data/palettes";
@@ -136,6 +136,12 @@ export const uiReducer = (
       return {
         ...state,
         unsavedHash: action.payload?.value || "",
+        spriteData: state.spriteData
+          ? {
+              ...state.spriteData,
+              palette: action?.payload?.palette || [],
+            }
+          : undefined,
       };
     case EditorActionTypes.COMMIT_DRAWING:
       return {
@@ -156,6 +162,7 @@ export const uiReducer = (
       return {
         ...state,
         colors: action.payload?.palette || defaultColors,
+        currentColor: "000",
       };
     case EditorActionTypes.REORDER_FRAMES:
       const newIndex =
@@ -207,13 +214,14 @@ type ContextProps = {
   onDrawStart: (e: InputEvent) => void;
   onTouchStart: (e: InputEvent) => void;
   onDrawEnd: (e: InputEvent) => void;
-  onDrawChange?: (hash: string) => void;
+  onDrawChange?: (hash: string, newPalette: string[]) => void;
   onReplacePalette: (newPalette: string[]) => void;
   onReorderFrames: (oldIndex: number, newIndex: number) => void;
 };
 
 const initialState: ContextProps = {
   state: {
+    debug: true,
     spriteData: undefined,
     colors: defaultColors,
     isDrawing: false,
@@ -256,7 +264,7 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
     return state.spriteData?.frames[state.currentFrame] || getDefaultHash();
   };
 
-  const getUpdatedFrames = (editedIndex: number, newHash: string) => {
+  const getUpdatedSpriteFrames = (editedIndex: number, newHash: string) => {
     const hasFrames = state.spriteData && state.spriteData?.frames?.length > 0;
 
     if (hasFrames) {
@@ -346,13 +354,14 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
     });
   };
 
-  const onDrawChange = (newHash: string) => {
+  const onDrawChange = (newHash: string, newPalette: []) => {
     console.log("onDrawChange");
 
     dispatch({
       type: EditorActionTypes.DRAG_DRAWING,
       payload: {
         value: newHash,
+        palette: newPalette,
       },
     });
   };
@@ -381,12 +390,17 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
       ];
     }
 
+    const newFrames = getUpdatedSpriteFrames(
+      state.currentFrame,
+      state.unsavedHash
+    );
+
     // Store sprite in localstorage
     set(
       `${localStorageKeys.SPRITE}-${state.spriteData?.id}`,
       JSON.stringify({
         ...state.spriteData,
-        frames: getUpdatedFrames(state.currentFrame, state.unsavedHash),
+        frames: newFrames,
       })
     );
 
@@ -394,7 +408,7 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
       type: EditorActionTypes.COMMIT_DRAWING,
       payload: {
         newHistory,
-        frames: getUpdatedFrames(state.currentFrame, state.unsavedHash),
+        frames: newFrames,
       },
     });
   };

@@ -10,6 +10,7 @@ import styles from "./Item.module.css";
 
 type Props = {
   hash: string;
+  palette: string[];
   isActive: boolean;
   isSelected: boolean;
   order: number;
@@ -26,6 +27,7 @@ type Props = {
 
 const Item: React.FC<Props> = ({
   hash,
+  palette,
   isActive,
   isSelected,
   order,
@@ -75,7 +77,7 @@ const Item: React.FC<Props> = ({
   return (
     <li className={itemClass} ref={ref}>
       <button className={styles.button} onClick={() => onClick(order)}>
-        <Frame hash={hash} />
+        <Frame hash={hash} palette={palette} />
       </button>
 
       <div

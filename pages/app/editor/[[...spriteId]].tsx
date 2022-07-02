@@ -9,7 +9,7 @@ import Footer from "components/Footer";
 
 import EditorContext from "context/EditorContext";
 
-import { getDefaultHash, getRandomHash } from "utils/hash";
+import { getDefaultHash, getRandomHash, encodeUrlSprite } from "utils/hash";
 import dynamic from "next/dynamic";
 import { useContext, useEffect, useMemo, useState } from "react";
 import Timeline from "components/Timeline";
@@ -28,11 +28,14 @@ const Home: NextPage = () => {
 
   const blankSprite = {
     id: guid(),
+    version: "2.0.0",
     name: "Blank sprite",
     description: "This is an example sprite",
+    palette: ["fff0"],
     size: 11,
+    fps: 10,
     frames: [
-      "fff0;000;0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     ],
   };
 
@@ -41,13 +44,7 @@ const Home: NextPage = () => {
       const spriteData = get(`${localStorageKeys.SPRITE}-${query.spriteId}`);
       if (spriteData) {
         const parsed = JSON.parse(spriteData) as Sprite;
-        const TEMP_cleanParsed = {
-          ...parsed,
-          frames: parsed.frames.map((frame) => {
-            return frame.replace(/#/gi, "");
-          }),
-        };
-        loadSprite(TEMP_cleanParsed);
+        loadSprite(parsed);
       }
     } else {
       loadSprite(blankSprite);
@@ -55,10 +52,12 @@ const Home: NextPage = () => {
   }, [query]);
 
   const onShare = () => {
-    const params = `?id=${state.spriteData?.id}&name=${
-      state.spriteData?.name
-    }&frames=${state.spriteData?.frames.join("_")}'`;
-    window.open(`/app/share${params}`, "_blank");
+    if (state.spriteData) {
+      const { n, a, s, d, p, f } = encodeUrlSprite(state.spriteData);
+
+      const params = `?n=${n}&a=${a}&s=${s}&d=${d}&p=${p}&f=${f}`;
+      window.open(`/app/share${params}`, "_blank");
+    }
   };
 
   return (

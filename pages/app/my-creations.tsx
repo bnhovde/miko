@@ -22,18 +22,17 @@ import { useRouter } from "next/router";
 const Home: NextPage = () => {
   const router = useRouter();
   const [sprites, setSprites] = useState<Sprite[]>([]);
+  const [legacyItemCount, setLegacyItemCount] = useState<number>(0);
 
   useEffect(() => {
     const items = getAll(localStorageKeys.SPRITE);
+    const legacyItems = getAll(localStorageKeys.LEGACY_SPRITES);
     const sprites = items?.map((item) => JSON.parse(item)) as Sprite[];
     if (sprites) {
-      const TEMP_cleanSprites = sprites.map((sprite) => ({
-        ...sprite,
-        frames: sprite.frames.map((frame) => {
-          return frame.replace(/#/gi, "");
-        }),
-      }));
-      setSprites(TEMP_cleanSprites);
+      setSprites(sprites);
+    }
+    if (legacyItems) {
+      setLegacyItemCount(legacyItems.length);
     }
   }, []);
 
@@ -57,7 +56,6 @@ const Home: NextPage = () => {
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(6, 1fr)",
-            gridTemplateRows: "repeat(6, 1fr)",
             gap: "var(--spacing-2)",
             width: "100%",
           }}
@@ -68,6 +66,7 @@ const Home: NextPage = () => {
                 <a>
                   <SpritePreview
                     hash={sprite.frames[0]}
+                    palette={sprite.palette}
                     title={sprite.name}
                     author={{ id: "123", name: "You!" }}
                   />
@@ -76,8 +75,15 @@ const Home: NextPage = () => {
             </li>
           ))}
         </ul>
+        <>
+          {legacyItemCount > 0 && (
+            <p style={{ paddingTop: "4rem" }}>
+              PS: You have {legacyItemCount} legacy sprites. I am working on
+              letting you import these..
+            </p>
+          )}
+        </>
       </Main>
-
       <Footer
         shortcuts={[
           {

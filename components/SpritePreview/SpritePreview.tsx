@@ -1,18 +1,29 @@
+import { defaultColors } from "data/palettes";
 import React from "react";
 import { User } from "types/user";
-import { getDefaultHash, getHashArray } from "utils/hash";
+import { getDefaultHash, getHashArray, getRandomPalette } from "utils/hash";
 
 import styles from "./SpritePreview.module.css";
 
 type Props = {
   title?: string;
   hash?: string;
+  palette?: string[];
   small?: boolean;
   author?: User;
 };
 
-const SpritePreview: React.FC<Props> = ({ title, hash, author, small }) => {
-  const hashArray = getHashArray(hash || getDefaultHash());
+const SpritePreview: React.FC<Props> = ({
+  title,
+  hash,
+  palette,
+  author,
+  small,
+}) => {
+  const hashArray = getHashArray(
+    hash || getDefaultHash(),
+    palette || defaultColors
+  );
   const showFooter = title || author;
 
   return (

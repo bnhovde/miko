@@ -52,6 +52,7 @@ const SpritePlayer: React.FC<Props> = ({ autoPlay, preview }) => {
                 isPlaying ? localFrame : state.currentFrame || 0
               ]
             }
+            palette={state.spriteData?.palette}
           />
         </div>
       </div>

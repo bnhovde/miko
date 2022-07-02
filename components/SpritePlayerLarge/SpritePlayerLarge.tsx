@@ -16,6 +16,8 @@ type Props = {
 };
 
 const SpritePlayerLarge: React.FC<Props> = ({ spriteData }) => {
+  const { state } = useContext(EditorContext);
+
   const [localFrame, setLocalFrame] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [delay] = useState<number>(100);
@@ -42,7 +44,11 @@ const SpritePlayerLarge: React.FC<Props> = ({ spriteData }) => {
       <p className="label">{spriteData?.name}</p>
       <div className={styles.player}>
         <div className={styles["player-inner"]}>
-          <Frame hash={spriteData?.frames[isPlaying ? localFrame : 0]} />
+          <Frame
+            hash={spriteData?.frames[isPlaying ? localFrame : 0]}
+            palette={spriteData?.palette}
+            debug={state.debug}
+          />
         </div>
       </div>
 

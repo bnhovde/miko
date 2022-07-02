@@ -70,6 +70,7 @@ const Timeline: React.FC = () => {
               key={`${i}-${f}`}
               order={i}
               hash={f}
+              palette={state.spriteData?.palette || []}
               isActive={isZoneActive}
               isSelected={state.currentFrame === i}
               shiftDown={shiftDown}

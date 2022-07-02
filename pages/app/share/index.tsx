@@ -14,23 +14,28 @@ const SpritePlayerLarge = dynamic(
   }
 );
 
-import { getRandomHash } from "utils/hash";
+import { decodeUrlSprite, getRandomHash } from "utils/hash";
 import dynamic from "next/dynamic";
 import { useMemo } from "react";
 import { useRouter } from "next/router";
-import { Sprite } from "types/sprite";
+import { Sprite, URLSprite } from "types/sprite";
 
 const Home: NextPage = () => {
   const router = useRouter();
   const { query } = router;
 
-  const spriteData = {
-    id: query.id,
-    name: query.name,
-    description: "This is an example sprite",
-    size: 11,
-    frames: query.frames ? String(query.frames)?.split("_") : [],
-  } as Sprite;
+  const { n, a, s, d, p, f } = query;
+
+  const urlSprite = {
+    n: n as string,
+    a: a as string,
+    s: parseInt(String(s)) as number,
+    d: parseInt(String(d)) as number,
+    p: String(p).split(","),
+    f: String(f).split(","),
+  } as URLSprite;
+
+  const spriteData = decodeUrlSprite(urlSprite);
 
   return (
     <Screen>

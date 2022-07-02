@@ -9,4 +9,5 @@
 .-scrolling {
   overflow: visible;
   height: auto;
+  min-height: 100vh;
 }
