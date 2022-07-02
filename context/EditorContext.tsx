@@ -228,7 +228,7 @@ type ContextProps = {
 
 const initialState: ContextProps = {
   state: {
-    debug: true,
+    debug: false,
     spriteData: undefined,
     colors: defaultColors,
     isDrawing: false,
