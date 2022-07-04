@@ -3,7 +3,17 @@
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  padding: var(--block-size) var(--gutter-size);
+  padding: calc(var(--block-size) * 1.5) var(--gutter-size);
+}
+
+@media (min-height: 60rem) {
+  .footer {
+    width: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: var(--block-size) var(--gutter-size);
+  }
 }
 
 .shortcuts {

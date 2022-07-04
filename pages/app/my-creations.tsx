@@ -11,6 +11,7 @@ import localStorageKeys from "constants/localStorageKeys";
 import { LegacySprite, Sprite } from "types/sprite";
 import { useRouter } from "next/router";
 import SpriteGrid from "components/SpriteGrid";
+import { encodeUrlSprite } from "utils/hash";
 
 const Home: NextPage = () => {
   const router = useRouter();
@@ -78,6 +79,25 @@ const Home: NextPage = () => {
     }
   }, []);
 
+  const handleView = (spriteId: string) => {
+    router.push(`/app/editor/${spriteId}`);
+  };
+
+  const handleShare = (spriteId: string) => {
+    const spriteData = sprites.find((sprite) => sprite.id === spriteId);
+    if (spriteData) {
+      const { n, a, s, d, p, f } = encodeUrlSprite(spriteData);
+
+      const params = `?n=${n}&a=${a}&s=${s}&d=${d}&p=${p}&f=${f}`;
+      window.open(`/app/share${params}`, "_blank");
+    }
+  };
+
+  const handleDelete = (spriteId: string) => {
+    remove(`${localStorageKeys.SPRITE}-${spriteId}`);
+    setSprites(sprites.filter((sprite) => sprite.id !== spriteId));
+  };
+
   return (
     <Screen scrolling>
       <Head>
@@ -95,7 +115,12 @@ const Home: NextPage = () => {
       />
 
       <Main centered padded>
-        <SpriteGrid sprites={sprites} />
+        <SpriteGrid
+          sprites={sprites}
+          onView={handleView}
+          onShare={handleShare}
+          onDelete={handleDelete}
+        />
       </Main>
       <Footer
         shortcuts={[

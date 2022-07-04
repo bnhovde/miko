@@ -1,0 +1,174 @@
+.outer {
+  display: block;
+  position: relative;
+  width: 3.6rem;
+}
+
+.button {
+  display: inline-block;
+  height: 3.6rem;
+  width: 3.6rem;
+  margin: 0;
+  color: var(--col-text);
+  background: var(--col-light);
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid transparent;
+  border-radius: var(--border-radius);
+  transition: background var(--transition), transform var(--transition);
+}
+.button:hover {
+  background: var(--col-1);
+}
+
+.button:active {
+  background: var(--col-1);
+  transform: scale(0.95);
+}
+
+.icon {
+  margin: 0 auto;
+}
+
+.menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 300px;
+  margin: var(--spacing-1) 0;
+  background-color: var(--col-white);
+  border: 1px solid var(--col-gray);
+  box-shadow: 0px 2px 30px rgb(0 0 0 / 10%);
+  border-radius: var(--border-radius);
+  z-index: 400;
+  overflow: hidden;
+}
+
+.menu.-visible {
+  display: block;
+}
+
+.menu.-hidden {
+  display: none;
+}
+
+.menu.-enter {
+  display: block;
+  animation: enter 0.4s cubic-bezier(0.19, 1, 0.22, 1) both;
+  transform-origin: top right;
+}
+
+.menu.-exit {
+  display: block;
+  animation: exit 0.3s cubic-bezier(0.86, 0, 0.4, 1) both;
+  transform-origin: top right;
+}
+
+.menu-item {
+  display: block;
+}
+
+.menu-item.-appear {
+  animation: slide-in 0.4s cubic-bezier(0.19, 1, 0.22, 1) both;
+}
+
+.menu-item-button {
+  display: block;
+  width: 100%;
+  padding: var(--spacing-1) var(--spacing-4);
+  font-size: 1.6rem;
+  font-family: var(--font-family);
+  border: 0;
+  transition: background 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.menu-item-button[aria-selected='true'] {
+  position: relative;
+  background: var(--col-active);
+}
+
+.menu-item-button[aria-selected='true']::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: var(--spacing-2);
+  background: var(--col-1);
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.menu > ul li:first-child .menu-item-button {
+  padding-top: var(--spacing-3);
+}
+
+.menu > ul li:last-child .menu-item-button {
+  padding-bottom: var(--spacing-3);
+}
+
+/* Modifiers */
+
+.-expanded .outer {
+  position: relative;
+  z-index: 1;
+}
+
+.-expanded .inner {
+  position: relative;
+  z-index: 400;
+}
+
+.-expanded .button {
+  background: var(--col-focus);
+}
+
+.-disabled .button {
+  background: var(--col-gray);
+  pointer-events: none;
+}
+
+.-disabled .button:hover {
+  background: var(--col-gray);
+}
+
+.button[disabled] {
+  cursor: not-allowed;
+  opacity: 0.2;
+}
+
+.menu-item-button:hover {
+  background: var(--col-1);
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes exit {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-1.6rem);
+  }
+}

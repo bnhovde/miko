@@ -1,5 +1,6 @@
 .grid {
   width: 100%;
+  margin: var(--block-size) 0;
 }
 
 .list {
@@ -10,7 +11,16 @@
 }
 
 .item {
-  display: block
+  display: block;
+  position: relative;
+}
+
+.actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+  padding: var(--block-size);
 }
 
 .inner {

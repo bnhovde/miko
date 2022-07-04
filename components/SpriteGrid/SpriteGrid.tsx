@@ -9,12 +9,21 @@ const SpritePreview = dynamic(() => import("components/SpritePreview"), {
 });
 
 import styles from "./SpriteGrid.module.css";
+import ButtonMore from "components/ButtonMore";
 
 type Props = {
   sprites?: Sprite[];
+  onView?: (spriteId: string) => void;
+  onDelete?: (spriteId: string) => void;
+  onShare?: (spriteId: string) => void;
 };
 
-const SpriteGrid: React.FC<Props> = ({ sprites }) => {
+const SpriteGrid: React.FC<Props> = ({
+  sprites,
+  onView,
+  onShare,
+  onDelete,
+}) => {
   const gridClass = classNames({
     [styles["grid"]]: true,
   });
@@ -24,6 +33,25 @@ const SpriteGrid: React.FC<Props> = ({ sprites }) => {
       <ul className={styles.list}>
         {sprites?.map((sprite) => (
           <li key={sprite.id} className={styles.item}>
+            <div className={styles.actions}>
+              <ButtonMore
+                label="Rediger"
+                options={[
+                  {
+                    label: "View",
+                    onClick: () => onView && onView(sprite.id),
+                  },
+                  {
+                    label: "Share",
+                    onClick: () => onShare && onShare(sprite.id),
+                  },
+                  {
+                    label: "Delete",
+                    onClick: () => onDelete && onDelete(sprite.id),
+                  },
+                ]}
+              />
+            </div>
             <div className={styles.inner}>
               <Link href={`/app/editor/${sprite.id}`}>
                 <a className={styles.link}>
