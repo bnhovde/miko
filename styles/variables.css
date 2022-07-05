@@ -28,6 +28,7 @@
   --col-dark: #646464;
   --col-text: black;
   --col-line: rgba(0, 0, 0, 0.1);
+  --col-focus: #FFC8DD;
 
   /**
  * Spacing.

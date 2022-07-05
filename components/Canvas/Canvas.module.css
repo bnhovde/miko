@@ -53,6 +53,10 @@
   opacity: 0.8;
 }
 
+.pixel[data-empty="true"]:hover {
+  background: #9a9a9a2b !important;
+}
+
 .debug-pixel {
   background: #ffffff91;
   width: 1.5rem;

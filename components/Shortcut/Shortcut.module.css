@@ -4,7 +4,8 @@
   font-size: var(--font-size-small);
   border: 0;
 }
-.shortcut:hover .badge {
+.shortcut:hover .badge,
+.shortcut:focus .badge {
   background-color: var(--col-1);
 }
 
@@ -32,13 +33,11 @@
 
 .-active .badge {
   border-color: var(--col-1);
-}
-
-.-active .text {
-  text-decoration: underline;
+  background-color: var(--col-1);
 }
 
 .-flashing .badge {
+  border-color: var(--col-1);
   background-color: var(--col-1);
   transform: scale(0.98);
 }

@@ -21,24 +21,26 @@ const Header: React.FC<Props> = ({ title, backUrl, action }) => {
 
   return (
     <header className={headerClass}>
-      <Link href={backUrl || "/"}>
-        <a className={styles.left}>
-          <span className={styles.text}>
-            {backUrl && <CgChevronLeftR />}
-            {backUrl ? "Back" : "Miko"}
-          </span>
-        </a>
-      </Link>
+      <div className={styles.left}>
+        <Link href={backUrl || "/"}>
+          <a>
+            <span className={styles.text}>
+              {backUrl && <CgChevronLeftR />}
+              {backUrl ? "Back" : "Miko"}
+            </span>
+          </a>
+        </Link>
+      </div>
       <h1 className={styles.title}>{title && title}</h1>
-      <>
+      <div className={styles.right}>
         {action && (
           <Link href={action.url}>
-            <a className={styles.right}>
+            <a>
               <span className={styles.text}>{action.text}</span>
             </a>
           </Link>
         )}
-      </>
+      </div>
     </header>
   );
 };

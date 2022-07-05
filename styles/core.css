@@ -82,8 +82,8 @@ hr {
 
 /* Accessibility styles (when using keyboard) */
 .body--a11y *:focus {
-  outline: 2px solid var(--col-focus);
-  outline-offset: -2px;
+  outline: 4px solid #000000;
+  outline-offset: 4px;
 }
 
 /* Text selection */
