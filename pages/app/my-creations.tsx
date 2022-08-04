@@ -80,7 +80,7 @@ const Home: NextPage = () => {
   }, []);
 
   const handleView = (spriteId: string) => {
-    router.push(`/app/editor/${spriteId}`);
+    router.push(`/app/editor/sprite/${spriteId}`);
   };
 
   const handleShare = (spriteId: string) => {
@@ -134,10 +134,10 @@ const Home: NextPage = () => {
             children: "⏎",
             label: "Draw",
             hotKeys: "enter",
-            onToggle: () => router.push("/app/editor"),
+            onToggle: () => router.push("/app/editor/sprite"),
           },
         ]}
-        action={{ text: "Draw!", url: "/app/editor" }}
+        action={{ text: "Draw!", url: "/app/editor/sprite" }}
       />
     </Screen>
   );

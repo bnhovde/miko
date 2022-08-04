@@ -19,37 +19,38 @@ import guid from "utils/guid";
 import Router, { useRouter } from "next/router";
 import { get } from "utils/localStorage";
 import localStorageKeys from "constants/localStorageKeys";
-import { Sprite } from "types/sprite";
+import { Spritesheet } from "types/sprite";
 
 const Home: NextPage = () => {
   const { query, push } = useRouter();
   const { state, onDrawEnd, loadSprite, onChangeFrame, onAddFrame } =
     useContext(EditorContext);
 
-  const blankSprite = {
+  const blankSpritesheet = {
     id: guid(),
     version: "2.0.0",
     name: "Untitled",
     description: "This is an example sprite",
-    palette: ["fff0"],
     size: 11,
     fps: 10,
-    frames: [
+    palette: ["fff0"],
+    sprites: [{ id: "a" }],
+    grid: [
       "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     ],
   };
 
-  useEffect(() => {
-    if (query.spriteId) {
-      const spriteData = get(`${localStorageKeys.SPRITE}-${query.spriteId}`);
-      if (spriteData) {
-        const parsed = JSON.parse(spriteData) as Sprite;
-        loadSprite(parsed);
-      }
-    } else {
-      loadSprite(blankSprite);
-    }
-  }, [query]);
+  // useEffect(() => {
+  //   if (query.spriteId) {
+  //     const spriteData = get(`${localStorageKeys.SPRITE}-${query.spriteId}`);
+  //     if (spriteData) {
+  //       const parsed = JSON.parse(spriteData) as Spritesheet;
+  //       loadSprite(parsed);
+  //     }
+  //   } else {
+  //     loadSprite(blankSprite);
+  //   }
+  // }, [query]);
 
   const onShare = () => {
     if (state.spriteData) {
@@ -72,13 +73,13 @@ const Home: NextPage = () => {
           <title>Miko.app</title>
           <meta
             name="description"
-            content="Sprite animator and tilemap maker"
+            content="Spritesheet animator and tilemap maker"
           />
           <link rel="icon" href="/favicon.ico" />
         </Head>
 
         <Header
-          title="New Sprite"
+          title="New Spritesheet"
           backUrl={query.spriteId ? "/app/my-creations" : "/"}
           action={{
             text: "Settings",

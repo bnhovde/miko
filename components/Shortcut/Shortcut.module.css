@@ -49,6 +49,10 @@
 .-disabled .badge {
   opacity: 0.5;
 }
+
+.-disabled .text {
+  opacity: 0.5;
+}
 .-disabled:hover .badge {
   background: white;
 }

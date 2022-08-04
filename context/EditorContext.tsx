@@ -33,6 +33,7 @@ enum EditorActionTypes {
   COMMIT_DRAWING = "COMMIT_DRAWING",
   REPLACE_PALETTE = "REPLACE_PALETTE",
   REORDER_FRAMES = "REORDER_FRAMES",
+  CHANGE_NAME = "CHANGE_NAME",
 }
 
 type UiActionPayload = {
@@ -106,6 +107,12 @@ export const uiReducer = (
           (_hash: string, index: number) => index !== action.payload?.index
         ),
       ];
+
+      const newFrameIndex =
+        action.payload?.index !== undefined
+          ? Math.max(action.payload?.index - 1, 0)
+          : state.spriteData?.frames?.length || 0;
+
       return {
         ...state,
         spriteData: state.spriteData
@@ -114,9 +121,8 @@ export const uiReducer = (
               frames: newFrames,
             }
           : undefined,
-        currentFrame: (newFrames.length || 0) - 1,
-        currentHash:
-          state?.spriteData?.frames[(newFrames.length || 0) - 1] || "",
+        currentFrame: newFrameIndex,
+        currentHash: state?.spriteData?.frames[newFrameIndex] || "",
         unsavedHash: "",
         undoHistory: [],
         undoHistoryIndex: 0,
@@ -201,6 +207,16 @@ export const uiReducer = (
         undoHistory: [],
         undoHistoryIndex: 0,
       };
+    case EditorActionTypes.CHANGE_NAME:
+      return {
+        ...state,
+        spriteData: state.spriteData
+          ? {
+              ...state.spriteData,
+              name: action?.payload?.value || "Blank frame",
+            }
+          : undefined,
+      };
     default:
       return state;
   }
@@ -224,6 +240,7 @@ type ContextProps = {
   onDrawChange: (frameIndex: number) => void;
   onReplacePalette: (newPalette: string[]) => void;
   onReorderFrames: (oldIndex: number, newIndex: number) => void;
+  onChangeName: (newName: string) => void;
 };
 
 const initialState: ContextProps = {
@@ -252,6 +269,7 @@ const initialState: ContextProps = {
   onDrawChange: () => null,
   onReplacePalette: () => null,
   onReorderFrames: () => null,
+  onChangeName: () => null,
 };
 
 const EditorContext = React.createContext<ContextProps>(initialState);
@@ -451,6 +469,15 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
     });
   };
 
+  const onChangeName = (newName: string) => {
+    dispatch({
+      type: EditorActionTypes.CHANGE_NAME,
+      payload: {
+        value: newName,
+      },
+    });
+  };
+
   return (
     <EditorContext.Provider
       value={{
@@ -467,6 +494,7 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
         onDrawEnd,
         onReplacePalette,
         onReorderFrames,
+        onChangeName,
       }}
     >
       {children}

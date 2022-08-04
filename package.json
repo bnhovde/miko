@@ -16,7 +16,8 @@
     "react-firebase-hooks": "^5.0.3",
     "react-hotkeys-hook": "^3.4.6",
     "react-icons": "^4.4.0",
-    "react-transition-group": "^4.4.2"
+    "react-transition-group": "^4.4.2",
+    "string-algorithms": "^1.0.31"
   },
   "devDependencies": {
     "@types/node": "18.0.0",

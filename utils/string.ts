@@ -21,6 +21,26 @@ export function diffStrings(string: string, compareString: string): string {
 
   return newStringArr.join("");
 }
+export function compressString(string: string): string {
+  const result = string.split("").reduce((sum, pixel) => {
+    const prevVal = sum[sum.length - 1];
+    const twoPrevVal = sum[sum.length - 2];
+
+    // Check if previous pixel is the same color
+    if (prevVal && pixel === prevVal) {
+      return [...sum, 2];
+
+      // Check if match AND previous pixel is numeric
+    } else if (prevVal && pixel === twoPrevVal && typeof prevVal === "number") {
+      return [...sum.slice(0, sum.length - 1), prevVal + 1];
+
+      // Add new color
+    } else {
+      return [...sum, pixel];
+    }
+  }, [] as (string | number)[]);
+  return result.join("");
+}
 
 // export function undiffStrings(string: string, compareString?: string): string {
 //     if (!compareString) {

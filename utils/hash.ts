@@ -52,9 +52,14 @@ const decodeUrlSprite = (urlSprite: URLSprite): Sprite => {
   const colorArray = [...p];
   const reg = /([0-9.]+)(?![0-9.])|([a-z]+)(?![a-z])/gi;
 
-  const allFrames = f.map((frame) => {
-    const frameArray = frame.match(reg) || [];
+  const allFrames = f.map((frame, index) => {
+    let frameArray = frame.match(reg) || [];
     const frameResults = [];
+
+    if (frame.startsWith("z")) {
+      const refFrame = f[parseInt(frame.substring(1))];
+      frameArray = refFrame.match(reg) || [];
+    }
 
     for (var i = 0; i < frameArray.length; i++) {
       const match = frameArray[i];
@@ -86,7 +91,21 @@ const decodeUrlSprite = (urlSprite: URLSprite): Sprite => {
 const encodeUrlSprite = (sprite: Sprite): URLSprite => {
   const { name, palette, author, size, frames, fps } = sprite;
 
-  const compressedFrames = frames.reduce((sum, frame) => {
+  const uniqueFrames = frames.reduce((sum, frame, index) => {
+    const matchIndex = frames.lastIndexOf(frame);
+
+    if (matchIndex > -1 && matchIndex !== index) {
+      return [...sum, "z" + matchIndex];
+    }
+    return [...sum, frame];
+  }, [] as string[]);
+
+  const compressedFrames = uniqueFrames.reduce((sum, frame) => {
+    // Ignore cloned frames
+    if (frame.startsWith("z")) {
+      return [...sum, frame];
+    }
+
     const compressedPixels = frame.split("").reduce((sum, pixel) => {
       const prevVal = sum[sum.length - 1];
       const twoPrevVal = sum[sum.length - 2];
@@ -111,14 +130,6 @@ const encodeUrlSprite = (sprite: Sprite): URLSprite => {
 
     return [...sum, compressedPixels.join("")];
   }, [] as string[]);
-
-  // const diffedFrames = compressedFrames.map((frame, index) => {
-  //   const prevFrame = compressedFrames[index - 1];
-  //   if (prevFrame) {
-  //     return diffStrings(frame, prevFrame);
-  //   }
-  //   return frame;
-  // });
 
   return {
     n: name,

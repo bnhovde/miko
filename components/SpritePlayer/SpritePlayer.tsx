@@ -60,12 +60,12 @@ const SpritePlayer: React.FC<Props> = ({ autoPlay, preview }) => {
         <div className={styles.actions}>
           <Shortcut
             label="play/pause"
-            hotKeys="p"
+            hotKeys="space"
             onToggle={(newState) => setIsPlaying(newState)}
             isActive={isPlaying}
             disabled={!state.spriteData?.frames}
           >
-            P
+            <RiSpace />
           </Shortcut>
         </div>
       )}

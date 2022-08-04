@@ -53,7 +53,7 @@ const SpriteGrid: React.FC<Props> = ({
               />
             </div>
             <div className={styles.inner}>
-              <Link href={`/app/editor/${sprite.id}`}>
+              <Link href={`/app/editor/sprite/${sprite.id}`}>
                 <a className={styles.link}>
                   <div className={styles.sprite}>
                     <SpritePreview

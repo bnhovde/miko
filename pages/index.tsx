@@ -64,16 +64,17 @@ const Home: NextPage = () => {
             children: "L",
             label: "Login",
             hotKeys: "l",
+            disabled: true,
             onToggle: () => router.push("/app/login"),
           },
           {
             children: "⏎",
             label: "Draw",
             hotKeys: "enter",
-            onToggle: () => router.push("/app/editor"),
+            onToggle: () => router.push("/app/editor/sprite"),
           },
         ]}
-        action={{ text: "Draw!", url: "/app/editor" }}
+        action={{ text: "Draw!", url: "/app/editor/sprite" }}
       />
     </Screen>
   );
