@@ -129,15 +129,15 @@ const Home: NextPage = () => {
             },
             {
               children: "⌘ + A",
-              label: "Add",
+              label: "Add blank",
               hotKeys: "cmd+a",
               onToggle: () =>
                 state.spriteData?.frames && onAddFrame(state.currentFrame),
             },
             {
-              children: "⌘ + C",
-              label: "Copy",
-              hotKeys: "cmd+c",
+              children: "⌘ + D",
+              label: "Duplicate",
+              hotKeys: "cmd+d",
               onToggle: () =>
                 onAddFrame(
                   state.currentFrame,
@@ -145,9 +145,9 @@ const Home: NextPage = () => {
                 ),
             },
             {
-              children: "⌘ + D",
+              children: "⌘ + E",
               label: "Delete",
-              hotKeys: "cmd+d",
+              hotKeys: "cmd+e",
               onToggle: () =>
                 state.spriteData?.frames && onDeleteFrame(state.currentFrame),
             },
