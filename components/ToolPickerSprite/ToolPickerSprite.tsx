@@ -15,18 +15,18 @@ const ToolPickerSprite: React.FC = () => {
       <ul className={styles.items}>
         <li className={styles.item}>
           <ToolButton
-            active={state.currentTool === "pencil"}
-            inUse={state.currentTool === "pencil" && state.isDrawing}
-            onClick={() => onSelectTool("pencil")}
+            active={state.currentTool === "select"}
+            inUse={state.currentTool === "select" && state.isDrawing}
+            onClick={() => onSelectTool("select")}
           >
             <RiCursorFill />
           </ToolButton>
         </li>
         <li className={styles.item}>
           <ToolButton
-            active={state.currentTool === "eraser"}
-            inUse={state.currentTool === "eraser" && state.isDrawing}
-            onClick={() => onSelectTool("eraser")}
+            active={state.currentTool === "paint"}
+            inUse={state.currentTool === "paint" && state.isDrawing}
+            onClick={() => onSelectTool("paint")}
           >
             <RiBrush2Fill />
           </ToolButton>

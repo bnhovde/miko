@@ -6,12 +6,25 @@
   gap: var(--gutter-size);
 }
 
+.inner {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  flex: 1;
+  gap: var(--gutter-size);
+}
+
 .colors {
   width: 100%;
   max-width: 16.6rem;
 }
 
-.inner {
+.sprites {
+  width: 100%;
+  max-width: 16.6rem;
+}
+
+.canvases {
   display: flex;
   align-items: center;
   justify-content: center;

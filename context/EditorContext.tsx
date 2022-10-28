@@ -3,15 +3,9 @@ import React, { useReducer, useEffect, useContext } from "react";
 import { EditorState } from "types/editor";
 
 import localStorageKeys from "constants/localStorageKeys";
-import { get, set } from "utils/localStorage";
-import guid from "utils/guid";
+import { set } from "utils/localStorage";
 
-import {
-  getDefaultHash,
-  getHashArray,
-  optimiseFrames,
-  updateHash,
-} from "utils/hash";
+import { getDefaultHash, optimiseFrames, updateHash } from "utils/hash";
 import { InputEvent } from "types/input";
 import { Sprite } from "types/sprite";
 import { defaultColors } from "data/palettes";
@@ -247,6 +241,7 @@ const initialState: ContextProps = {
   state: {
     debug: false,
     spriteData: undefined,
+    sheetData: undefined,
     colors: defaultColors,
     isDrawing: false,
     currentFrame: 0,
@@ -256,6 +251,7 @@ const initialState: ContextProps = {
     currentTool: "pencil",
     currentHash: getDefaultHash(),
     unsavedHash: "",
+    currentSheetIndex: 0,
   },
   loadSprite: () => null,
   onAddFrame: () => null,
