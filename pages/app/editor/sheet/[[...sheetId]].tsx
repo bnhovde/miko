@@ -13,7 +13,7 @@ import { getDefaultHash, getRandomHash, encodeUrlSprite } from "utils/hash";
 import dynamic from "next/dynamic";
 import { useContext, useEffect, useMemo, useState } from "react";
 import Timeline from "components/Timeline";
-import Editor from "components/Editor";
+import EditorSprite from "components/EditorSprite";
 import sprites from "data/sprite";
 import guid from "utils/guid";
 import Router, { useRouter } from "next/router";
@@ -88,7 +88,7 @@ const Home: NextPage = () => {
         />
 
         <Main padded>
-          <Editor />
+          <EditorSprite />
         </Main>
 
         <Footer

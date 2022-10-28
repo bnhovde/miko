@@ -1,0 +1,74 @@
+.wrapper {
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--block-size-small);
+  max-width: min(var(--canvas-max-size), 50vh);
+  margin: 0 auto;
+}
+
+.editor {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding-bottom: 100%;
+}
+
+.canvas {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(11, 1fr);
+  grid-template-rows: repeat(11, 1fr);
+  border: 1px solid #a8a8a81c;
+  touch-action: none;
+}
+
+.pixel {
+  position: relative;
+  display: block;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  border: 1px solid #a8a8a81c;
+}
+
+.onion-skin {
+  position: absolute;
+  display: block;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  opacity: 0.2;
+}
+
+.pixel:hover {
+  opacity: 0.8;
+}
+
+.pixel[data-empty="true"]:hover {
+  background: #9a9a9a2b !important;
+}
+
+.debug-pixel {
+  background: #ffffff91;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  overflow: hidden;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-size: 10px;
+  transform: translateX(-50%) translateY(-50%);
+}

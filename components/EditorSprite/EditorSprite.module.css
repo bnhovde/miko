@@ -1,0 +1,29 @@
+.editor {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  gap: var(--gutter-size);
+}
+
+.colors {
+  width: 100%;
+  max-width: 16.6rem;
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: var(--gutter-size);
+}
+
+.canvas {
+  width: 100%;
+}
+
+.toolbar {
+  margin-top: var(--block-size);
+}
+
