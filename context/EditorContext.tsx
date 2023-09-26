@@ -10,6 +10,7 @@ import { InputEvent } from "types/input";
 import { Sprite } from "types/sprite";
 import { defaultColors } from "data/palettes";
 import { insertAtIndex, moveToIndex } from "utils/array";
+import { Spritesheet } from "types/sheet";
 
 /**
  * Reducer
@@ -28,6 +29,7 @@ enum EditorActionTypes {
   REPLACE_PALETTE = "REPLACE_PALETTE",
   REORDER_FRAMES = "REORDER_FRAMES",
   CHANGE_NAME = "CHANGE_NAME",
+  LOAD_SPRITESHEET = "LOAD_SPRITESHEET",
 }
 
 type UiActionPayload = {
@@ -39,6 +41,7 @@ type UiActionPayload = {
   palette?: string[];
   newHistory?: string[];
   sprite?: Sprite;
+  spritesheet?: Spritesheet;
 };
 
 type UiAction = {
@@ -211,6 +214,15 @@ export const uiReducer = (
             }
           : undefined,
       };
+    case EditorActionTypes.LOAD_SPRITESHEET:
+      return {
+        ...initialState.state,
+        editorType: "sheet",
+        spriteData: action.payload?.spritesheet?.sprites[0].data,
+        sheetData: action.payload?.spritesheet,
+        currentHash:
+          action.payload?.spritesheet?.sprites[0].data.frames[0] || "",
+      };
     default:
       return state;
   }
@@ -235,10 +247,12 @@ type ContextProps = {
   onReplacePalette: (newPalette: string[]) => void;
   onReorderFrames: (oldIndex: number, newIndex: number) => void;
   onChangeName: (newName: string) => void;
+  loadSpriteSheet: (spritesheet: Spritesheet) => void;
 };
 
 const initialState: ContextProps = {
   state: {
+    editorType: "sprite",
     debug: false,
     spriteData: undefined,
     sheetData: undefined,
@@ -266,6 +280,7 @@ const initialState: ContextProps = {
   onReplacePalette: () => null,
   onReorderFrames: () => null,
   onChangeName: () => null,
+  loadSpriteSheet: () => null,
 };
 
 const EditorContext = React.createContext<ContextProps>(initialState);
@@ -306,6 +321,14 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
       type: EditorActionTypes.LOAD_SPRITE,
       payload: {
         sprite,
+      },
+    });
+
+  const loadSpriteSheet = (spritesheet: Spritesheet) =>
+    dispatch({
+      type: EditorActionTypes.LOAD_SPRITESHEET,
+      payload: {
+        spritesheet,
       },
     });
 
@@ -491,6 +514,7 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
         onReplacePalette,
         onReorderFrames,
         onChangeName,
+        loadSpriteSheet,
       }}
     >
       {children}

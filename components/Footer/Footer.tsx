@@ -14,6 +14,7 @@ type Props = {
     label: string;
     hotKeys: string;
     disabled?: boolean;
+    isActive?: boolean;
     onToggle?: (newState: boolean) => void;
   }[];
   action?: {
@@ -42,6 +43,7 @@ const Footer: React.FC<Props> = ({ shortcuts, action, button }) => {
                   label={s.label}
                   hotKeys={s.hotKeys}
                   disabled={s.disabled}
+                  isActive={s.isActive}
                   onToggle={s.onToggle}
                 >
                   {s.children}

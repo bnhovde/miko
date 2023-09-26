@@ -57,6 +57,11 @@
   background: #9a9a9a2b !important;
 }
 
+.pixel[data-active="true"] {
+  background: #9a9a9a2b !important;
+  border: 1px dashed black;
+}
+
 .debug-pixel {
   background: #ffffff91;
   width: 1.5rem;

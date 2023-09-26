@@ -3,6 +3,7 @@ import { Spritesheet } from "./sheet";
 
 export type EditorState = {
   debug: boolean;
+  editorType: "sprite" | "sheet";
   spriteData?: Sprite;
   sheetData?: Spritesheet;
   colors: string[];

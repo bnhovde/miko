@@ -19,38 +19,56 @@ import guid from "utils/guid";
 import Router, { useRouter } from "next/router";
 import { get } from "utils/localStorage";
 import localStorageKeys from "constants/localStorageKeys";
-import { Spritesheet } from "types/sprite";
+import { Spritesheet } from "types/sheet";
 
 const Home: NextPage = () => {
   const { query, push } = useRouter();
-  const { state, onDrawEnd, loadSprite, onChangeFrame, onAddFrame } =
+  const { state, onDrawEnd, loadSpriteSheet, onChangeFrame, onAddFrame } =
     useContext(EditorContext);
 
   const blankSpritesheet = {
     id: guid(),
     version: "2.0.0",
     name: "Untitled",
-    description: "This is an example sprite",
+    description: "This is an example spritesheet",
     size: 11,
     fps: 10,
     palette: ["fff0"],
-    sprites: [{ id: "a" }],
+    sprites: [
+      {
+        id: "a",
+        data: {
+          id: guid(),
+          version: "2.0.0",
+          name: "Untitled",
+          description: "This is an example sprite",
+          palette: ["fff0"],
+          size: 11,
+          fps: 10,
+          frames: [
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          ],
+        },
+      },
+    ],
     grid: [
-      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
     ],
   };
 
-  // useEffect(() => {
-  //   if (query.spriteId) {
-  //     const spriteData = get(`${localStorageKeys.SPRITE}-${query.spriteId}`);
-  //     if (spriteData) {
-  //       const parsed = JSON.parse(spriteData) as Spritesheet;
-  //       loadSprite(parsed);
-  //     }
-  //   } else {
-  //     loadSprite(blankSprite);
-  //   }
-  // }, [query]);
+  useEffect(() => {
+    if (query.sheetId) {
+      const spriteData = get(
+        `${localStorageKeys.SPRITESHEET}-${query.sheetId}`
+      );
+      if (spriteData) {
+        const parsed = JSON.parse(spriteData) as Spritesheet;
+        loadSpriteSheet(parsed);
+      }
+    } else {
+      loadSpriteSheet(blankSpritesheet);
+    }
+  }, [query]);
 
   const onShare = () => {
     if (state.spriteData) {

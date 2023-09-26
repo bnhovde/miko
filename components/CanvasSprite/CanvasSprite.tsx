@@ -1,3 +1,4 @@
+import SpritePreview from "components/SpritePreview";
 import EditorContext from "context/EditorContext";
 import React, { useContext } from "react";
 import { InputEvent } from "types/input";
@@ -8,11 +9,6 @@ import styles from "./CanvasSprite.module.css";
 const CanvasSprite: React.FC = () => {
   const { state, onDrawStart, onTouchStart, onDrawChange, onSelectColor } =
     useContext(EditorContext);
-
-  const hash = state.unsavedHash || state.currentHash;
-  const spritePalette = state.spriteData?.palette || [];
-  const hashArray = getHashArray(hash || getDefaultHash(), spritePalette);
-  // const onionHashArray = onionskinHash ? getHashArray(onionskinHash) : [];
 
   const onMouseOver = (
     index: number,
@@ -51,30 +47,23 @@ const CanvasSprite: React.FC = () => {
           onMouseDown={onDrawStart}
           onTouchStart={onTouchStart}
         >
-          {hashArray.map((hex, index) => (
+          {state.sheetData?.sprites.map((sprite, index) => (
             <button
               key={index}
               className={styles.pixel}
-              onContextMenu={(event) => onContextMenu(event, hex)}
+              // onContextMenu={(event) => onContextMenu(event, hex)}
               onMouseOver={(event) => onMouseOver(index, event)}
               onFocus={(event) => onMouseOver(index, event)}
               onTouchMove={(event) => onMouseOver(index, event, false, true)}
               onMouseDown={(event) => onMouseOver(index, event, true)}
               onTouchStart={(event) => onMouseOver(index, event, true, true)}
-              style={{ background: `#${hex}` }}
-              data-empty={hex == "fff0"}
+              data-empty={!!sprite.data}
+              data-active={state.currentSheetIndex === index}
             >
-              <>
-                {state.debug && (
-                  <span className={styles["debug-pixel"]}>{hash[index]}</span>
-                )}
-              </>
-              {/* {onionHashArray[index] && (
-                <div
-                  className={styles["onion-skin"]}
-                  style={{ background: `${onionHashArray[index]}` }}
-                ></div>
-              )} */}
+              <SpritePreview
+                hash={sprite.data.frames[0]}
+                palette={sprite.data.palette}
+              />
             </button>
           ))}
         </div>
