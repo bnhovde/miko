@@ -7,7 +7,7 @@ import styles from "./ToolPickerSprite.module.css";
 import EditorContext from "context/EditorContext";
 
 const ToolPickerSprite: React.FC = () => {
-  const { state, onSelectTool } = useContext(EditorContext);
+  const { state, onSelectSpriteTool } = useContext(EditorContext);
 
   return (
     <div className={styles.wrapper}>
@@ -15,27 +15,27 @@ const ToolPickerSprite: React.FC = () => {
       <ul className={styles.items}>
         <li className={styles.item}>
           <ToolButton
-            active={state.currentTool === "select"}
-            inUse={state.currentTool === "select" && state.isDrawing}
-            onClick={() => onSelectTool("select")}
-          >
-            <RiCursorFill />
-          </ToolButton>
-        </li>
-        <li className={styles.item}>
-          <ToolButton
-            active={state.currentTool === "paint"}
-            inUse={state.currentTool === "paint" && state.isDrawing}
-            onClick={() => onSelectTool("paint")}
+            active={state.currentSpriteTool === "paint"}
+            inUse={state.currentSpriteTool === "paint" && state.isDrawing}
+            onClick={() => onSelectSpriteTool("paint")}
           >
             <RiBrush2Fill />
           </ToolButton>
         </li>
         <li className={styles.item}>
           <ToolButton
-            active={state.currentTool === "fill"}
-            inUse={state.currentTool === "fill" && state.isDrawing}
-            onClick={() => onSelectTool("fill")}
+            active={state.currentSpriteTool === "select"}
+            inUse={state.currentSpriteTool === "select" && state.isDrawing}
+            onClick={() => onSelectSpriteTool("select")}
+          >
+            <RiCursorFill />
+          </ToolButton>
+        </li>
+        <li className={styles.item}>
+          <ToolButton
+            active={state.currentSpriteTool === "fill"}
+            inUse={state.currentSpriteTool === "fill" && state.isDrawing}
+            onClick={() => onSelectSpriteTool("fill")}
             disabled
           >
             <RiPaintFill />

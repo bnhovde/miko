@@ -44,7 +44,7 @@ const Canvas: React.FC = () => {
 
   return (
     <div className={styles.wrapper}>
-      <p className="label">Canvas {state.isDrawing && " - drawing"}</p>
+      <p className="label">Sprite</p>
       <div className={styles.editor}>
         <div
           className={styles.canvas}

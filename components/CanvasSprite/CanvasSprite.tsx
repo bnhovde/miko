@@ -2,7 +2,7 @@ import SpritePreview from "components/SpritePreview";
 import EditorContext from "context/EditorContext";
 import React, { useContext } from "react";
 import { InputEvent } from "types/input";
-import { getDefaultHash, getHashArray, updateHash } from "utils/hash";
+import { getSpriteArray } from "utils/sprite";
 
 import styles from "./CanvasSprite.module.css";
 
@@ -38,16 +38,22 @@ const CanvasSprite: React.FC = () => {
     onSelectColor(hex);
   };
 
+  // Get array of characters from state grid string
+  const currentSheet = getSpriteArray(
+    state.sheetData?.grid[state.currentSheetIndex],
+    state.sheetData?.items
+  );
+
   return (
     <div className={styles.wrapper}>
-      <p className="label">Sprite {state.isDrawing && " - drawing"}</p>
+      <p className="label">Sheet {state.isDrawing && " - drawing"}</p>
       <div className={styles.editor}>
         <div
           className={styles.canvas}
           onMouseDown={onDrawStart}
           onTouchStart={onTouchStart}
         >
-          {state.sheetData?.sprites.map((sprite, index) => (
+          {currentSheet?.map((item, index) => (
             <button
               key={index}
               className={styles.pixel}
@@ -57,13 +63,23 @@ const CanvasSprite: React.FC = () => {
               onTouchMove={(event) => onMouseOver(index, event, false, true)}
               onMouseDown={(event) => onMouseOver(index, event, true)}
               onTouchStart={(event) => onMouseOver(index, event, true, true)}
-              data-empty={!!sprite.data}
+              data-empty={!item}
               data-active={state.currentSheetIndex === index}
             >
-              <SpritePreview
-                hash={sprite.data.frames[0]}
-                palette={sprite.data.palette}
-              />
+              {item && (
+                <SpritePreview
+                  hash={
+                    state.sheetData?.sprites?.find(
+                      (s) => s.id === item.spriteId
+                    )?.frames[0]
+                  }
+                  palette={
+                    state.sheetData?.sprites?.find(
+                      (s) => s.id === item.spriteId
+                    )?.palette
+                  }
+                />
+              )}
             </button>
           ))}
         </div>

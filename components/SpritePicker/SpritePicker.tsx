@@ -9,7 +9,7 @@ import localStorageKeys from "constants/localStorageKeys";
 import SpritePreview from "components/SpritePreview";
 
 const SpritePicker: React.FC = () => {
-  const { state, onSelectColor, onReplacePalette } = useContext(EditorContext);
+  const { state, onChangeSprite } = useContext(EditorContext);
   const [sprites, setSprites] = useState<Sprite[]>([]);
 
   useEffect(() => {
@@ -33,6 +33,8 @@ const SpritePicker: React.FC = () => {
                   <SpritePreview
                     hash={sprite.frames[0]}
                     palette={sprite.palette}
+                    selected={state.spriteData?.id === sprite.id}
+                    onClick={() => onChangeSprite(sprite)}
                   />
                 </div>
               </button>

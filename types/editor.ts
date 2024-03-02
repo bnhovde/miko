@@ -13,6 +13,7 @@ export type EditorState = {
   currentColor: string;
   undoHistoryIndex: number;
   currentTool: string;
+  currentSpriteTool: string;
   currentHash: string;
   unsavedHash: string;
   currentSheetIndex: number;

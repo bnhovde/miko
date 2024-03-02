@@ -2,9 +2,9 @@ import { Sprite } from "./sprite";
 
 export type SpritesheetItem = {
   id: string;
-  rotation?: 0 | 90 | 180 | 270;
-  flip?: "x" | "y" | "xy";
-  data: Sprite;
+  spriteId: string;
+  rotation?: number;
+  flip?: "x" | "y" | "xy" | "yx";
 };
 
 export type Spritesheet = {
@@ -19,6 +19,17 @@ export type Spritesheet = {
   size: number;
   fps?: number;
   palette: string[];
-  sprites: SpritesheetItem[];
+  items: SpritesheetItem[];
+  sprites: Sprite[];
   grid: string[];
+};
+
+export type URLSheet = {
+  n: string;
+  v: string;
+  a: string;
+  s: number;
+  d: number;
+  p: string[];
+  f: string[];
 };

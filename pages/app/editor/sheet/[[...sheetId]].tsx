@@ -23,8 +23,21 @@ import { Spritesheet } from "types/sheet";
 
 const Home: NextPage = () => {
   const { query, push } = useRouter();
-  const { state, onDrawEnd, loadSpriteSheet, onChangeFrame, onAddFrame } =
+  const { state, onDrawEnd, initSheet, onChangeFrame, onAddFrame } =
     useContext(EditorContext);
+
+  const blankSprite = {
+    id: guid(),
+    version: "2.0.0",
+    name: "Untitled",
+    description: "This is an example sprite",
+    palette: ["fff0"],
+    size: 11,
+    fps: 10,
+    frames: [
+      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    ],
+  };
 
   const blankSpritesheet = {
     id: guid(),
@@ -34,25 +47,16 @@ const Home: NextPage = () => {
     size: 11,
     fps: 10,
     palette: ["fff0"],
-    sprites: [
+    items: [
       {
-        id: "a",
-        data: {
-          id: guid(),
-          version: "2.0.0",
-          name: "Untitled",
-          description: "This is an example sprite",
-          palette: ["fff0"],
-          size: 11,
-          fps: 10,
-          frames: [
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-          ],
-        },
+        id: guid(),
+        spriteId: blankSprite.id,
+        rotation: 0,
       },
     ],
+    sprites: [blankSprite],
     grid: [
-      "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
     ],
   };
 
@@ -63,10 +67,10 @@ const Home: NextPage = () => {
       );
       if (spriteData) {
         const parsed = JSON.parse(spriteData) as Spritesheet;
-        loadSpriteSheet(parsed);
+        initSheet(parsed);
       }
     } else {
-      loadSpriteSheet(blankSpritesheet);
+      initSheet(blankSpritesheet);
     }
   }, [query]);
 

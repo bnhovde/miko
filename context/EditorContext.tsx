@@ -17,19 +17,21 @@ import { Spritesheet } from "types/sheet";
  */
 
 enum EditorActionTypes {
-  LOAD_SPRITE = "LOAD_SPRITE",
+  INIT_SPRITE = "INIT_SPRITE",
+  INIT_SHEET = "INIT_SHEET",
+  CHANGE_SPRITE = "CHANGE_SPRITE",
   ADD_FRAME = "ADD_FRAME",
   DELETE_FRAME = "DELETE_FRAME",
   CHANGE_FRAME = "CHANGE_FRAME",
   CHANGE_COLOR = "CHANGE_COLOR",
   CHANGE_TOOL = "CHANGE_TOOL",
+  CHANGE_SPRITE_TOOL = "CHANGE_SPRITE_TOOL",
   START_DRAWING = "START_DRAWING",
   DRAG_DRAWING = "DRAG_DRAWING",
   COMMIT_DRAWING = "COMMIT_DRAWING",
   REPLACE_PALETTE = "REPLACE_PALETTE",
   REORDER_FRAMES = "REORDER_FRAMES",
   CHANGE_NAME = "CHANGE_NAME",
-  LOAD_SPRITESHEET = "LOAD_SPRITESHEET",
 }
 
 type UiActionPayload = {
@@ -58,9 +60,15 @@ export const uiReducer = (
   action: UiAction
 ): EditorState => {
   switch (action.type) {
-    case EditorActionTypes.LOAD_SPRITE:
+    case EditorActionTypes.INIT_SPRITE:
       return {
         ...initialState.state,
+        spriteData: action.payload?.sprite,
+        currentHash: action.payload?.sprite?.frames[0] || "",
+      };
+    case EditorActionTypes.CHANGE_SPRITE:
+      return {
+        ...state,
         spriteData: action.payload?.sprite,
         currentHash: action.payload?.sprite?.frames[0] || "",
       };
@@ -134,6 +142,11 @@ export const uiReducer = (
       return {
         ...state,
         currentTool: action.payload?.value || "pencil",
+      };
+    case EditorActionTypes.CHANGE_SPRITE_TOOL:
+      return {
+        ...state,
+        currentSpriteTool: action.payload?.value || "paint",
       };
     case EditorActionTypes.START_DRAWING:
       return {
@@ -214,14 +227,14 @@ export const uiReducer = (
             }
           : undefined,
       };
-    case EditorActionTypes.LOAD_SPRITESHEET:
+    case EditorActionTypes.INIT_SHEET:
+      const spriteData = action.payload?.spritesheet?.sprites?.[0];
       return {
         ...initialState.state,
         editorType: "sheet",
-        spriteData: action.payload?.spritesheet?.sprites[0].data,
+        spriteData: spriteData,
         sheetData: action.payload?.spritesheet,
-        currentHash:
-          action.payload?.spritesheet?.sprites[0].data.frames[0] || "",
+        currentHash: spriteData?.frames[0] || "",
       };
     default:
       return state;
@@ -234,20 +247,22 @@ export const uiReducer = (
 
 type ContextProps = {
   state: EditorState;
-  loadSprite: (sprite: Sprite) => void;
+  initSprite: (sprite: Sprite) => void;
+  initSheet: (spritesheet: Spritesheet) => void;
   onAddFrame: (frameIndex: number, frameHash?: string) => void;
   onChangeFrame: (frame: number) => void;
   onDeleteFrame: (frame: number) => void;
   onSelectColor: (newColor?: string) => void;
   onSelectTool: (newTool: string) => void;
+  onSelectSpriteTool: (newTool: string) => void;
   onDrawStart: (e: InputEvent) => void;
   onTouchStart: (e: InputEvent) => void;
   onDrawEnd: (e: InputEvent) => void;
   onDrawChange: (frameIndex: number) => void;
   onReplacePalette: (newPalette: string[]) => void;
   onReorderFrames: (oldIndex: number, newIndex: number) => void;
+  onChangeSprite: (newSprite: Sprite) => void;
   onChangeName: (newName: string) => void;
-  loadSpriteSheet: (spritesheet: Spritesheet) => void;
 };
 
 const initialState: ContextProps = {
@@ -263,16 +278,19 @@ const initialState: ContextProps = {
     undoHistory: [],
     undoHistoryIndex: 0,
     currentTool: "pencil",
+    currentSpriteTool: "paint",
     currentHash: getDefaultHash(),
     unsavedHash: "",
     currentSheetIndex: 0,
   },
-  loadSprite: () => null,
+  initSprite: () => null,
+  initSheet: () => null,
   onAddFrame: () => null,
   onChangeFrame: () => null,
   onDeleteFrame: () => null,
   onSelectColor: () => null,
   onSelectTool: () => null,
+  onSelectSpriteTool: () => null,
   onTouchStart: () => null,
   onDrawStart: () => null,
   onDrawEnd: () => null,
@@ -280,7 +298,7 @@ const initialState: ContextProps = {
   onReplacePalette: () => null,
   onReorderFrames: () => null,
   onChangeName: () => null,
-  loadSpriteSheet: () => null,
+  onChangeSprite: () => null,
 };
 
 const EditorContext = React.createContext<ContextProps>(initialState);
@@ -316,17 +334,17 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
     }
   };
 
-  const loadSprite = (sprite: Sprite) =>
+  const initSprite = (sprite: Sprite) =>
     dispatch({
-      type: EditorActionTypes.LOAD_SPRITE,
+      type: EditorActionTypes.INIT_SPRITE,
       payload: {
         sprite,
       },
     });
 
-  const loadSpriteSheet = (spritesheet: Spritesheet) =>
+  const initSheet = (spritesheet: Spritesheet) =>
     dispatch({
-      type: EditorActionTypes.LOAD_SPRITESHEET,
+      type: EditorActionTypes.INIT_SHEET,
       payload: {
         spritesheet,
       },
@@ -368,6 +386,14 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
   const onSelectTool = (newTool?: string) =>
     dispatch({
       type: EditorActionTypes.CHANGE_TOOL,
+      payload: {
+        value: newTool,
+      },
+    });
+
+  const onSelectSpriteTool = (newTool?: string) =>
+    dispatch({
+      type: EditorActionTypes.CHANGE_SPRITE_TOOL,
       payload: {
         value: newTool,
       },
@@ -497,16 +523,27 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
     });
   };
 
+  const onChangeSprite = (newSprite: Sprite) => {
+    dispatch({
+      type: EditorActionTypes.CHANGE_SPRITE,
+      payload: {
+        sprite: newSprite,
+      },
+    });
+  };
+
   return (
     <EditorContext.Provider
       value={{
         state,
-        loadSprite,
+        initSprite,
+        initSheet,
         onAddFrame,
         onDeleteFrame,
         onChangeFrame,
         onSelectColor,
         onSelectTool,
+        onSelectSpriteTool,
         onTouchStart,
         onDrawStart,
         onDrawChange,
@@ -514,7 +551,7 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
         onReplacePalette,
         onReorderFrames,
         onChangeName,
-        loadSpriteSheet,
+        onChangeSprite,
       }}
     >
       {children}

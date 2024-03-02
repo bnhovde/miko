@@ -28,7 +28,7 @@ const Home: NextPage = () => {
   const {
     state,
     onDrawEnd,
-    loadSprite,
+    initSprite,
     onChangeFrame,
     onAddFrame,
     onDeleteFrame,
@@ -47,10 +47,10 @@ const Home: NextPage = () => {
       const spriteData = get(`${localStorageKeys.SPRITE}-${spriteId}`);
       if (spriteData) {
         const parsed = JSON.parse(spriteData) as Sprite;
-        loadSprite(parsed);
+        initSprite(parsed);
       }
     } else {
-      loadSprite({
+      initSprite({
         id: guid(),
         version: "2.0.0",
         name: "Untitled",

@@ -45,7 +45,16 @@
 
 /* Modifers */
 
+.wrapper[data-selected="true"] {
+  background-color: var(--col-gray);
+}
+
+.wrapper[data-selected="true"] .inner {
+  scale: 0.4;
+}
+
 .canvas[data-small="true"] {
   width: 3rem;
   padding-bottom: 3rem;
 }
+

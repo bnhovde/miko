@@ -11,6 +11,8 @@ type Props = {
   palette?: string[];
   small?: boolean;
   author?: User;
+  selected?: boolean;
+  onClick?: () => void;
 };
 
 const SpritePreview: React.FC<Props> = ({
@@ -19,6 +21,8 @@ const SpritePreview: React.FC<Props> = ({
   palette,
   author,
   small,
+  selected,
+  onClick,
 }) => {
   const hashArray = getHashArray(
     hash || getDefaultHash(),
@@ -27,7 +31,11 @@ const SpritePreview: React.FC<Props> = ({
   const showFooter = title || author;
 
   return (
-    <figure className={styles.wrapper}>
+    <figure
+      className={styles.wrapper}
+      data-selected={selected}
+      onClick={onClick}
+    >
       <div className={styles.canvas} data-small={small}>
         <div className={styles.inner}>
           {hashArray.map((hex, index) => (
