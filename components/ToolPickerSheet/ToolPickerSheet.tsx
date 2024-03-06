@@ -2,12 +2,12 @@ import React, { useContext } from "react";
 import { RiCursorFill, RiBrush2Fill, RiPaintFill } from "react-icons/ri";
 
 import ToolButton from "components/ToolButton";
-
-import styles from "./ToolPickerSprite.module.css";
 import EditorContext from "context/EditorContext";
 
-const ToolPickerSprite: React.FC = () => {
-  const { state, onSelectSpriteTool } = useContext(EditorContext);
+import styles from "./ToolPickerSheet.module.css";
+
+const ToolPickerSheet: React.FC = () => {
+  const { state, onSelectToolSheet } = useContext(EditorContext);
 
   return (
     <div className={styles.wrapper}>
@@ -16,8 +16,7 @@ const ToolPickerSprite: React.FC = () => {
         <li className={styles.item}>
           <ToolButton
             active={state.currentSpriteTool === "paint"}
-            inUse={state.currentSpriteTool === "paint" && state.isDrawing}
-            onClick={() => onSelectSpriteTool("paint")}
+            onClick={() => onSelectToolSheet("paint")}
           >
             <RiBrush2Fill />
           </ToolButton>
@@ -25,8 +24,7 @@ const ToolPickerSprite: React.FC = () => {
         <li className={styles.item}>
           <ToolButton
             active={state.currentSpriteTool === "select"}
-            inUse={state.currentSpriteTool === "select" && state.isDrawing}
-            onClick={() => onSelectSpriteTool("select")}
+            onClick={() => onSelectToolSheet("select")}
           >
             <RiCursorFill />
           </ToolButton>
@@ -34,8 +32,7 @@ const ToolPickerSprite: React.FC = () => {
         <li className={styles.item}>
           <ToolButton
             active={state.currentSpriteTool === "fill"}
-            inUse={state.currentSpriteTool === "fill" && state.isDrawing}
-            onClick={() => onSelectSpriteTool("fill")}
+            onClick={() => onSelectToolSheet("fill")}
             disabled
           >
             <RiPaintFill />
@@ -46,4 +43,4 @@ const ToolPickerSprite: React.FC = () => {
   );
 };
 
-export default ToolPickerSprite;
+export default ToolPickerSheet;

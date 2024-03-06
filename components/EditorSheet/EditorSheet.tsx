@@ -1,18 +1,16 @@
 import React from "react";
 import classNames from "classnames";
 
-import Timeline from "components/Timeline";
 import ColorPicker from "components/ColorPicker";
 import Canvas from "components/Canvas";
-import SpritePlayer from "components/SpritePlayer";
 import ToolPicker from "components/ToolPicker";
-import ToolPickerSprite from "components/ToolPickerSprite";
+import ToolPickerSheet from "components/ToolPickerSheet";
 
-import styles from "./EditorSprite.module.css";
-import CanvasSprite from "components/CanvasSprite";
+import styles from "./EditorSheet.module.css";
+import CanvasSheet from "components/CanvasSheet";
 import SpritePicker from "components/SpritePicker";
 
-const EditorSprite: React.FC = () => {
+const EditorSheet: React.FC = () => {
   const editorClass = classNames({
     [styles["editor"]]: true,
   });
@@ -33,9 +31,9 @@ const EditorSprite: React.FC = () => {
           </div>
 
           <div className={styles.canvas}>
-            <CanvasSprite />
+            <CanvasSheet />
             <div className={styles.toolbar}>
-              <ToolPickerSprite />
+              <ToolPickerSheet />
             </div>
           </div>
         </div>
@@ -48,4 +46,4 @@ const EditorSprite: React.FC = () => {
   );
 };
 
-export default EditorSprite;
+export default EditorSheet;

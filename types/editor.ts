@@ -8,13 +8,16 @@ export type EditorState = {
   sheetData?: Spritesheet;
   colors: string[];
   undoHistory: string[];
-  isDrawing: boolean;
+  isDrawingSprite: boolean;
+  isDrawingSheet: boolean;
   currentFrame: number;
   currentColor: string;
   undoHistoryIndex: number;
   currentTool: string;
   currentSpriteTool: string;
   currentHash: string;
+  currentGrid: string;
   unsavedHash: string;
+  unsavedGrid: string;
   currentSheetIndex: number;
 };

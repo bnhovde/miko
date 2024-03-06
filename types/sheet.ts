@@ -1,7 +1,6 @@
 import { Sprite } from "./sprite";
 
 export type SpritesheetItem = {
-  id: string;
   spriteId: string;
   rotation?: number;
   flip?: "x" | "y" | "xy" | "yx";
@@ -18,10 +17,9 @@ export type Spritesheet = {
   };
   size: number;
   fps?: number;
-  palette: string[];
+  grid: string[];
   items: SpritesheetItem[];
   sprites: Sprite[];
-  grid: string[];
 };
 
 export type URLSheet = {

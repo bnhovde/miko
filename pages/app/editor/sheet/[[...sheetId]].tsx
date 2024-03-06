@@ -13,7 +13,7 @@ import { getDefaultHash, getRandomHash, encodeUrlSprite } from "utils/hash";
 import dynamic from "next/dynamic";
 import { useContext, useEffect, useMemo, useState } from "react";
 import Timeline from "components/Timeline";
-import EditorSprite from "components/EditorSprite";
+import EditorSheet from "components/EditorSheet";
 import sprites from "data/sprite";
 import guid from "utils/guid";
 import Router, { useRouter } from "next/router";
@@ -46,18 +46,16 @@ const Home: NextPage = () => {
     description: "This is an example spritesheet",
     size: 11,
     fps: 10,
-    palette: ["fff0"],
+    grid: [
+      "a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    ],
     items: [
       {
-        id: guid(),
         spriteId: blankSprite.id,
         rotation: 0,
       },
     ],
     sprites: [blankSprite],
-    grid: [
-      "a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-    ],
   };
 
   useEffect(() => {
@@ -110,7 +108,7 @@ const Home: NextPage = () => {
         />
 
         <Main padded>
-          <EditorSprite />
+          <EditorSheet />
         </Main>
 
         <Footer

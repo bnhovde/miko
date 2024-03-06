@@ -30,7 +30,7 @@ const Canvas: React.FC = () => {
       return;
     }
 
-    if (state.isDrawing || isFirstClick) {
+    if (state.isDrawingSprite || isFirstClick) {
       onDrawChange && onDrawChange(index);
     }
   };
@@ -44,7 +44,7 @@ const Canvas: React.FC = () => {
 
   return (
     <div className={styles.wrapper}>
-      <p className="label">Sprite</p>
+      <p className="label">Sprite {state.isDrawingSprite && "drawing"}</p>
       <div className={styles.editor}>
         <div
           className={styles.canvas}

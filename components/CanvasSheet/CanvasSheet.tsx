@@ -4,11 +4,16 @@ import React, { useContext } from "react";
 import { InputEvent } from "types/input";
 import { getSpriteArray } from "utils/sprite";
 
-import styles from "./CanvasSprite.module.css";
+import styles from "./CanvasSheet.module.css";
 
-const CanvasSprite: React.FC = () => {
-  const { state, onDrawStart, onTouchStart, onDrawChange, onSelectColor } =
-    useContext(EditorContext);
+const CanvasSheet: React.FC = () => {
+  const {
+    state,
+    onDrawStartSheet,
+    onTouchStartSheet,
+    onDrawChangeSheet,
+    onSelectColor,
+  } = useContext(EditorContext);
 
   const onMouseOver = (
     index: number,
@@ -26,8 +31,8 @@ const CanvasSprite: React.FC = () => {
       return;
     }
 
-    if (state.isDrawing || isFirstClick) {
-      onDrawChange && onDrawChange(index);
+    if (state.isDrawingSheet || isFirstClick) {
+      onDrawChangeSheet && onDrawChangeSheet(index);
     }
   };
 
@@ -46,12 +51,12 @@ const CanvasSprite: React.FC = () => {
 
   return (
     <div className={styles.wrapper}>
-      <p className="label">Sheet {state.isDrawing && " - drawing"}</p>
+      <p className="label">Sheet {state.isDrawingSheet && " - drawing"}</p>
       <div className={styles.editor}>
         <div
           className={styles.canvas}
-          onMouseDown={onDrawStart}
-          onTouchStart={onTouchStart}
+          onMouseDown={onDrawStartSheet}
+          onTouchStart={onTouchStartSheet}
         >
           {currentSheet?.map((item, index) => (
             <button
@@ -63,8 +68,8 @@ const CanvasSprite: React.FC = () => {
               onTouchMove={(event) => onMouseOver(index, event, false, true)}
               onMouseDown={(event) => onMouseOver(index, event, true)}
               onTouchStart={(event) => onMouseOver(index, event, true, true)}
-              data-empty={!item}
               data-active={state.currentSheetIndex === index}
+              data-empty={!item}
             >
               {item && (
                 <SpritePreview
@@ -88,4 +93,4 @@ const CanvasSprite: React.FC = () => {
   );
 };
 
-export default CanvasSprite;
+export default CanvasSheet;

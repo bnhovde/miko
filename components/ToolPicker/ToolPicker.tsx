@@ -16,7 +16,6 @@ const ToolPicker: React.FC = () => {
         <li className={styles.item}>
           <ToolButton
             active={state.currentTool === "pencil"}
-            inUse={state.currentTool === "pencil" && state.isDrawing}
             onClick={() => onSelectTool("pencil")}
           >
             <RiMarkPenLine />
@@ -25,7 +24,6 @@ const ToolPicker: React.FC = () => {
         <li className={styles.item}>
           <ToolButton
             active={state.currentTool === "eraser"}
-            inUse={state.currentTool === "eraser" && state.isDrawing}
             onClick={() => onSelectTool("eraser")}
           >
             <RiEraserLine />
@@ -34,7 +32,6 @@ const ToolPicker: React.FC = () => {
         <li className={styles.item}>
           <ToolButton
             active={state.currentTool === "fill"}
-            inUse={state.currentTool === "fill" && state.isDrawing}
             onClick={() => onSelectTool("fill")}
             disabled
           >

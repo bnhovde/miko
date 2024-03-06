@@ -7,7 +7,6 @@ type Props = {
   children: JSX.Element[] | JSX.Element | string;
   square?: boolean;
   active?: boolean;
-  inUse?: boolean;
   disabled?: boolean;
   onClick: () => void;
 };
@@ -16,7 +15,6 @@ const ToolButton: React.FC<Props> = ({
   children,
   square,
   active,
-  inUse,
   disabled,
   onClick,
 }) => {
@@ -24,7 +22,6 @@ const ToolButton: React.FC<Props> = ({
     [styles["button"]]: true,
     [styles["-square"]]: square,
     [styles["-active"]]: active,
-    [styles["-in-use"]]: inUse,
     [styles["-disabled"]]: disabled,
   });
 

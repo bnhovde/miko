@@ -1,5 +1,6 @@
 import { Sprite, URLSprite } from "types/sprite";
 import { diffStrings } from "./string";
+import { SpritesheetItem } from "types/sheet";
 
 export const getRandomColor = () =>
   `${Math.floor(Math.random() * 16777215).toString(16)}`;
@@ -173,6 +174,49 @@ const updateHash = (
   return { newHash, newPalette };
 };
 
+const updateHashSheet = (
+  pixelIndex: number,
+  hash: string,
+  grid: string[],
+  items: SpritesheetItem[],
+  sprites: Sprite[],
+  newSprite: Sprite | undefined,
+  selectedTool: string
+) => {
+  const isErasing = selectedTool === "eraser";
+  // const isFilling = selectedTool === "fill";
+
+  let newHash = "";
+  const newGrid = [...grid];
+
+  // Add new sprite to sprites if not existing
+  let newSprites = [...sprites];
+  if (newSprite && !newSprites.find((sprite) => sprite.id === newSprite?.id)) {
+    newSprites.push(newSprite);
+  }
+
+  // Add new item to items and newGrid
+  let newItems = [...items];
+  const itemIndex = items.findIndex((item) => item.spriteId === newSprite?.id);
+  if (itemIndex) {
+    // Convert index to alplhanumerical so that a-z can be used
+    newGrid[pixelIndex] = String.fromCharCode(itemIndex + 97);
+  } else {
+    newItems.push({
+      spriteId: newSprite?.id || "url",
+      rotation: 0,
+    });
+    newGrid[pixelIndex] = String.fromCharCode(items.length + 97);
+  }
+
+  // Update hash
+  for (var i = 0; i < hash.length; i++) {
+    newHash += i === pixelIndex ? "a" : hash.charAt(i);
+  }
+
+  return { newHash, newGrid, newItems, newSprites };
+};
+
 const optimiseFrames = (frames: string[], spritePalette: string[]) => {
   const newPalette = [...spritePalette] as string[];
 
@@ -225,6 +269,7 @@ export {
   getRandomPalette,
   getHashArray,
   updateHash,
+  updateHashSheet,
   encodeUrlSprite,
   decodeUrlSprite,
   optimiseFrames,

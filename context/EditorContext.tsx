@@ -5,12 +5,17 @@ import { EditorState } from "types/editor";
 import localStorageKeys from "constants/localStorageKeys";
 import { set } from "utils/localStorage";
 
-import { getDefaultHash, optimiseFrames, updateHash } from "utils/hash";
+import {
+  getDefaultHash,
+  optimiseFrames,
+  updateHash,
+  updateHashSheet,
+} from "utils/hash";
 import { InputEvent } from "types/input";
 import { Sprite } from "types/sprite";
 import { defaultColors } from "data/palettes";
 import { insertAtIndex, moveToIndex } from "utils/array";
-import { Spritesheet } from "types/sheet";
+import { Spritesheet, SpritesheetItem } from "types/sheet";
 
 /**
  * Reducer
@@ -25,10 +30,13 @@ enum EditorActionTypes {
   CHANGE_FRAME = "CHANGE_FRAME",
   CHANGE_COLOR = "CHANGE_COLOR",
   CHANGE_TOOL = "CHANGE_TOOL",
-  CHANGE_SPRITE_TOOL = "CHANGE_SPRITE_TOOL",
-  START_DRAWING = "START_DRAWING",
+  CHANGE_TOOL_SHEET = "CHANGE_TOOL_SHEET",
+  START_DRAWING_SPRITE = "START_DRAWING_SPRITE",
+  START_DRAWING_SHEET = "START_DRAWING_SHEET",
   DRAG_DRAWING = "DRAG_DRAWING",
+  DRAG_DRAWING_SHEET = "DRAG_DRAWING_SHEET",
   COMMIT_DRAWING = "COMMIT_DRAWING",
+  COMMIT_DRAWING_SHEET = "COMMIT_DRAWING_SHEET",
   REPLACE_PALETTE = "REPLACE_PALETTE",
   REORDER_FRAMES = "REORDER_FRAMES",
   CHANGE_NAME = "CHANGE_NAME",
@@ -41,8 +49,11 @@ type UiActionPayload = {
   active?: boolean;
   frames?: string[];
   palette?: string[];
+  grid?: string[];
   newHistory?: string[];
+  items?: SpritesheetItem[];
   sprite?: Sprite;
+  sprites?: Sprite[];
   spritesheet?: Spritesheet;
 };
 
@@ -143,15 +154,20 @@ export const uiReducer = (
         ...state,
         currentTool: action.payload?.value || "pencil",
       };
-    case EditorActionTypes.CHANGE_SPRITE_TOOL:
+    case EditorActionTypes.CHANGE_TOOL_SHEET:
       return {
         ...state,
         currentSpriteTool: action.payload?.value || "paint",
       };
-    case EditorActionTypes.START_DRAWING:
+    case EditorActionTypes.START_DRAWING_SPRITE:
       return {
         ...state,
-        isDrawing: !!action.payload?.active,
+        isDrawingSprite: !!action.payload?.active,
+      };
+    case EditorActionTypes.START_DRAWING_SHEET:
+      return {
+        ...state,
+        isDrawingSheet: !!action.payload?.active,
       };
     case EditorActionTypes.DRAG_DRAWING:
       return {
@@ -164,10 +180,23 @@ export const uiReducer = (
             }
           : undefined,
       };
+    case EditorActionTypes.DRAG_DRAWING_SHEET:
+      return {
+        ...state,
+        unsavedGrid: action.payload?.value || "",
+        sheetData: state.sheetData
+          ? {
+              ...state.sheetData,
+              grid: action?.payload?.grid || [],
+              items: action?.payload?.items || [],
+              sprites: action?.payload?.sprites || [],
+            }
+          : undefined,
+      };
     case EditorActionTypes.COMMIT_DRAWING:
       return {
         ...state,
-        isDrawing: false,
+        isDrawingSprite: false,
         spriteData: state.spriteData
           ? {
               ...state.spriteData,
@@ -180,6 +209,22 @@ export const uiReducer = (
         currentHash:
           (action?.payload?.frames || [])[state.currentFrame || 0] || "",
         unsavedHash: "",
+      };
+    case EditorActionTypes.COMMIT_DRAWING_SHEET:
+      return {
+        ...state,
+        isDrawingSheet: false,
+        // sheetData: state.sheetData
+        //   ? {
+        //       ...state.sheetData,
+        //       grid: action?.payload?.frames || [],
+        //     }
+        //   : undefined,
+        // undoHistory: action.payload?.newHistory || [],
+        // undoHistoryIndex: (action.payload?.newHistory || []).length,
+        // currentHash:
+        //   (action?.payload?.frames || [])[state.currentFrame || 0] || "",
+        // unsavedHash: "",
       };
     case EditorActionTypes.REPLACE_PALETTE:
       return {
@@ -254,11 +299,14 @@ type ContextProps = {
   onDeleteFrame: (frame: number) => void;
   onSelectColor: (newColor?: string) => void;
   onSelectTool: (newTool: string) => void;
-  onSelectSpriteTool: (newTool: string) => void;
+  onSelectToolSheet: (newTool: string) => void;
   onDrawStart: (e: InputEvent) => void;
+  onDrawStartSheet: (e: InputEvent) => void;
   onTouchStart: (e: InputEvent) => void;
+  onTouchStartSheet: (e: InputEvent) => void;
   onDrawEnd: (e: InputEvent) => void;
   onDrawChange: (frameIndex: number) => void;
+  onDrawChangeSheet: (frameIndex: number) => void;
   onReplacePalette: (newPalette: string[]) => void;
   onReorderFrames: (oldIndex: number, newIndex: number) => void;
   onChangeSprite: (newSprite: Sprite) => void;
@@ -272,7 +320,8 @@ const initialState: ContextProps = {
     spriteData: undefined,
     sheetData: undefined,
     colors: defaultColors,
-    isDrawing: false,
+    isDrawingSprite: false,
+    isDrawingSheet: false,
     currentFrame: 0,
     currentColor: "000",
     undoHistory: [],
@@ -280,7 +329,9 @@ const initialState: ContextProps = {
     currentTool: "pencil",
     currentSpriteTool: "paint",
     currentHash: getDefaultHash(),
+    currentGrid: getDefaultHash(),
     unsavedHash: "",
+    unsavedGrid: "",
     currentSheetIndex: 0,
   },
   initSprite: () => null,
@@ -290,11 +341,14 @@ const initialState: ContextProps = {
   onDeleteFrame: () => null,
   onSelectColor: () => null,
   onSelectTool: () => null,
-  onSelectSpriteTool: () => null,
-  onTouchStart: () => null,
+  onSelectToolSheet: () => null,
   onDrawStart: () => null,
-  onDrawEnd: () => null,
+  onDrawStartSheet: () => null,
+  onTouchStart: () => null,
+  onTouchStartSheet: () => null,
   onDrawChange: () => null,
+  onDrawChangeSheet: () => null,
+  onDrawEnd: () => null,
   onReplacePalette: () => null,
   onReorderFrames: () => null,
   onChangeName: () => null,
@@ -391,9 +445,9 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
       },
     });
 
-  const onSelectSpriteTool = (newTool?: string) =>
+  const onSelectToolSheet = (newTool?: string) =>
     dispatch({
-      type: EditorActionTypes.CHANGE_SPRITE_TOOL,
+      type: EditorActionTypes.CHANGE_TOOL_SHEET,
       payload: {
         value: newTool,
       },
@@ -401,7 +455,16 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
 
   const onTouchStart = (event: InputEvent) => {
     dispatch({
-      type: EditorActionTypes.START_DRAWING,
+      type: EditorActionTypes.START_DRAWING_SPRITE,
+      payload: {
+        active: true,
+      },
+    });
+  };
+
+  const onTouchStartSheet = (event: InputEvent) => {
+    dispatch({
+      type: EditorActionTypes.START_DRAWING_SHEET,
       payload: {
         active: true,
       },
@@ -417,7 +480,23 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
     }
 
     dispatch({
-      type: EditorActionTypes.START_DRAWING,
+      type: EditorActionTypes.START_DRAWING_SPRITE,
+      payload: {
+        active: true,
+      },
+    });
+  };
+
+  const onDrawStartSheet = (event: InputEvent) => {
+    event.preventDefault();
+
+    // Skip action for right click
+    if ("button" in event && event.button === 2) {
+      return;
+    }
+
+    dispatch({
+      type: EditorActionTypes.START_DRAWING_SHEET,
       payload: {
         active: true,
       },
@@ -425,6 +504,10 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
   };
 
   const onDrawChange = (frameIndex: number) => {
+    if (!state.isDrawingSprite) {
+      return;
+    }
+
     const { newHash, newPalette } = updateHash(
       frameIndex,
       state.unsavedHash || state.currentHash || getDefaultHash(),
@@ -442,57 +525,102 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
     });
   };
 
+  const onDrawChangeSheet = (frameIndex: number) => {
+    if (!state.isDrawingSheet) {
+      return;
+    }
+
+    // Update sprite hash array
+    const { newHash, newGrid, newItems, newSprites } = updateHashSheet(
+      frameIndex,
+      state.unsavedGrid || state.currentHash || getDefaultHash(),
+      state.sheetData?.grid || [],
+      state.sheetData?.items || [],
+      state.sheetData?.sprites || [],
+      state.spriteData,
+      state.currentSpriteTool || ""
+    );
+
+    console.log("onDrawChangeSheet", newHash);
+
+    dispatch({
+      type: EditorActionTypes.DRAG_DRAWING_SHEET,
+      payload: {
+        value: newHash,
+        grid: newGrid,
+        items: newItems,
+        sprites: newSprites,
+      },
+    });
+  };
+
   const onDrawEnd = (event: InputEvent) => {
     event.preventDefault();
 
     // Ignore if not drawing
-    if (!state.isDrawing) {
+    if (!state.isDrawingSprite && !state.isDrawingSheet) {
       return;
     }
 
-    const isFirstPaint = state.undoHistory.length === 0;
-    const isChangingHistory =
-      state.undoHistoryIndex !== state.undoHistory.length;
-    let newHistory = [...state.undoHistory, state.unsavedHash];
+    // Handle sprite draw end
+    if (state.isDrawingSprite) {
+      // Handle history changes
+      const isFirstPaint = state.undoHistory.length === 0;
+      const isChangingHistory =
+        state.undoHistoryIndex !== state.undoHistory.length;
+      let newHistory = [...state.undoHistory, state.unsavedHash];
 
-    if (isFirstPaint) {
-      newHistory = [getCurrentFrameHash() || "", state.unsavedHash];
+      if (isFirstPaint) {
+        newHistory = [getCurrentFrameHash() || "", state.unsavedHash];
+      }
+
+      if (isChangingHistory) {
+        newHistory = [
+          ...state.undoHistory.slice(0, state.undoHistoryIndex + 1),
+          state.unsavedHash,
+        ];
+      }
+
+      // Get updated frames including the current change
+      const updatedFrames =
+        getUpdatedSpriteFrames(state.currentFrame, state.unsavedHash) || [];
+
+      // TO-DO: Update palette and hashes by most used colors
+      const { newFrames, newPalette } = optimiseFrames(
+        updatedFrames,
+        state.spriteData?.palette || []
+      );
+
+      // Store sprite in localstorage
+      set(
+        `${localStorageKeys.SPRITE}-${state.spriteData?.id}`,
+        JSON.stringify({
+          ...state.spriteData,
+          frames: newFrames,
+          palette: newPalette,
+        })
+      );
+
+      dispatch({
+        type: EditorActionTypes.COMMIT_DRAWING,
+        payload: {
+          newHistory,
+          frames: newFrames,
+          palette: newPalette,
+        },
+      });
     }
 
-    if (isChangingHistory) {
-      newHistory = [
-        ...state.undoHistory.slice(0, state.undoHistoryIndex + 1),
-        state.unsavedHash,
-      ];
+    // Handle sheet draw end
+    if (state.isDrawingSheet) {
+      dispatch({
+        type: EditorActionTypes.COMMIT_DRAWING_SHEET,
+        // payload: {
+        //   newHistory: [state.currentHash, state.unsavedHash],
+        //   frames: [state.currentHash, state.unsavedHash],
+        // },
+      });
     }
-
-    const updatedFrames =
-      getUpdatedSpriteFrames(state.currentFrame, state.unsavedHash) || [];
-
-    // TO-DO: Update palette and hashes by most used colors
-    const { newFrames, newPalette } = optimiseFrames(
-      updatedFrames,
-      state.spriteData?.palette || []
-    );
-
-    // Store sprite in localstorage
-    set(
-      `${localStorageKeys.SPRITE}-${state.spriteData?.id}`,
-      JSON.stringify({
-        ...state.spriteData,
-        frames: newFrames,
-        palette: newPalette,
-      })
-    );
-
-    dispatch({
-      type: EditorActionTypes.COMMIT_DRAWING,
-      payload: {
-        newHistory,
-        frames: newFrames,
-        palette: newPalette,
-      },
-    });
   };
 
   const onReplacePalette = (newPalette: string[]) => {
@@ -543,10 +671,13 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
         onChangeFrame,
         onSelectColor,
         onSelectTool,
-        onSelectSpriteTool,
+        onSelectToolSheet,
         onTouchStart,
+        onTouchStartSheet,
         onDrawStart,
+        onDrawStartSheet,
         onDrawChange,
+        onDrawChangeSheet,
         onDrawEnd,
         onReplacePalette,
         onReorderFrames,

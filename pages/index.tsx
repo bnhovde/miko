@@ -77,7 +77,6 @@ const Home: NextPage = () => {
             children: "S",
             label: "Make spritesheet",
             hotKeys: "s",
-            disabled: true,
             onToggle: () => router.push("/app/editor/sheet"),
           },
         ]}
