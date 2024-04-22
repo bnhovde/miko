@@ -16,7 +16,6 @@
   --gutter-size: 6.3rem;
 
   --canvas-max-size: 48rem;
-  --button-size: 7.5rem;
 
   /**
  * Colors.
@@ -84,21 +83,31 @@
 
 :root {
   --block-size: 1.6rem;
-  --block-size-small: 1.2rem;
-  --block-size-medium: 1.6rem;
+  --block-size-small: 0.4rem;
+  --block-size-medium: 1rem;
   --gutter-size: 1.6rem;
-  --timeline-height: 7.5rem;
+  --button-size: 4.5rem;
+  --base-font-size: 1.6rem;
+  --font-size-small: 1.2rem;
 }
 @media (min-height: 60rem) {
   :root {
     --block-size: 3.6rem;
     --block-size-small: 1.2rem;
     --block-size-medium: 1.6rem;
-    --timeline-height: 7.5rem;
+    --button-size: 7.5rem;
+    --font-size-small: 1.2rem;
+    --base-font-size: 2rem;
   }
 }
 @media (min-width: 48em) {
   :root {
     --gutter-size: 6.3rem;
+    --block-size: 1.6rem;
+    --block-size-small: 1.2rem;
+    --block-size-medium: 1.6rem;
+    --button-size: 7.5rem;
+    --font-size-small: 1.2rem;
+    --base-font-size: 2rem;
   }
 }

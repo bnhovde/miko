@@ -2,8 +2,14 @@
   width: 100%;
   display: flex;
   align-items: flex-end;
-  justify-content: space-between;
+  justify-content: center;
   padding: calc(var(--block-size) * 1.5) var(--gutter-size);
+}
+
+@media (min-width: 1024px) {
+  .footer {
+    justify-content: space-between;
+  }
 }
 
 @media (min-height: 60rem) {
@@ -17,8 +23,13 @@
 }
 
 .shortcuts {
-  display: flex;
+  display: none;
   justify-content: flex-start;
   align-items: center;
   gap: var(--block-size);
+}
+@media (min-width: 1024px) {
+  .shortcuts {
+    display: flex;
+  }
 }

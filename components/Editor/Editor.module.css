@@ -4,13 +4,20 @@
 
 .timeline {
   display: block;
-  height: var( --timeline-height);
 }
 
 .body {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  display: flex;
+  flex-direction: column;
+  gap: var(--block-size);
   margin-top: var(--block-size);
+}
+
+@media (min-width: 1024px) {
+  .body {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+  }
 }
 
 .toolbar {
@@ -19,7 +26,11 @@
 
 .colors-inner {
   width: 100%;
-  max-width: 16.6rem;
+}
+@media (min-width: 1024px) {
+  .colors-inner {
+    max-width: 16.6rem;
+  }
 }
 
 .preview {
@@ -29,5 +40,9 @@
 
 .preview-inner {
   width: 100%;
-  max-width: 26rem;
+}
+@media (min-width: 1024px) {
+  .preview-inner {
+    max-width: 16.6rem;
+  }
 }

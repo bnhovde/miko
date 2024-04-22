@@ -1,7 +1,7 @@
 h1,
 .h1 {
   font-family: var(--font-family);
-  font-size: 2rem;
+  font-size: var(--base-font-size);
   font-weight: 300;
   line-height: 1.2;
 }

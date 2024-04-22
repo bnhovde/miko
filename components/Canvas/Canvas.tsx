@@ -6,8 +6,7 @@ import { getDefaultHash, getHashArray, updateHash } from "utils/hash";
 import styles from "./Canvas.module.css";
 
 const Canvas: React.FC = () => {
-  const { state, onDrawStart, onTouchStart, onDrawChange, onSelectColor } =
-    useContext(EditorContext);
+  const { state, onDrawChange, onSelectColor } = useContext(EditorContext);
 
   const hash = state.unsavedHash || state.currentHash;
   const spritePalette = state.spriteData?.palette || [];
@@ -20,9 +19,24 @@ const Canvas: React.FC = () => {
     isFirstClick?: boolean,
     isTouch?: boolean
   ) => {
-    if (!isTouch) {
-      event.preventDefault();
+    // Check for touch
+    if (isTouch && typeof event === "object" && "touches" in event) {
+      // Handle touch move event
+      const touch = event.touches[0];
+      const targetButton = document.elementFromPoint(
+        touch.clientX,
+        touch.clientY
+      );
+
+      if ((state.isDrawingSprite || isFirstClick) && targetButton) {
+        onDrawChange && onDrawChange(parseInt(targetButton.id), isFirstClick);
+      }
+
+      return;
     }
+
+    // Handle non-touch
+    event.preventDefault();
 
     // Skip action for right click
     if ("button" in event && event.button === 2) {
@@ -31,7 +45,7 @@ const Canvas: React.FC = () => {
     }
 
     if (state.isDrawingSprite || isFirstClick) {
-      onDrawChange && onDrawChange(index);
+      onDrawChange && onDrawChange(index, isFirstClick);
     }
   };
 
@@ -44,16 +58,15 @@ const Canvas: React.FC = () => {
 
   return (
     <div className={styles.wrapper}>
-      <p className="label">Sprite {state.isDrawingSprite && "drawing"}</p>
+      <p className="label" data-desktop>
+        Sprite {state.isDrawingSprite && "drawing"}
+      </p>
       <div className={styles.editor}>
-        <div
-          className={styles.canvas}
-          onMouseDown={onDrawStart}
-          onTouchStart={onTouchStart}
-        >
+        <div className={styles.canvas}>
           {hashArray.map((hex, index) => (
             <button
               key={index}
+              id={index.toString()}
               className={styles.pixel}
               onContextMenu={(event) => onContextMenu(event, hex)}
               onMouseOver={(event) => onMouseOver(index, event)}

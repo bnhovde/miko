@@ -13,7 +13,7 @@
 
 .line {
   position: absolute;
-  top: 3.8rem;
+  top: calc(var(--button-size) / 2);
   display: block;
   height: 1px;
   width: 100%;

@@ -21,7 +21,9 @@ const ColorPicker: React.FC = () => {
 
   return (
     <div className={styles.wrapper}>
-      <p className="label">Palette</p>
+      <p className="label" data-desktop>
+        Palette
+      </p>
       <ul className={styles.items}>
         {state.colors
           ?.filter((c) => c !== "fff0")

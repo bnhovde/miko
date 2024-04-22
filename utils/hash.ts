@@ -198,7 +198,8 @@ const updateHashSheet = (
   // Add new item to items and newGrid
   let newItems = [...items];
   const itemIndex = items.findIndex((item) => item.spriteId === newSprite?.id);
-  if (itemIndex) {
+
+  if (itemIndex > -1) {
     // Convert index to alplhanumerical so that a-z can be used
     newGrid[pixelIndex] = String.fromCharCode(itemIndex + 97);
   } else {

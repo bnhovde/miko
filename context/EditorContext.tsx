@@ -300,12 +300,10 @@ type ContextProps = {
   onSelectColor: (newColor?: string) => void;
   onSelectTool: (newTool: string) => void;
   onSelectToolSheet: (newTool: string) => void;
-  onDrawStart: (e: InputEvent) => void;
   onDrawStartSheet: (e: InputEvent) => void;
-  onTouchStart: (e: InputEvent) => void;
   onTouchStartSheet: (e: InputEvent) => void;
   onDrawEnd: (e: InputEvent) => void;
-  onDrawChange: (frameIndex: number) => void;
+  onDrawChange: (frameIndex: number, isFirstClick?: boolean) => void;
   onDrawChangeSheet: (frameIndex: number) => void;
   onReplacePalette: (newPalette: string[]) => void;
   onReorderFrames: (oldIndex: number, newIndex: number) => void;
@@ -342,9 +340,7 @@ const initialState: ContextProps = {
   onSelectColor: () => null,
   onSelectTool: () => null,
   onSelectToolSheet: () => null,
-  onDrawStart: () => null,
   onDrawStartSheet: () => null,
-  onTouchStart: () => null,
   onTouchStartSheet: () => null,
   onDrawChange: () => null,
   onDrawChangeSheet: () => null,
@@ -367,6 +363,13 @@ type ProviderProps = {
 
 export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(uiReducer, initialState.state);
+
+  // Expose state to window for debugging
+  useEffect(() => {
+    if (state.debug) {
+      (window as any).state = state;
+    }
+  }, [state]);
 
   const getCurrentFrameHash = () => {
     return state.spriteData?.frames[state.currentFrame] || getDefaultHash();
@@ -453,34 +456,9 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
       },
     });
 
-  const onTouchStart = (event: InputEvent) => {
-    dispatch({
-      type: EditorActionTypes.START_DRAWING_SPRITE,
-      payload: {
-        active: true,
-      },
-    });
-  };
-
   const onTouchStartSheet = (event: InputEvent) => {
     dispatch({
       type: EditorActionTypes.START_DRAWING_SHEET,
-      payload: {
-        active: true,
-      },
-    });
-  };
-
-  const onDrawStart = (event: InputEvent) => {
-    event.preventDefault();
-
-    // Skip action for right click
-    if ("button" in event && event.button === 2) {
-      return;
-    }
-
-    dispatch({
-      type: EditorActionTypes.START_DRAWING_SPRITE,
       payload: {
         active: true,
       },
@@ -503,9 +481,20 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
     });
   };
 
-  const onDrawChange = (frameIndex: number) => {
-    if (!state.isDrawingSprite) {
+  const onDrawChange = (frameIndex: number, isFirstClick?: boolean) => {
+    if (!state.isDrawingSprite && !isFirstClick) {
+      console.log("not drawing");
       return;
+    }
+
+    if (isFirstClick) {
+      console.log("START_DRAWING_SPRITE");
+      dispatch({
+        type: EditorActionTypes.START_DRAWING_SPRITE,
+        payload: {
+          active: true,
+        },
+      });
     }
 
     const { newHash, newPalette } = updateHash(
@@ -541,8 +530,6 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
       state.currentSpriteTool || ""
     );
 
-    console.log("onDrawChangeSheet", newHash);
-
     dispatch({
       type: EditorActionTypes.DRAG_DRAWING_SHEET,
       payload: {
@@ -555,7 +542,10 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
   };
 
   const onDrawEnd = (event: InputEvent) => {
-    event.preventDefault();
+    // Prevent default if not touch event
+    if (!(typeof event === "object" && "touches" in event)) {
+      event.preventDefault();
+    }
 
     // Ignore if not drawing
     if (!state.isDrawingSprite && !state.isDrawingSheet) {
@@ -672,9 +662,7 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
         onSelectColor,
         onSelectTool,
         onSelectToolSheet,
-        onTouchStart,
         onTouchStartSheet,
-        onDrawStart,
         onDrawStartSheet,
         onDrawChange,
         onDrawChangeSheet,

@@ -1,24 +1,38 @@
 .button {
   display: block;
   position: relative;
-  width: 7.5rem;
-  height: 7.5rem;
+  width: 3.4rem;
+  height: 3.4rem;
   border: 0;
   transition: all 0.1s ease;
+}
+@media (min-width: 1024px) {
+  .button {
+    width: 7.5rem;
+    height: 7.5rem;
+  }
 }
 
 .button:after {
   content: '';
   display: block;
-  width: 4.5rem;
-  height: 4.5rem;
+  width: 1.5rem;
+  height: 1.5rem;
   position: absolute;
   background: var(--col-bg);
   border-radius: 50%;
-  top: calc(50% - 2.25rem);
-  left: calc(50% - 2.25rem);
+  top: calc(50% - 0.75rem);
+  left: calc(50% - 0.75rem);
   transform: scale(0);
   transition: all var(--transition);
+}
+@media (min-width: 1024px) {
+  .button:after {
+    width: 4.5rem;
+    height: 4.5rem;
+    top: calc(50% - 2.25rem);
+    left: calc(50% - 2.25rem);
+  }
 }
 
 .button:active {

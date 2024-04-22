@@ -10,11 +10,21 @@
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-  gap: var(--block-size-medium);
+}
+@media (min-width: 1024px) {
+  .items {
+    gap: var(--block-size-medium);
+  }
 }
 
 .footer {
-  display: flex;
+  display: none;
   flex-direction: column;
   align-items: center;
+}
+
+@media (min-width: 1024px) {
+  .footer {
+    display: flex;
+  }
 }

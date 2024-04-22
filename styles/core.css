@@ -100,3 +100,10 @@ hr {
 .body--preload * {
   transition: none !important;
 }
+
+/* Helper class for hiding elements on mobile */
+@media screen and (max-width: 1023px) {
+  *[data-desktop] {
+    display: none;
+  }
+}

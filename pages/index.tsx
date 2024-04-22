@@ -37,7 +37,7 @@ const Home: NextPage = () => {
 
       <Header
         action={{
-          text: "My creations",
+          text: "My sprites",
           url: "/app/my-creations",
         }}
       />
@@ -45,7 +45,7 @@ const Home: NextPage = () => {
       <Main centered>
         <div
           style={{
-            width: "100%",
+            width: "80%",
             maxWidth: "48rem",
           }}
         >
@@ -73,12 +73,12 @@ const Home: NextPage = () => {
             hotKeys: "enter",
             onToggle: () => router.push("/app/editor/sprite"),
           },
-          {
-            children: "S",
-            label: "Make spritesheet",
-            hotKeys: "s",
-            onToggle: () => router.push("/app/editor/sheet"),
-          },
+          // {
+          //   children: "S",
+          //   label: "Make spritesheet",
+          //   hotKeys: "s",
+          //   onToggle: () => router.push("/app/editor/sheet"),
+          // },
         ]}
         action={{ text: "Draw!", url: "/app/editor/sprite" }}
       />

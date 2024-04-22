@@ -5,6 +5,7 @@ import { InputEvent } from "types/input";
 import { getSpriteArray } from "utils/sprite";
 
 import styles from "./CanvasSheet.module.css";
+import { getDefaultHash } from "utils/hash";
 
 const CanvasSheet: React.FC = () => {
   const {
@@ -14,6 +15,11 @@ const CanvasSheet: React.FC = () => {
     onDrawChangeSheet,
     onSelectColor,
   } = useContext(EditorContext);
+
+  const hash = state.unsavedGrid || state.currentGrid;
+  const gridItems = state.sheetData?.items || [];
+  const hashArray = getSpriteArray(hash || getDefaultHash(), gridItems);
+  // const onionHashArray = onionskinHash ? getHashArray(onionskinHash) : [];
 
   const onMouseOver = (
     index: number,
@@ -43,12 +49,6 @@ const CanvasSheet: React.FC = () => {
     onSelectColor(hex);
   };
 
-  // Get array of characters from state grid string
-  const currentSheet = getSpriteArray(
-    state.sheetData?.grid[state.currentSheetIndex],
-    state.sheetData?.items
-  );
-
   return (
     <div className={styles.wrapper}>
       <p className="label">Sheet {state.isDrawingSheet && " - drawing"}</p>
@@ -58,7 +58,7 @@ const CanvasSheet: React.FC = () => {
           onMouseDown={onDrawStartSheet}
           onTouchStart={onTouchStartSheet}
         >
-          {currentSheet?.map((item, index) => (
+          {hashArray?.map((item, index) => (
             <button
               key={index}
               className={styles.pixel}
@@ -85,6 +85,11 @@ const CanvasSheet: React.FC = () => {
                   }
                 />
               )}
+              <>
+                {state.debug && (
+                  <span className={styles["debug-pixel"]}>{hash[index]}</span>
+                )}
+              </>
             </button>
           ))}
         </div>
