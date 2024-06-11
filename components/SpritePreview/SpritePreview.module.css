@@ -19,8 +19,6 @@
   bottom: 0;
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(11, 1fr);
-  grid-template-rows: repeat(11, 1fr);
 }
 
 .pixel {

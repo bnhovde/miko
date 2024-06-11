@@ -52,15 +52,13 @@ const Home: NextPage = () => {
     } else {
       initSprite({
         id: guid(),
-        version: "2.0.0",
+        version: "3.0.0",
         name: "Untitled",
         description: "This is an example sprite",
         palette: ["fff0"],
-        size: 11,
+        size: 16,
         fps: 10,
-        frames: [
-          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        ],
+        frames: ["a".repeat(16 * 16)],
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -5,7 +5,7 @@ const sprite = {
   id: "example",
   name: "Example sprite",
   description: "This is an example sprite",
-  size: 11,
+  size: 16,
   fps: 10,
   frames: [frame1],
 };
@@ -13,7 +13,7 @@ const sprite = {
 export const urlSprite = {
   n: "Example sprite",
   a: "miko",
-  s: 11,
+  s: 16,
   d: 10,
   p: [
     "fff0",

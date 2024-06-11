@@ -62,7 +62,13 @@ const Canvas: React.FC = () => {
         Sprite {state.isDrawingSprite && "drawing"}
       </p>
       <div className={styles.editor}>
-        <div className={styles.canvas}>
+        <div
+          className={styles.canvas}
+          style={{
+            gridTemplateColumns: `repeat(${Math.sqrt(hashArray.length)}, 1fr)`,
+            gridTemplateRows: `repeat(${Math.sqrt(hashArray.length)}, 1fr)`,
+          }}
+        >
           {hashArray.map((hex, index) => (
             <button
               key={index}

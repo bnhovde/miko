@@ -23,8 +23,6 @@
   left: 0;
   height: 100%;
   display: grid;
-  grid-template-columns: repeat(11, 1fr);
-  grid-template-rows: repeat(11, 1fr);
   border: 1px solid #a8a8a81c;
   touch-action: none;
 }

@@ -18,7 +18,13 @@ const Frame: React.FC<Props> = ({ hash, palette, debug }) => {
 
   return (
     <div className={styles.canvas}>
-      <figure className={styles.frame}>
+      <figure
+        className={styles.frame}
+        style={{
+          gridTemplateColumns: `repeat(${Math.sqrt(hashArray.length)}, 1fr)`,
+          gridTemplateRows: `repeat(${Math.sqrt(hashArray.length)}, 1fr)`,
+        }}
+      >
         {hashArray.map((hex, index) => (
           <div
             className={styles.pixel}

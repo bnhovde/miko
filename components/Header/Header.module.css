@@ -24,11 +24,17 @@
   text-transform: uppercase;
 }
 
-.text {
+.logo {
   display: flex;
+  align-items: center;
   font-size: var(--base-font-size);
   gap: var(--block-size-small);
-  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.avatar {
+  width: 4rem;
+  height: 4rem;
 }
 
 

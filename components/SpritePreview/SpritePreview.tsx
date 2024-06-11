@@ -37,7 +37,13 @@ const SpritePreview: React.FC<Props> = ({
       onClick={onClick}
     >
       <div className={styles.canvas} data-small={small}>
-        <div className={styles.inner}>
+        <div
+          className={styles.inner}
+          style={{
+            gridTemplateColumns: `repeat(${Math.sqrt(hashArray.length)}, 1fr)`,
+            gridTemplateRows: `repeat(${Math.sqrt(hashArray.length)}, 1fr)`,
+          }}
+        >
           {hashArray.map((hex, index) => (
             <div
               className={styles.pixel}
