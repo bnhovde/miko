@@ -7,7 +7,7 @@
   min-width: 20.2rem;
   pointer-events: auto;
   cursor: pointer;
-  border: 0.4rem solid white;
+  border: 1px solid var(--col-line);
   padding: 1.5rem 3rem;
   margin: 0;
   padding: 0;
@@ -17,7 +17,6 @@
   text-transform: uppercase;
   text-align: center;
   text-decoration: none;
-  border-radius: var(--border-radius-card);
   transition: all var(--transition);
 }
 .button:hover {

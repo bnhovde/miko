@@ -59,7 +59,7 @@ const Canvas: React.FC = () => {
   return (
     <div className={styles.wrapper}>
       <p className="label" data-desktop>
-        Sprite {state.isDrawingSprite && "drawing"}
+        {state.spriteData?.name || "New Sprite"}
       </p>
       <div className={styles.editor}>
         <div

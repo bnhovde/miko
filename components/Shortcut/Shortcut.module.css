@@ -13,8 +13,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: white;
-  border: 0.2rem solid white;
+  border: 1px solid var(--col-line);
   height: 2.6rem;
   min-width: 4.6rem;
   color: var(--col-text);
