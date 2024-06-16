@@ -68,8 +68,12 @@ const Home: NextPage = () => {
     const link = document.createElement("a");
 
     if (typeof link.download === "string") {
+      // Set filename to package name
+
       link.href = data;
-      link.download = "image.jpg";
+      link.download = state?.packageData?.name
+        ? `${state.packageData.name}.png`
+        : `package.png`;
 
       document.body.appendChild(link);
       link.click();
@@ -80,7 +84,7 @@ const Home: NextPage = () => {
   };
 
   return (
-    <Screen>
+    <Screen scrolling>
       <Head>
         <title>Miko.app</title>
         <meta
@@ -156,7 +160,7 @@ const Home: NextPage = () => {
           // },
         ]}
         button={{
-          text: "Share",
+          text: "Export",
           onClick: () => onExport(),
         }}
       />
