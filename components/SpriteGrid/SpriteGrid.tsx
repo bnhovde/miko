@@ -4,9 +4,12 @@ import Link from "next/link";
 import { Sprite } from "types/sprite";
 import dynamic from "next/dynamic";
 
-const SpritePreview = dynamic(() => import("components/SpritePreview"), {
-  ssr: false,
-});
+const SpritePreviewPlayer = dynamic(
+  () => import("components/SpritePreviewPlayer"),
+  {
+    ssr: false,
+  }
+);
 
 import styles from "./SpriteGrid.module.css";
 import ButtonMore from "components/ButtonMore";
@@ -24,6 +27,8 @@ const SpriteGrid: React.FC<Props> = ({
   onShare,
   onDelete,
 }) => {
+  const [playSpriteId, setPlaySpriteId] = React.useState<string | null>(null);
+
   const gridClass = classNames({
     [styles["grid"]]: true,
   });
@@ -32,7 +37,12 @@ const SpriteGrid: React.FC<Props> = ({
     <section className={gridClass}>
       <ul className={styles.list}>
         {sprites?.map((sprite) => (
-          <li key={sprite.id} className={styles.item}>
+          <li
+            key={sprite.id}
+            className={styles.item}
+            onMouseEnter={() => setPlaySpriteId(sprite.id)}
+            onMouseLeave={() => setPlaySpriteId(sprite.id)}
+          >
             <div className={styles.actions}>
               <ButtonMore
                 label="Rediger"
@@ -56,9 +66,9 @@ const SpriteGrid: React.FC<Props> = ({
               <Link href={`/app/editor/sprite/${sprite.id}`}>
                 <a className={styles.link}>
                   <div className={styles.sprite}>
-                    <SpritePreview
-                      hash={sprite.frames[0]}
-                      palette={sprite.palette}
+                    <SpritePreviewPlayer
+                      sprite={sprite}
+                      isPlaying={playSpriteId === sprite.id}
                     />
                   </div>
                 </a>
