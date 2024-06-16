@@ -1,11 +1,12 @@
 import { Sprite } from "./sprite";
 import { Spritesheet } from "./sheet";
+import { SpritePackage } from "./package";
 
 export type EditorState = {
   debug: boolean;
-  editorType: "sprite" | "sheet";
   spriteData?: Sprite;
   sheetData?: Spritesheet;
+  packageData?: SpritePackage;
   colors: string[];
   undoHistory: string[];
   isDrawingSprite: boolean;

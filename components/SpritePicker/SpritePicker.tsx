@@ -8,8 +8,12 @@ import { getAll } from "utils/localStorage";
 import localStorageKeys from "constants/localStorageKeys";
 import SpritePreview from "components/SpritePreview";
 
-const SpritePicker: React.FC = () => {
-  const { state, onChangeSprite } = useContext(EditorContext);
+type Props = {
+  onSelect: (sprite: Sprite) => void;
+  selecedItems?: Sprite[];
+};
+
+const SpritePicker: React.FC<Props> = ({ onSelect, selecedItems }) => {
   const [sprites, setSprites] = useState<Sprite[]>([]);
 
   useEffect(() => {
@@ -23,7 +27,6 @@ const SpritePicker: React.FC = () => {
 
   return (
     <div className={styles.wrapper}>
-      <p className="label">Sprites</p>
       <ul className={styles.items}>
         {sprites?.map((sprite) => (
           <li key={sprite.id} className={styles.item}>
@@ -33,8 +36,8 @@ const SpritePicker: React.FC = () => {
                   <SpritePreview
                     hash={sprite.frames[0]}
                     palette={sprite.palette}
-                    selected={state.spriteData?.id === sprite.id}
-                    onClick={() => onChangeSprite(sprite)}
+                    selected={selecedItems?.some((s) => s.id === sprite.id)}
+                    onClick={() => onSelect(sprite)}
                   />
                 </div>
               </button>

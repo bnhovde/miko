@@ -60,13 +60,13 @@ const Home: NextPage = () => {
 
       <Footer
         shortcuts={[
-          {
-            children: "L",
-            label: "Login",
-            hotKeys: "l",
-            disabled: true,
-            onToggle: () => router.push("/app/login"),
-          },
+          // {
+          //   children: "L",
+          //   label: "Login",
+          //   hotKeys: "l",
+          //   disabled: true,
+          //   onToggle: () => router.push("/app/login"),
+          // },
           {
             children: "⏎",
             label: "Draw",
@@ -79,6 +79,12 @@ const Home: NextPage = () => {
           //   hotKeys: "s",
           //   onToggle: () => router.push("/app/editor/sheet"),
           // },
+          {
+            children: "P",
+            label: "Package",
+            hotKeys: "p",
+            onToggle: () => router.push("/app/editor/package"),
+          },
         ]}
         action={{ text: "Draw!", url: "/app/editor/sprite" }}
       />

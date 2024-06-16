@@ -1,0 +1,12 @@
+.wrapper {
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--block-size-small);
+}
+
+.body {
+  width: 100%;
+  display: grid;
+}

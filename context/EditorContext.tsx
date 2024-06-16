@@ -16,6 +16,7 @@ import { Sprite } from "types/sprite";
 import { defaultColors } from "data/palettes";
 import { insertAtIndex, moveToIndex } from "utils/array";
 import { Spritesheet, SpritesheetItem } from "types/sheet";
+import { SpritePackage } from "types/package";
 
 /**
  * Reducer
@@ -24,6 +25,7 @@ import { Spritesheet, SpritesheetItem } from "types/sheet";
 enum EditorActionTypes {
   INIT_SPRITE = "INIT_SPRITE",
   INIT_SHEET = "INIT_SHEET",
+  INIT_PACKAGE = "INIT_PACKAGE",
   CHANGE_SPRITE = "CHANGE_SPRITE",
   ADD_FRAME = "ADD_FRAME",
   DELETE_FRAME = "DELETE_FRAME",
@@ -40,6 +42,7 @@ enum EditorActionTypes {
   REPLACE_PALETTE = "REPLACE_PALETTE",
   REORDER_FRAMES = "REORDER_FRAMES",
   CHANGE_NAME = "CHANGE_NAME",
+  UPDATE_PACKAGE = "UPDATE_PACKAGE",
 }
 
 type UiActionPayload = {
@@ -55,6 +58,7 @@ type UiActionPayload = {
   sprite?: Sprite;
   sprites?: Sprite[];
   spritesheet?: Spritesheet;
+  spritePackage?: SpritePackage;
 };
 
 type UiAction = {
@@ -276,10 +280,19 @@ export const uiReducer = (
       const spriteData = action.payload?.spritesheet?.sprites?.[0];
       return {
         ...initialState.state,
-        editorType: "sheet",
         spriteData: spriteData,
         sheetData: action.payload?.spritesheet,
         currentHash: spriteData?.frames[0] || "",
+      };
+    case EditorActionTypes.INIT_PACKAGE:
+      return {
+        ...initialState.state,
+        packageData: action.payload?.spritePackage,
+      };
+    case EditorActionTypes.UPDATE_PACKAGE:
+      return {
+        ...state,
+        packageData: action.payload?.spritePackage,
       };
     default:
       return state;
@@ -294,6 +307,7 @@ type ContextProps = {
   state: EditorState;
   initSprite: (sprite: Sprite) => void;
   initSheet: (spritesheet: Spritesheet) => void;
+  initPackage: (spritePackage: SpritePackage) => void;
   onAddFrame: (frameIndex: number, frameHash?: string) => void;
   onChangeFrame: (frame: number) => void;
   onDeleteFrame: (frame: number) => void;
@@ -309,11 +323,11 @@ type ContextProps = {
   onReorderFrames: (oldIndex: number, newIndex: number) => void;
   onChangeSprite: (newSprite: Sprite) => void;
   onChangeName: (newName: string) => void;
+  onUpdatePackage: (spritePackage: SpritePackage) => void;
 };
 
 const initialState: ContextProps = {
   state: {
-    editorType: "sprite",
     debug: false,
     spriteData: undefined,
     sheetData: undefined,
@@ -334,6 +348,7 @@ const initialState: ContextProps = {
   },
   initSprite: () => null,
   initSheet: () => null,
+  initPackage: () => null,
   onAddFrame: () => null,
   onChangeFrame: () => null,
   onDeleteFrame: () => null,
@@ -349,6 +364,7 @@ const initialState: ContextProps = {
   onReorderFrames: () => null,
   onChangeName: () => null,
   onChangeSprite: () => null,
+  onUpdatePackage: () => null,
 };
 
 const EditorContext = React.createContext<ContextProps>(initialState);
@@ -404,6 +420,14 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
       type: EditorActionTypes.INIT_SHEET,
       payload: {
         spritesheet,
+      },
+    });
+
+  const initPackage = (spritePackage: SpritePackage) =>
+    dispatch({
+      type: EditorActionTypes.INIT_PACKAGE,
+      payload: {
+        spritePackage,
       },
     });
 
@@ -650,12 +674,22 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
     });
   };
 
+  const onUpdatePackage = (spritePackage: SpritePackage) => {
+    dispatch({
+      type: EditorActionTypes.UPDATE_PACKAGE,
+      payload: {
+        spritePackage,
+      },
+    });
+  };
+
   return (
     <EditorContext.Provider
       value={{
         state,
         initSprite,
         initSheet,
+        initPackage,
         onAddFrame,
         onDeleteFrame,
         onChangeFrame,
@@ -671,6 +705,7 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
         onReorderFrames,
         onChangeName,
         onChangeSprite,
+        onUpdatePackage,
       }}
     >
       {children}

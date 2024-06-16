@@ -39,7 +39,7 @@ const EditorSheet: React.FC = () => {
         </div>
 
         <div className={styles.sprites}>
-          <SpritePicker />
+          <SpritePicker onSelect={() => {}} />
         </div>
       </div>
     </section>

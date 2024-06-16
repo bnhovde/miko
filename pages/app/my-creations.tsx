@@ -16,59 +16,6 @@ import { encodeUrlSprite } from "utils/hash";
 const Home: NextPage = () => {
   const router = useRouter();
   const [sprites, setSprites] = useState<Sprite[]>([]);
-  const [legacySprites, setLegacySprites] = useState<Sprite[]>([]);
-
-  useEffect(() => {
-    const legacyItems = getAll(localStorageKeys.LEGACY_SPRITES);
-    const legacySpritesUnprocessed = legacyItems?.map((item) =>
-      JSON.parse(item)
-    ) as LegacySprite[];
-
-    if (legacySpritesUnprocessed) {
-      const processed = legacySpritesUnprocessed.map((legacy) => {
-        const sprite = {
-          id: legacy.id,
-          version: "2.0.0",
-          name: legacy.name,
-          description: legacy.description,
-          palette: [
-            legacy.frames?.[0].split(";")[0],
-            ...legacy.frames?.[0].split(";")[1]?.split(","),
-          ],
-          size: legacy.size,
-          fps: 10,
-          frames: legacy.frames?.map((frame) =>
-            frame
-              .split(";")[2]
-              ?.split("")
-              ?.map((pixel) =>
-                pixel === "0"
-                  ? "a"
-                  : String.fromCharCode(pixel.charCodeAt(0) + 1)
-              )
-              .join("")
-          ),
-        } as Sprite;
-
-        // Store sprite in localstorage
-        set(
-          `${localStorageKeys.SPRITE}-${sprite?.id}`,
-          JSON.stringify({
-            ...sprite,
-            frames: sprite.frames,
-            palette: sprite.palette,
-          })
-        );
-
-        // Delete old legacy sprite
-        remove(`${localStorageKeys.LEGACY_SPRITES}-${sprite?.id}`);
-
-        return sprite;
-      });
-
-      setLegacySprites(processed);
-    }
-  }, []);
 
   useEffect(() => {
     const items = getAll(localStorageKeys.SPRITE);
