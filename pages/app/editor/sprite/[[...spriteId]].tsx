@@ -56,9 +56,9 @@ const Home: NextPage = () => {
         name: "Untitled",
         description: "This is an example sprite",
         palette: ["fff0"],
-        size: 16,
+        size: 11,
         fps: 10,
-        frames: ["a".repeat(16 * 16)],
+        frames: ["a".repeat(11 * 11)],
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

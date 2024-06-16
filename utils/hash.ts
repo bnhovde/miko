@@ -6,7 +6,7 @@ export const getRandomColor = () =>
   `${Math.floor(Math.random() * 16777215).toString(16)}`;
 
 const getRandomHash = (gridSize?: number): string => {
-  const cellCount = (gridSize || 16) * (gridSize || 16);
+  const cellCount = (gridSize || 11) * (gridSize || 11);
   const cells = [];
 
   for (var i = 0; i < cellCount; i++) {
@@ -31,7 +31,7 @@ const getRandomPalette = (): string[] => {
 };
 
 const getDefaultHash = (gridSize?: number): string => {
-  const cellCount = (gridSize || 16) * (gridSize || 16);
+  const cellCount = (gridSize || 11) * (gridSize || 11);
   const cells = new Array(cellCount + 1).join("a");
   return cells;
 };
@@ -82,7 +82,7 @@ const decodeUrlSprite = (urlSprite: URLSprite): Sprite => {
     version: v || "unknown",
     name: n || "Untitled",
     description: `by ${a || "Anonymous"}`,
-    size: s || 16,
+    size: s || 11,
     fps: d || 10,
     palette: colorArray,
     frames: allFrames,

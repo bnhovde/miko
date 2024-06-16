@@ -32,7 +32,7 @@ const Home: NextPage = () => {
     name: "Untitled",
     description: "This is an example sprite",
     palette: ["fff0"],
-    size: 16,
+    size: 11,
     fps: 10,
     frames: [
       "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
@@ -44,7 +44,7 @@ const Home: NextPage = () => {
     version: "2.0.0",
     name: "Untitled",
     description: "This is an example spritesheet",
-    size: 16,
+    size: 11,
     fps: 10,
     grid: [
       "a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",

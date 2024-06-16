@@ -39,7 +39,7 @@ const Home: NextPage = () => {
     version: "2.0.0",
     name: "Untitled package",
     description: "This is a sprite package made with Miko.app",
-    size: 16,
+    size: 11,
     sprites: [],
   };
 
