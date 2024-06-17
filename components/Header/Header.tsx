@@ -31,13 +31,16 @@ const Header: React.FC<Props> = ({ title, backUrl, action }) => {
   );
 
   const setFavicon = async () => {
-    const element = document.getElementById("header-sprite");
+    const headerSprite = document.getElementById("header-sprite");
+    const canvasSprite = document.getElementById("editor-canvas");
     const favicon = document.getElementById("favicon") as HTMLLinkElement;
-    if (!element || !favicon) {
+    const source = canvasSprite || headerSprite;
+
+    if (!source || !favicon) {
       return;
     }
 
-    const canvas = await html2canvas(element, {
+    const canvas = await html2canvas(source, {
       backgroundColor: null,
       scale: 1,
     });
@@ -47,7 +50,9 @@ const Header: React.FC<Props> = ({ title, backUrl, action }) => {
   };
 
   useEffect(() => {
-    setFavicon();
+    setTimeout(() => {
+      setFavicon();
+    }, 100);
   }, []);
 
   return (

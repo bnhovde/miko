@@ -408,18 +408,13 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
     }
   };
 
-  const initSprite = (sprite: Sprite) => {
+  const initSprite = (sprite: Sprite) =>
     dispatch({
       type: EditorActionTypes.INIT_SPRITE,
       payload: {
         sprite,
       },
     });
-
-    setTimeout(() => {
-      setFavicon();
-    }, 300);
-  };
 
   const initSheet = (spritesheet: Spritesheet) =>
     dispatch({
