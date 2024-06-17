@@ -96,6 +96,7 @@ const Home: NextPage = () => {
 
       <Header
         backUrl={query.spriteId ? "/app/my-creations" : "/"}
+        title={state.packageData?.name || "New Package"}
         action={{
           text: "Settings",
           url: query.spriteId

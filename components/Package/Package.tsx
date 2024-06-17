@@ -18,9 +18,6 @@ const Package: React.FC = () => {
 
   return (
     <div className={styles.wrapper}>
-      <p className="label" data-desktop>
-        {state.packageData?.name || "New Package"}
-      </p>
       <div
         className={styles.body}
         id="package-body"
