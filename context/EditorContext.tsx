@@ -17,6 +17,7 @@ import { defaultColors } from "data/palettes";
 import { insertAtIndex, moveToIndex } from "utils/array";
 import { Spritesheet, SpritesheetItem } from "types/sheet";
 import { SpritePackage } from "types/package";
+import html2canvas from "html2canvas";
 
 /**
  * Reducer
@@ -407,13 +408,18 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
     }
   };
 
-  const initSprite = (sprite: Sprite) =>
+  const initSprite = (sprite: Sprite) => {
     dispatch({
       type: EditorActionTypes.INIT_SPRITE,
       payload: {
         sprite,
       },
     });
+
+    setTimeout(() => {
+      setFavicon();
+    }, 300);
+  };
 
   const initSheet = (spritesheet: Spritesheet) =>
     dispatch({
@@ -615,6 +621,9 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
         })
       );
 
+      // Update favicon
+      setFavicon();
+
       dispatch({
         type: EditorActionTypes.COMMIT_DRAWING,
         payload: {
@@ -681,6 +690,22 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
         spritePackage,
       },
     });
+  };
+
+  const setFavicon = async () => {
+    const element = document.getElementById("editor-canvas");
+    const favicon = document.getElementById("favicon") as HTMLLinkElement;
+    if (!element || !favicon) {
+      return;
+    }
+
+    const canvas = await html2canvas(element, {
+      backgroundColor: null,
+      scale: 1,
+    });
+
+    const data = canvas.toDataURL("image/x-icon");
+    favicon.href = data;
   };
 
   return (

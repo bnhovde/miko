@@ -6,6 +6,7 @@ import { getDefaultHash, getHashArray, getRandomPalette } from "utils/hash";
 import styles from "./SpritePreview.module.css";
 
 type Props = {
+  id?: string;
   title?: string;
   hash?: string;
   palette?: string[];
@@ -16,6 +17,7 @@ type Props = {
 };
 
 const SpritePreview: React.FC<Props> = ({
+  id,
   title,
   hash,
   palette,
@@ -36,7 +38,7 @@ const SpritePreview: React.FC<Props> = ({
       data-selected={selected}
       onClick={onClick}
     >
-      <div className={styles.canvas} data-small={small}>
+      <div className={styles.canvas} data-small={small} id={id}>
         <div
           className={styles.inner}
           style={{

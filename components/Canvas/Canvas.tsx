@@ -63,6 +63,7 @@ const Canvas: React.FC = () => {
       </p>
       <div className={styles.editor}>
         <div
+          id="editor-canvas"
           className={styles.canvas}
           style={{
             gridTemplateColumns: `repeat(${Math.sqrt(hashArray.length)}, 1fr)`,

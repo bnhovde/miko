@@ -88,7 +88,7 @@ const Home: NextPage = () => {
             name="description"
             content="Sprite animator and tilemap maker"
           />
-          <link rel="icon" href="/favicon.ico" />
+          <link rel="icon" type="image/x-icon" id="favicon" />
         </Head>
 
         <Header
