@@ -12,10 +12,11 @@ import { Sprite } from "types/sprite";
 import { RiSpace } from "react-icons/ri";
 
 type Props = {
+  id?: string;
   spriteData?: Sprite;
 };
 
-const SpritePlayerLarge: React.FC<Props> = ({ spriteData }) => {
+const SpritePlayerLarge: React.FC<Props> = ({ spriteData, id }) => {
   const { state } = useContext(EditorContext);
 
   const [localFrame, setLocalFrame] = useState(0);
@@ -43,7 +44,7 @@ const SpritePlayerLarge: React.FC<Props> = ({ spriteData }) => {
     <div className={wrapperClass}>
       <p className="label">{spriteData?.name}</p>
       <div className={styles.player}>
-        <div className={styles["player-inner"]}>
+        <div className={styles["player-inner"]} id={id}>
           <Frame
             hash={spriteData?.frames[isPlaying ? localFrame : 0]}
             palette={spriteData?.palette}

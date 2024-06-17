@@ -83,7 +83,7 @@ const Home: NextPage = () => {
     >
       <Screen>
         <Head>
-          <title>Miko.app</title>
+          <title>{state?.spriteData?.name} - Miko.app</title>
           <meta
             name="description"
             content="Sprite animator and tilemap maker"
