@@ -3,7 +3,7 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding: calc(var(--block-size) * 1.5) var(--gutter-size);
+  padding: 0 var(--gutter-size) calc(var(--block-size) * 1.5) var(--gutter-size);
 }
 
 @media (min-width: 1024px) {
@@ -19,6 +19,12 @@
     align-items: flex-end;
     justify-content: space-between;
     padding: var(--block-size) var(--gutter-size);
+  }
+}
+
+@media (min-width: 120em) {
+  .footer {
+    padding: 0 var(--gutter-size) calc(var(--block-size) * 2) var(--gutter-size);
   }
 }
 

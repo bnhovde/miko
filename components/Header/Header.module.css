@@ -2,7 +2,12 @@
   width: 100%;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  padding: var(--block-size) var(--gutter-size);
+  padding: var(--block-size) var(--gutter-size) 0 var(--gutter-size);
+}
+@media (min-width: 120em) {
+  .header {
+    padding: calc(var(--block-size) * 2) var(--gutter-size);
+  }
 }
 
 .left {

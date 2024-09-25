@@ -4,6 +4,11 @@
   align-items: center;
   gap: var(--block-size-small);
 }
+@media (min-width: 120em) {
+  .wrapper {
+    padding: calc(var(--block-size) * 2) 0;
+  }
+}
 
 .inner {
   display: block;
