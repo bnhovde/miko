@@ -1,6 +1,6 @@
 ## Miko
 
-![Image showing editor]([https://example.com/image.png](https://bardhovde.com/assets/miko.png))
+![Image showing editor](https://bardhovde.com/assets/miko.png)
 
 Simple pixel editor with frame animation. Share your creations via an URL.
 
