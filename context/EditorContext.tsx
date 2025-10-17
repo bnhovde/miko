@@ -156,7 +156,8 @@ export const uiReducer = (
       return {
         ...state,
         currentColor: action.payload?.value || "fff0",
-        currentTool: "pencil",
+        currentTool:
+          state.currentTool === "eraser" ? "pencil" : state.currentTool,
       };
     case EditorActionTypes.CHANGE_TOOL:
       return {

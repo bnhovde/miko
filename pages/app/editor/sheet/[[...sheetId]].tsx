@@ -76,6 +76,11 @@ const Home: NextPage = () => {
       }
     } else {
       initSheet(blankSpritesheet);
+
+      // Update URL with new sprite id
+      push(`/app/editor/sheet/${blankSpritesheet.id}`, undefined, {
+        shallow: true,
+      });
     }
   }, [query]);
 

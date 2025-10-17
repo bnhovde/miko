@@ -50,8 +50,10 @@ const Home: NextPage = () => {
         initSprite(parsed);
       }
     } else {
+      const spriteId = guid();
+
       initSprite({
-        id: guid(),
+        id: spriteId,
         version: "3.0.0",
         name: "Untitled",
         description: "This is an example sprite",
@@ -59,6 +61,11 @@ const Home: NextPage = () => {
         size: 11,
         fps: 10,
         frames: ["a".repeat(11 * 11)],
+      });
+
+      // Update URL with new sprite id
+      push(`/app/editor/sprite/${spriteId}`, undefined, {
+        shallow: true,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

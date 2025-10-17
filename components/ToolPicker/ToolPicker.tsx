@@ -33,7 +33,6 @@ const ToolPicker: React.FC = () => {
           <ToolButton
             active={state.currentTool === "fill"}
             onClick={() => onSelectTool("fill")}
-            disabled
           >
             <RiPaintFill />
           </ToolButton>

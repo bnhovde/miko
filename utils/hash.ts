@@ -151,7 +151,7 @@ const updateHash = (
   selectedTool: string
 ) => {
   const isErasing = selectedTool === "eraser";
-  // const isFilling = selectedTool === "fill";
+  const isFilling = selectedTool === "fill";
 
   let newHash = "";
   const newPalette = [...spritePalette];
@@ -161,14 +161,19 @@ const updateHash = (
     newPalette.push(newColor);
   }
 
-  // Update pixel at index
-  for (var i = 0; i < hash.length; i++) {
-    newHash +=
-      i === pixelIndex
-        ? isErasing
-          ? "a"
-          : String.fromCharCode(newPalette.indexOf(newColor) + 97)
-        : hash.charAt(i);
+  const newColorChar = isErasing
+    ? "a"
+    : String.fromCharCode(newPalette.indexOf(newColor) + 97);
+
+  // Handle fill tool with flood fill algorithm
+  if (isFilling) {
+    const gridSize = Math.sqrt(hash.length);
+    newHash = floodFill(hash, pixelIndex, newColorChar, gridSize);
+  } else {
+    // Update single pixel at index (pencil/eraser)
+    for (var i = 0; i < hash.length; i++) {
+      newHash += i === pixelIndex ? newColorChar : hash.charAt(i);
+    }
   }
 
   return { newHash, newPalette };
@@ -186,7 +191,7 @@ const updateHashSheet = (
   flip?: "x" | "y" | "xy" | "yx"
 ) => {
   const isErasing = selectedTool === "eraser";
-  // const isFilling = selectedTool === "fill";
+  const isFilling = selectedTool === "fill";
 
   let newHash = "";
   let newGridString = grid[0] || getDefaultHash();
@@ -228,11 +233,23 @@ const updateHashSheet = (
     }
   }
 
-  // Update grid string at pixelIndex
-  let newGridStringUpdated = "";
-  for (var i = 0; i < newGridString.length; i++) {
-    newGridStringUpdated +=
-      i === pixelIndex ? itemChar : newGridString.charAt(i);
+  // Handle fill tool with flood fill algorithm
+  let newGridStringUpdated: string;
+  if (isFilling) {
+    const gridSize = Math.sqrt(newGridString.length);
+    newGridStringUpdated = floodFill(
+      newGridString,
+      pixelIndex,
+      itemChar,
+      gridSize
+    );
+  } else {
+    // Update single cell at pixelIndex (paint/eraser)
+    newGridStringUpdated = "";
+    for (var i = 0; i < newGridString.length; i++) {
+      newGridStringUpdated +=
+        i === pixelIndex ? itemChar : newGridString.charAt(i);
+    }
   }
 
   // Update hash (kept for backward compatibility but may not be needed)
@@ -274,20 +291,81 @@ const optimiseFrames = (frames: string[], spritePalette: string[]) => {
   return { newFrames, newPalette };
 };
 
-// const floodFill = (pixels: string, pixelIndex: number, newColor: string) => {
-//   const currentCol = pixels[pixelIndex];
+/**
+ * Flood fill algorithm for sprite pixels
+ * @param hash - The current hash string representing the sprite
+ * @param pixelIndex - The starting pixel index to fill from
+ * @param newColorChar - The new color character to fill with
+ * @param gridSize - The size of the grid (default 11x11 = 121 pixels)
+ * @returns The new hash string with flood fill applied
+ */
+const floodFill = (
+  hash: string,
+  pixelIndex: number,
+  newColorChar: string,
+  gridSize: number = 11
+): string => {
+  const targetChar = hash.charAt(pixelIndex);
 
-//   // If the newColor is same as the existing, return the original image.
-//   if(currentCol === newColor){
-//       return pixels;
-//   }
+  // If the newColor is same as the existing, return the original hash
+  if (targetChar === newColorChar) {
+    return hash;
+  }
 
-//   //Other wise call the fill function which will fill in the existing image.
-//   fill(image, sr, sc, newColor, current);
+  // Convert hash string to array for easier manipulation
+  const pixels = hash.split("");
+  const totalPixels = gridSize * gridSize;
 
-//   //Return the image once it is filled
-//   return image;
-// };
+  // BFS queue for flood fill
+  const queue: number[] = [pixelIndex];
+  const visited = new Set<number>();
+
+  while (queue.length > 0) {
+    const currentIndex = queue.shift()!;
+
+    // Skip if already visited or out of bounds
+    if (
+      visited.has(currentIndex) ||
+      currentIndex < 0 ||
+      currentIndex >= totalPixels
+    ) {
+      continue;
+    }
+
+    // Skip if not the target color
+    if (pixels[currentIndex] !== targetChar) {
+      continue;
+    }
+
+    // Mark as visited and fill
+    visited.add(currentIndex);
+    pixels[currentIndex] = newColorChar;
+
+    // Get row and column
+    const row = Math.floor(currentIndex / gridSize);
+    const col = currentIndex % gridSize;
+
+    // Add neighbors (up, down, left, right)
+    // Up
+    if (row > 0) {
+      queue.push(currentIndex - gridSize);
+    }
+    // Down
+    if (row < gridSize - 1) {
+      queue.push(currentIndex + gridSize);
+    }
+    // Left
+    if (col > 0) {
+      queue.push(currentIndex - 1);
+    }
+    // Right
+    if (col < gridSize - 1) {
+      queue.push(currentIndex + 1);
+    }
+  }
+
+  return pixels.join("");
+};
 
 export {
   getDefaultHash,

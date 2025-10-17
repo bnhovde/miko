@@ -48,7 +48,6 @@ const ToolPickerSheet: React.FC = () => {
           <ToolButton
             active={state.currentSpriteTool === "fill"}
             onClick={() => onSelectToolSheet("fill")}
-            disabled
           >
             <RiPaintFill />
           </ToolButton>
