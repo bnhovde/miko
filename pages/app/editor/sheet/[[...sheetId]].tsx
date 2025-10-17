@@ -23,8 +23,14 @@ import { Spritesheet } from "types/sheet";
 
 const Home: NextPage = () => {
   const { query, push } = useRouter();
-  const { state, onDrawEnd, initSheet, onChangeFrame, onAddFrame } =
-    useContext(EditorContext);
+  const {
+    state,
+    onDrawEnd,
+    initSheet,
+    onChangeFrame,
+    onAddFrame,
+    onRotateSelectedSprite,
+  } = useContext(EditorContext);
 
   const blankSprite = {
     id: guid(),
@@ -146,20 +152,13 @@ const Home: NextPage = () => {
               onToggle: () =>
                 state.spriteData?.frames && onAddFrame(state.currentFrame),
             },
-            // {
-            //   children: "⇧ + ←",
-            //   label: "Shift left",
-            //   hotKeys: "shift+left",
-            //   disabled: !state.currentHash,
-            //   onToggle: () => onChangeFrame(state.currentFrame - 1),
-            // },
-            // {
-            //   children: "⇧ + →",
-            //   label: "Shift right",
-            //   hotKeys: "shift+right",
-            //   disabled: !state.currentHash,
-            //   onToggle: () => onChangeFrame(state.currentFrame + 1),
-            // },
+            {
+              children: "R",
+              label: "Rotate",
+              hotKeys: "r",
+              disabled: !state.currentSheetSprite,
+              onToggle: () => onRotateSelectedSprite(),
+            },
           ]}
           button={{
             text: "Share",

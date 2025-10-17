@@ -14,6 +14,8 @@ type Props = {
   author?: User;
   selected?: boolean;
   onClick?: () => void;
+  rotation?: number;
+  flip?: "x" | "y" | "xy" | "yx";
 };
 
 const SpritePreview: React.FC<Props> = ({
@@ -25,12 +27,33 @@ const SpritePreview: React.FC<Props> = ({
   small,
   selected,
   onClick,
+  rotation = 0,
+  flip,
 }) => {
   const hashArray = getHashArray(
     hash || getDefaultHash(),
     palette || defaultColors
   );
   const showFooter = title || author;
+
+  // Build transform string from rotation and flip
+  const getTransform = () => {
+    const transforms = [];
+
+    if (rotation) {
+      transforms.push(`rotate(${rotation}deg)`);
+    }
+
+    if (flip === "x") {
+      transforms.push(`scaleX(-1)`);
+    } else if (flip === "y") {
+      transforms.push(`scaleY(-1)`);
+    } else if (flip === "xy" || flip === "yx") {
+      transforms.push(`scaleX(-1) scaleY(-1)`);
+    }
+
+    return transforms.length > 0 ? transforms.join(" ") : undefined;
+  };
 
   return (
     <figure
@@ -44,6 +67,7 @@ const SpritePreview: React.FC<Props> = ({
           style={{
             gridTemplateColumns: `repeat(${Math.sqrt(hashArray.length)}, 1fr)`,
             gridTemplateRows: `repeat(${Math.sqrt(hashArray.length)}, 1fr)`,
+            transform: getTransform(),
           }}
         >
           {hashArray.map((hex, index) => (

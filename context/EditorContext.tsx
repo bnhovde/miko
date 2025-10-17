@@ -44,6 +44,9 @@ enum EditorActionTypes {
   REORDER_FRAMES = "REORDER_FRAMES",
   CHANGE_NAME = "CHANGE_NAME",
   UPDATE_PACKAGE = "UPDATE_PACKAGE",
+  SELECT_SPRITE_FOR_SHEET = "SELECT_SPRITE_FOR_SHEET",
+  ROTATE_SELECTED_SPRITE = "ROTATE_SELECTED_SPRITE",
+  FLIP_SELECTED_SPRITE = "FLIP_SELECTED_SPRITE",
 }
 
 type UiActionPayload = {
@@ -188,7 +191,7 @@ export const uiReducer = (
     case EditorActionTypes.DRAG_DRAWING_SHEET:
       return {
         ...state,
-        unsavedGrid: action.payload?.value || "",
+        unsavedGrid: (action?.payload?.grid || [])[0] || state.currentGrid,
         sheetData: state.sheetData
           ? {
               ...state.sheetData,
@@ -216,20 +219,20 @@ export const uiReducer = (
         unsavedHash: "",
       };
     case EditorActionTypes.COMMIT_DRAWING_SHEET:
+      const updatedGrid = action?.payload?.grid || state.sheetData?.grid || [];
       return {
         ...state,
         isDrawingSheet: false,
-        // sheetData: state.sheetData
-        //   ? {
-        //       ...state.sheetData,
-        //       grid: action?.payload?.frames || [],
-        //     }
-        //   : undefined,
-        // undoHistory: action.payload?.newHistory || [],
-        // undoHistoryIndex: (action.payload?.newHistory || []).length,
-        // currentHash:
-        //   (action?.payload?.frames || [])[state.currentFrame || 0] || "",
-        // unsavedHash: "",
+        sheetData: state.sheetData
+          ? {
+              ...state.sheetData,
+              grid: updatedGrid,
+              items: action?.payload?.items || state.sheetData.items,
+              sprites: action?.payload?.sprites || state.sheetData.sprites,
+            }
+          : undefined,
+        currentGrid: updatedGrid[0] || state.currentGrid,
+        unsavedGrid: "",
       };
     case EditorActionTypes.REPLACE_PALETTE:
       return {
@@ -284,6 +287,7 @@ export const uiReducer = (
         spriteData: spriteData,
         sheetData: action.payload?.spritesheet,
         currentHash: spriteData?.frames[0] || "",
+        currentGrid: action.payload?.spritesheet?.grid?.[0] || getDefaultHash(),
       };
     case EditorActionTypes.INIT_PACKAGE:
       return {
@@ -294,6 +298,40 @@ export const uiReducer = (
       return {
         ...state,
         packageData: action.payload?.spritePackage,
+      };
+    case EditorActionTypes.SELECT_SPRITE_FOR_SHEET:
+      return {
+        ...state,
+        currentSheetSprite: action.payload?.sprite,
+        currentRotation: 0,
+        currentFlip: undefined,
+      };
+    case EditorActionTypes.ROTATE_SELECTED_SPRITE:
+      return {
+        ...state,
+        currentRotation: (state.currentRotation + 90) % 360,
+      };
+    case EditorActionTypes.FLIP_SELECTED_SPRITE:
+      const currentFlip = state.currentFlip;
+      let newFlip: "x" | "y" | "xy" | "yx" | undefined;
+
+      if (action.payload?.value === "x") {
+        if (!currentFlip) newFlip = "x";
+        else if (currentFlip === "y") newFlip = "xy";
+        else if (currentFlip === "xy") newFlip = "y";
+        else if (currentFlip === "x") newFlip = undefined;
+        else if (currentFlip === "yx") newFlip = "y";
+      } else if (action.payload?.value === "y") {
+        if (!currentFlip) newFlip = "y";
+        else if (currentFlip === "x") newFlip = "xy";
+        else if (currentFlip === "xy") newFlip = "x";
+        else if (currentFlip === "y") newFlip = undefined;
+        else if (currentFlip === "yx") newFlip = "x";
+      }
+
+      return {
+        ...state,
+        currentFlip: newFlip,
       };
     default:
       return state;
@@ -325,6 +363,9 @@ type ContextProps = {
   onChangeSprite: (newSprite: Sprite) => void;
   onChangeName: (newName: string) => void;
   onUpdatePackage: (spritePackage: SpritePackage) => void;
+  onSelectSpriteForSheet: (sprite: Sprite) => void;
+  onRotateSelectedSprite: () => void;
+  onFlipSelectedSprite: (axis: "x" | "y") => void;
 };
 
 const initialState: ContextProps = {
@@ -346,6 +387,9 @@ const initialState: ContextProps = {
     unsavedHash: "",
     unsavedGrid: "",
     currentSheetIndex: 0,
+    currentSheetSprite: undefined,
+    currentRotation: 0,
+    currentFlip: undefined,
   },
   initSprite: () => null,
   initSheet: () => null,
@@ -366,6 +410,9 @@ const initialState: ContextProps = {
   onChangeName: () => null,
   onChangeSprite: () => null,
   onUpdatePackage: () => null,
+  onSelectSpriteForSheet: () => null,
+  onRotateSelectedSprite: () => null,
+  onFlipSelectedSprite: () => null,
 };
 
 const EditorContext = React.createContext<ContextProps>(initialState);
@@ -544,15 +591,20 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
       return;
     }
 
+    // Use currentSheetSprite if available, otherwise use the current spriteData
+    const spriteToPlace = state.currentSheetSprite || state.spriteData;
+
     // Update sprite hash array
     const { newHash, newGrid, newItems, newSprites } = updateHashSheet(
       frameIndex,
-      state.unsavedGrid || state.currentHash || getDefaultHash(),
+      state.unsavedGrid || state.currentGrid || getDefaultHash(),
       state.sheetData?.grid || [],
       state.sheetData?.items || [],
       state.sheetData?.sprites || [],
-      state.spriteData,
-      state.currentSpriteTool || ""
+      spriteToPlace,
+      state.currentSpriteTool || "",
+      state.currentRotation,
+      state.currentFlip
     );
 
     dispatch({
@@ -631,12 +683,21 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
 
     // Handle sheet draw end
     if (state.isDrawingSheet) {
+      // Store sheet in localstorage
+      if (state.sheetData) {
+        set(
+          `${localStorageKeys.SPRITESHEET}-${state.sheetData.id}`,
+          JSON.stringify(state.sheetData)
+        );
+      }
+
       dispatch({
         type: EditorActionTypes.COMMIT_DRAWING_SHEET,
-        // payload: {
-        //   newHistory: [state.currentHash, state.unsavedHash],
-        //   frames: [state.currentHash, state.unsavedHash],
-        // },
+        payload: {
+          grid: state.sheetData?.grid,
+          items: state.sheetData?.items,
+          sprites: state.sheetData?.sprites,
+        },
       });
     }
   };
@@ -703,6 +764,30 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
     favicon.href = data;
   };
 
+  const onSelectSpriteForSheet = (sprite: Sprite) => {
+    dispatch({
+      type: EditorActionTypes.SELECT_SPRITE_FOR_SHEET,
+      payload: {
+        sprite,
+      },
+    });
+  };
+
+  const onRotateSelectedSprite = () => {
+    dispatch({
+      type: EditorActionTypes.ROTATE_SELECTED_SPRITE,
+    });
+  };
+
+  const onFlipSelectedSprite = (axis: "x" | "y") => {
+    dispatch({
+      type: EditorActionTypes.FLIP_SELECTED_SPRITE,
+      payload: {
+        value: axis,
+      },
+    });
+  };
+
   return (
     <EditorContext.Provider
       value={{
@@ -726,6 +811,9 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
         onChangeName,
         onChangeSprite,
         onUpdatePackage,
+        onSelectSpriteForSheet,
+        onRotateSelectedSprite,
+        onFlipSelectedSprite,
       }}
     >
       {children}

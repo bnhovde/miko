@@ -83,6 +83,8 @@ const CanvasSheet: React.FC = () => {
                       (s) => s.id === item.spriteId
                     )?.palette
                   }
+                  rotation={item.rotation}
+                  flip={item.flip}
                 />
               )}
               <>

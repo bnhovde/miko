@@ -18,7 +18,21 @@ const SpritePicker: React.FC<Props> = ({ onSelect, selecedItems }) => {
 
   useEffect(() => {
     const items = getAll(localStorageKeys.SPRITE);
-    const sprites = items?.map((item) => JSON.parse(item)) as Sprite[];
+    const sprites = items
+      ?.map((item) => {
+        try {
+          return JSON.parse(item) as Sprite;
+        } catch (e) {
+          console.error("Failed to parse sprite:", e);
+          return null;
+        }
+      })
+      .filter(
+        (sprite): sprite is Sprite =>
+          sprite !== null &&
+          sprite.frames !== undefined &&
+          sprite.frames.length > 0
+      );
 
     if (sprites) {
       setSprites(sprites);

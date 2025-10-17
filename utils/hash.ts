@@ -181,13 +181,15 @@ const updateHashSheet = (
   items: SpritesheetItem[],
   sprites: Sprite[],
   newSprite: Sprite | undefined,
-  selectedTool: string
+  selectedTool: string,
+  rotation?: number,
+  flip?: "x" | "y" | "xy" | "yx"
 ) => {
   const isErasing = selectedTool === "eraser";
   // const isFilling = selectedTool === "fill";
 
   let newHash = "";
-  const newGrid = [...grid];
+  let newGridString = grid[0] || getDefaultHash();
 
   // Add new sprite to sprites if not existing
   let newSprites = [...sprites];
@@ -195,27 +197,50 @@ const updateHashSheet = (
     newSprites.push(newSprite);
   }
 
-  // Add new item to items and newGrid
+  // Add new item to items and update grid string
   let newItems = [...items];
-  const itemIndex = items.findIndex((item) => item.spriteId === newSprite?.id);
 
-  if (itemIndex > -1) {
-    // Convert index to alplhanumerical so that a-z can be used
-    newGrid[pixelIndex] = String.fromCharCode(itemIndex + 97);
+  let itemChar: string;
+
+  if (isErasing) {
+    // Eraser: set to 'a' (empty)
+    itemChar = "a";
   } else {
-    newItems.push({
-      spriteId: newSprite?.id || "url",
-      rotation: 0,
-    });
-    newGrid[pixelIndex] = String.fromCharCode(items.length + 97);
+    // Check if there's already an item with same sprite, rotation, and flip
+    const existingItemIndex = items.findIndex(
+      (item) =>
+        item.spriteId === newSprite?.id &&
+        item.rotation === rotation &&
+        item.flip === flip
+    );
+
+    if (existingItemIndex > -1) {
+      // Use existing item
+      itemChar = String.fromCharCode(existingItemIndex + 97);
+    } else {
+      // Create new item with transformation
+      newItems.push({
+        spriteId: newSprite?.id || "url",
+        rotation: rotation || 0,
+        flip: flip,
+      });
+      itemChar = String.fromCharCode(items.length + 97);
+    }
   }
 
-  // Update hash
+  // Update grid string at pixelIndex
+  let newGridStringUpdated = "";
+  for (var i = 0; i < newGridString.length; i++) {
+    newGridStringUpdated +=
+      i === pixelIndex ? itemChar : newGridString.charAt(i);
+  }
+
+  // Update hash (kept for backward compatibility but may not be needed)
   for (var i = 0; i < hash.length; i++) {
     newHash += i === pixelIndex ? "a" : hash.charAt(i);
   }
 
-  return { newHash, newGrid, newItems, newSprites };
+  return { newHash, newGrid: [newGridStringUpdated], newItems, newSprites };
 };
 
 const optimiseFrames = (frames: string[], spritePalette: string[]) => {

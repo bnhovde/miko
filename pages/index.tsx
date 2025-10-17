@@ -70,12 +70,12 @@ const Home: NextPage = () => {
             hotKeys: "enter",
             onToggle: () => router.push("/app/editor/sprite"),
           },
-          // {
-          //   children: "S",
-          //   label: "Make spritesheet",
-          //   hotKeys: "s",
-          //   onToggle: () => router.push("/app/editor/sheet"),
-          // },
+          {
+            children: "S",
+            label: "Combine",
+            hotKeys: "s",
+            onToggle: () => router.push("/app/editor/sheet"),
+          },
           {
             children: "P",
             label: "Package",

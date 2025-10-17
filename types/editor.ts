@@ -21,4 +21,7 @@ export type EditorState = {
   unsavedHash: string;
   unsavedGrid: string;
   currentSheetIndex: number;
+  currentSheetSprite?: Sprite;
+  currentRotation: number;
+  currentFlip?: "x" | "y" | "xy" | "yx";
 };

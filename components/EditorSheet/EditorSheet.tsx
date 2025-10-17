@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import classNames from "classnames";
 
 import ColorPicker from "components/ColorPicker";
@@ -9,8 +9,11 @@ import ToolPickerSheet from "components/ToolPickerSheet";
 import styles from "./EditorSheet.module.css";
 import CanvasSheet from "components/CanvasSheet";
 import SpritePicker from "components/SpritePicker";
+import EditorContext from "context/EditorContext";
 
 const EditorSheet: React.FC = () => {
+  const { state, onSelectSpriteForSheet } = useContext(EditorContext);
+
   const editorClass = classNames({
     [styles["editor"]]: true,
   });
@@ -39,7 +42,12 @@ const EditorSheet: React.FC = () => {
         </div>
 
         <div className={styles.sprites}>
-          <SpritePicker onSelect={() => {}} />
+          <SpritePicker
+            onSelect={onSelectSpriteForSheet}
+            selecedItems={
+              state.currentSheetSprite ? [state.currentSheetSprite] : []
+            }
+          />
         </div>
       </div>
     </section>

@@ -8,11 +8,11 @@
  */
   --base-font-size: 2rem; /* Base font size = 16px */
   --font-size-small: 1.2rem;
-  
+
   --block-size: 3.6rem;
   --block-size-small: 1.2rem;
   --block-size-medium: 1.6rem;
-  
+
   --gutter-size: 6.3rem;
 
   --canvas-max-size: 48rem;
@@ -21,13 +21,15 @@
  * Colors.
  */
   --col-bg: #fff;
-  --col-1: #FFC8DD;
+  --col-1: #ffc8dd;
 
-  --col-gray: #79828D;
+  --col-white: #ffffff;
+  --col-gray: #79828d;
   --col-dark: #646464;
+  --col-black: #000000;
   --col-text: black;
   --col-line: rgba(0, 0, 0, 0.1);
-  --col-focus: #FFC8DD;
+  --col-focus: #ffc8dd;
 
   /**
  * Spacing.
@@ -59,7 +61,7 @@
   --layout-three-columns: minmax(32rem, 1fr) 4fr 2fr;
   --layout-four-columns: minmax(32rem, 1fr) 4fr 2fr 4fr;
 
-  --font-family: 'Sen', sans-serif;
+  --font-family: "Sen", sans-serif;
   --font-family-alt: "Raleway", sans-serif;
 
   /**

@@ -8,6 +8,7 @@ type Props = {
   square?: boolean;
   active?: boolean;
   disabled?: boolean;
+  rotation?: number;
   onClick: () => void;
 };
 
@@ -16,6 +17,7 @@ const ToolButton: React.FC<Props> = ({
   square,
   active,
   disabled,
+  rotation,
   onClick,
 }) => {
   const buttonClass = classNames({
@@ -24,6 +26,10 @@ const ToolButton: React.FC<Props> = ({
     [styles["-active"]]: active,
     [styles["-disabled"]]: disabled,
   });
+
+  const inlineStyle = {
+    transform: rotation ? `rotate(${rotation}deg)` : undefined,
+  };
 
   return (
     <button
@@ -34,7 +40,9 @@ const ToolButton: React.FC<Props> = ({
       }}
       disabled={disabled}
     >
-      <div className={styles.icon}>{children}</div>
+      <div className={styles.icon} style={inlineStyle}>
+        {children}
+      </div>
     </button>
   );
 };

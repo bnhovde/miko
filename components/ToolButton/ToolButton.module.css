@@ -9,13 +9,18 @@
   transition: all var(--transition);
 }
 
+.button:hover:not(:disabled) {
+  border-color: var(--col-black);
+}
+
 .button:active {
   opacity: 0.8;
   transform: scale(0.95);
 }
 
 .-active {
-  background-color: white;
+  background-color: var(--col-black);
+  color: var(--col-white);
 }
 
 .icon {
