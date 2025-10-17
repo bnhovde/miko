@@ -347,17 +347,60 @@ export const uiReducer = (
       }
 
       const rotateItems = [...(state.sheetData.items || [])];
-      const rotateItem = { ...rotateItems[rotateItemIndex] };
-      rotateItem.rotation = ((rotateItem.rotation || 0) + 90) % 360;
-      rotateItems[rotateItemIndex] = rotateItem;
+      const currentItem = rotateItems[rotateItemIndex];
+      const newRotation = ((currentItem.rotation || 0) + 90) % 360;
+
+      // Check if an item with this sprite+rotation+flip combo already exists
+      const existingItemIndex = rotateItems.findIndex(
+        (item) =>
+          item.spriteId === currentItem.spriteId &&
+          item.rotation === newRotation &&
+          item.flip === currentItem.flip
+      );
+
+      let targetItemIndex: number;
+      if (existingItemIndex > -1) {
+        // Reuse existing item
+        targetItemIndex = existingItemIndex;
+      } else {
+        // Create new item
+        rotateItems.push({
+          spriteId: currentItem.spriteId,
+          rotation: newRotation,
+          flip: currentItem.flip,
+        });
+        targetItemIndex = rotateItems.length - 1;
+      }
+
+      // Update grid to point current cell to target item
+      const newGridString = rotateGridString
+        .split("")
+        .map((char, idx) =>
+          idx === state.currentSheetIndex
+            ? String.fromCharCode(targetItemIndex + 97)
+            : char
+        )
+        .join("");
+
+      const updatedSheetData: Spritesheet = {
+        ...state.sheetData!,
+        grid: [newGridString],
+        items: rotateItems,
+      };
+
+      // Save to localStorage
+      if (state.sheetData?.id) {
+        set(
+          `${localStorageKeys.SPRITESHEET}-${state.sheetData.id}`,
+          JSON.stringify(updatedSheetData)
+        );
+      }
 
       return {
         ...state,
-        sheetData: {
-          ...state.sheetData,
-          items: rotateItems,
-        },
-        currentRotation: rotateItem.rotation,
+        sheetData: updatedSheetData,
+        currentGrid: newGridString,
+        currentRotation: newRotation,
       };
     case EditorActionTypes.FLIP_SHEET_CELL:
       // Flip the sprite at the current sheet index
@@ -380,9 +423,9 @@ export const uiReducer = (
       }
 
       const flipItems = [...(state.sheetData.items || [])];
-      const flipItem = { ...flipItems[flipItemIndex] };
+      const currentFlipItem = flipItems[flipItemIndex];
 
-      const currentFlip = flipItem.flip;
+      const currentFlip = currentFlipItem.flip;
       let newFlip: "x" | "y" | "xy" | "yx" | undefined;
 
       if (action.payload?.value === "x") {
@@ -399,15 +442,56 @@ export const uiReducer = (
         else if (currentFlip === "yx") newFlip = "x";
       }
 
-      flipItem.flip = newFlip;
-      flipItems[flipItemIndex] = flipItem;
+      // Check if an item with this sprite+rotation+flip combo already exists
+      const existingFlipItemIndex = flipItems.findIndex(
+        (item) =>
+          item.spriteId === currentFlipItem.spriteId &&
+          item.rotation === currentFlipItem.rotation &&
+          item.flip === newFlip
+      );
+
+      let targetFlipItemIndex: number;
+      if (existingFlipItemIndex > -1) {
+        // Reuse existing item
+        targetFlipItemIndex = existingFlipItemIndex;
+      } else {
+        // Create new item
+        flipItems.push({
+          spriteId: currentFlipItem.spriteId,
+          rotation: currentFlipItem.rotation,
+          flip: newFlip,
+        });
+        targetFlipItemIndex = flipItems.length - 1;
+      }
+
+      // Update grid to point current cell to target item
+      const newFlipGridString = flipGridString
+        .split("")
+        .map((char, idx) =>
+          idx === state.currentSheetIndex
+            ? String.fromCharCode(targetFlipItemIndex + 97)
+            : char
+        )
+        .join("");
+
+      const updatedFlipSheetData: Spritesheet = {
+        ...state.sheetData!,
+        grid: [newFlipGridString],
+        items: flipItems,
+      };
+
+      // Save to localStorage
+      if (state.sheetData?.id) {
+        set(
+          `${localStorageKeys.SPRITESHEET}-${state.sheetData.id}`,
+          JSON.stringify(updatedFlipSheetData)
+        );
+      }
 
       return {
         ...state,
-        sheetData: {
-          ...state.sheetData,
-          items: flipItems,
-        },
+        sheetData: updatedFlipSheetData,
+        currentGrid: newFlipGridString,
         currentFlip: newFlip,
       };
     default:
