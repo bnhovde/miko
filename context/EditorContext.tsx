@@ -45,8 +45,9 @@ enum EditorActionTypes {
   CHANGE_NAME = "CHANGE_NAME",
   UPDATE_PACKAGE = "UPDATE_PACKAGE",
   SELECT_SPRITE_FOR_SHEET = "SELECT_SPRITE_FOR_SHEET",
-  ROTATE_SELECTED_SPRITE = "ROTATE_SELECTED_SPRITE",
-  FLIP_SELECTED_SPRITE = "FLIP_SELECTED_SPRITE",
+  SELECT_SHEET_CELL = "SELECT_SHEET_CELL",
+  ROTATE_SHEET_CELL = "ROTATE_SHEET_CELL",
+  FLIP_SHEET_CELL = "FLIP_SHEET_CELL",
 }
 
 type UiActionPayload = {
@@ -306,13 +307,82 @@ export const uiReducer = (
         currentRotation: 0,
         currentFlip: undefined,
       };
-    case EditorActionTypes.ROTATE_SELECTED_SPRITE:
+    case EditorActionTypes.SELECT_SHEET_CELL:
+      // When selecting a cell, load its sprite and transformation
+      const selectedItemIndex = state.sheetData?.grid?.[0]?.charCodeAt(
+        action.payload?.index || 0
+      );
+      const itemIdx = selectedItemIndex ? selectedItemIndex - 97 : -1;
+      const selectedItem =
+        itemIdx >= 0 ? state.sheetData?.items?.[itemIdx] : undefined;
+      const selectedSprite = selectedItem
+        ? state.sheetData?.sprites?.find((s) => s.id === selectedItem.spriteId)
+        : undefined;
+
       return {
         ...state,
-        currentRotation: (state.currentRotation + 90) % 360,
+        currentSheetIndex: action.payload?.index || 0,
+        currentSheetSprite: selectedSprite,
+        currentRotation: selectedItem?.rotation || 0,
+        currentFlip: selectedItem?.flip,
       };
-    case EditorActionTypes.FLIP_SELECTED_SPRITE:
-      const currentFlip = state.currentFlip;
+    case EditorActionTypes.ROTATE_SHEET_CELL:
+      // Rotate the sprite at the current sheet index
+      if (state.currentSheetIndex === undefined || !state.sheetData) {
+        return state;
+      }
+
+      const rotateGrid = [...(state.sheetData.grid || [])];
+      const rotateGridString = rotateGrid[0] || getDefaultHash();
+      const rotateItemCharCode = rotateGridString.charCodeAt(
+        state.currentSheetIndex
+      );
+      const rotateItemIndex = rotateItemCharCode - 97;
+
+      if (
+        rotateItemIndex < 0 ||
+        rotateItemIndex >= (state.sheetData.items?.length || 0)
+      ) {
+        return state;
+      }
+
+      const rotateItems = [...(state.sheetData.items || [])];
+      const rotateItem = { ...rotateItems[rotateItemIndex] };
+      rotateItem.rotation = ((rotateItem.rotation || 0) + 90) % 360;
+      rotateItems[rotateItemIndex] = rotateItem;
+
+      return {
+        ...state,
+        sheetData: {
+          ...state.sheetData,
+          items: rotateItems,
+        },
+        currentRotation: rotateItem.rotation,
+      };
+    case EditorActionTypes.FLIP_SHEET_CELL:
+      // Flip the sprite at the current sheet index
+      if (state.currentSheetIndex === undefined || !state.sheetData) {
+        return state;
+      }
+
+      const flipGrid = [...(state.sheetData.grid || [])];
+      const flipGridString = flipGrid[0] || getDefaultHash();
+      const flipItemCharCode = flipGridString.charCodeAt(
+        state.currentSheetIndex
+      );
+      const flipItemIndex = flipItemCharCode - 97;
+
+      if (
+        flipItemIndex < 0 ||
+        flipItemIndex >= (state.sheetData.items?.length || 0)
+      ) {
+        return state;
+      }
+
+      const flipItems = [...(state.sheetData.items || [])];
+      const flipItem = { ...flipItems[flipItemIndex] };
+
+      const currentFlip = flipItem.flip;
       let newFlip: "x" | "y" | "xy" | "yx" | undefined;
 
       if (action.payload?.value === "x") {
@@ -329,8 +399,15 @@ export const uiReducer = (
         else if (currentFlip === "yx") newFlip = "x";
       }
 
+      flipItem.flip = newFlip;
+      flipItems[flipItemIndex] = flipItem;
+
       return {
         ...state,
+        sheetData: {
+          ...state.sheetData,
+          items: flipItems,
+        },
         currentFlip: newFlip,
       };
     default:
@@ -357,15 +434,16 @@ type ContextProps = {
   onTouchStartSheet: (e: InputEvent) => void;
   onDrawEnd: (e: InputEvent) => void;
   onDrawChange: (frameIndex: number, isFirstClick?: boolean) => void;
-  onDrawChangeSheet: (frameIndex: number) => void;
+  onDrawChangeSheet: (frameIndex: number, isFirstClick?: boolean) => void;
   onReplacePalette: (newPalette: string[]) => void;
   onReorderFrames: (oldIndex: number, newIndex: number) => void;
   onChangeSprite: (newSprite: Sprite) => void;
   onChangeName: (newName: string) => void;
   onUpdatePackage: (spritePackage: SpritePackage) => void;
   onSelectSpriteForSheet: (sprite: Sprite) => void;
-  onRotateSelectedSprite: () => void;
-  onFlipSelectedSprite: (axis: "x" | "y") => void;
+  onSelectSheetCell: (index: number) => void;
+  onRotateSheetCell: () => void;
+  onFlipSheetCell: (axis: "x" | "y") => void;
 };
 
 const initialState: ContextProps = {
@@ -411,8 +489,9 @@ const initialState: ContextProps = {
   onChangeSprite: () => null,
   onUpdatePackage: () => null,
   onSelectSpriteForSheet: () => null,
-  onRotateSelectedSprite: () => null,
-  onFlipSelectedSprite: () => null,
+  onSelectSheetCell: () => null,
+  onRotateSheetCell: () => null,
+  onFlipSheetCell: () => null,
 };
 
 const EditorContext = React.createContext<ContextProps>(initialState);
@@ -586,9 +665,18 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
     });
   };
 
-  const onDrawChangeSheet = (frameIndex: number) => {
-    if (!state.isDrawingSheet) {
+  const onDrawChangeSheet = (frameIndex: number, isFirstClick?: boolean) => {
+    if (!state.isDrawingSheet && !isFirstClick) {
       return;
+    }
+
+    if (isFirstClick) {
+      dispatch({
+        type: EditorActionTypes.START_DRAWING_SHEET,
+        payload: {
+          active: true,
+        },
+      });
     }
 
     // Use currentSheetSprite if available, otherwise use the current spriteData
@@ -773,15 +861,24 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
     });
   };
 
-  const onRotateSelectedSprite = () => {
+  const onSelectSheetCell = (index: number) => {
     dispatch({
-      type: EditorActionTypes.ROTATE_SELECTED_SPRITE,
+      type: EditorActionTypes.SELECT_SHEET_CELL,
+      payload: {
+        index,
+      },
     });
   };
 
-  const onFlipSelectedSprite = (axis: "x" | "y") => {
+  const onRotateSheetCell = () => {
     dispatch({
-      type: EditorActionTypes.FLIP_SELECTED_SPRITE,
+      type: EditorActionTypes.ROTATE_SHEET_CELL,
+    });
+  };
+
+  const onFlipSheetCell = (axis: "x" | "y") => {
+    dispatch({
+      type: EditorActionTypes.FLIP_SHEET_CELL,
       payload: {
         value: axis,
       },
@@ -812,8 +909,9 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
         onChangeSprite,
         onUpdatePackage,
         onSelectSpriteForSheet,
-        onRotateSelectedSprite,
-        onFlipSelectedSprite,
+        onSelectSheetCell,
+        onRotateSheetCell,
+        onFlipSheetCell,
       }}
     >
       {children}

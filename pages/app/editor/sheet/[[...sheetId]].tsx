@@ -29,7 +29,8 @@ const Home: NextPage = () => {
     initSheet,
     onChangeFrame,
     onAddFrame,
-    onRotateSelectedSprite,
+    onRotateSheetCell,
+    onFlipSheetCell,
   } = useContext(EditorContext);
 
   const blankSprite = {
@@ -157,7 +158,21 @@ const Home: NextPage = () => {
               label: "Rotate",
               hotKeys: "r",
               disabled: !state.currentSheetSprite,
-              onToggle: () => onRotateSelectedSprite(),
+              onToggle: () => onRotateSheetCell(),
+            },
+            {
+              children: "H",
+              label: "Flip H",
+              hotKeys: "h",
+              disabled: !state.currentSheetSprite,
+              onToggle: () => onFlipSheetCell("x"),
+            },
+            {
+              children: "V",
+              label: "Flip V",
+              hotKeys: "v",
+              disabled: !state.currentSheetSprite,
+              onToggle: () => onFlipSheetCell("y"),
             },
           ]}
           button={{

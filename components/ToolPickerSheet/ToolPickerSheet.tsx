@@ -13,12 +13,8 @@ import EditorContext from "context/EditorContext";
 import styles from "./ToolPickerSheet.module.css";
 
 const ToolPickerSheet: React.FC = () => {
-  const {
-    state,
-    onSelectToolSheet,
-    onRotateSelectedSprite,
-    onFlipSelectedSprite,
-  } = useContext(EditorContext);
+  const { state, onSelectToolSheet, onRotateSheetCell, onFlipSheetCell } =
+    useContext(EditorContext);
 
   return (
     <div className={styles.wrapper}>
@@ -59,7 +55,7 @@ const ToolPickerSheet: React.FC = () => {
         </li>
         <li className={styles.item}>
           <ToolButton
-            onClick={() => onRotateSelectedSprite()}
+            onClick={() => onRotateSheetCell()}
             disabled={!state.currentSheetSprite}
           >
             <MdRotateRight />
@@ -67,7 +63,7 @@ const ToolPickerSheet: React.FC = () => {
         </li>
         <li className={styles.item}>
           <ToolButton
-            onClick={() => onFlipSelectedSprite("x")}
+            onClick={() => onFlipSheetCell("x")}
             disabled={!state.currentSheetSprite}
           >
             <MdFlip />
@@ -75,7 +71,7 @@ const ToolPickerSheet: React.FC = () => {
         </li>
         <li className={styles.item}>
           <ToolButton
-            onClick={() => onFlipSelectedSprite("y")}
+            onClick={() => onFlipSheetCell("y")}
             disabled={!state.currentSheetSprite}
             rotation={90}
           >
