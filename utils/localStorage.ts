@@ -25,7 +25,7 @@ const getAll = (match: string): string[] | null => {
   if (isSupported()) {
     let matches = [];
     for (var key in localStorage) {
-      if (key.indexOf(match) === 0) {
+      if (key.indexOf(match + "-") === 0) {
         const value = localStorage.getItem(key);
         if (value) {
           matches.push(value);

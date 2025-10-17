@@ -9,40 +9,77 @@ import { useEffect, useState } from "react";
 import { getAll, remove, set } from "utils/localStorage";
 import localStorageKeys from "constants/localStorageKeys";
 import { LegacySprite, Sprite } from "types/sprite";
+import { Spritesheet } from "types/sheet";
 import { useRouter } from "next/router";
 import SpriteGrid from "components/SpriteGrid";
 import { encodeUrlSprite } from "utils/hash";
 
+type Creation = (Sprite | Spritesheet) & { type: "sprite" | "sheet" };
+
 const Home: NextPage = () => {
   const router = useRouter();
-  const [sprites, setSprites] = useState<Sprite[]>([]);
+  const [creations, setCreations] = useState<Creation[]>([]);
 
   useEffect(() => {
-    const items = getAll(localStorageKeys.SPRITE);
-    const sprites = items?.map((item) => JSON.parse(item)) as Sprite[];
+    // Load sprites
+    const spriteItems = getAll(localStorageKeys.SPRITE);
+    const sprites = (spriteItems
+      ?.map((item) => {
+        try {
+          const parsed = JSON.parse(item) as Sprite;
+          return { ...parsed, type: "sprite" as const };
+        } catch (e) {
+          return null;
+        }
+      })
+      .filter(Boolean) || []) as Creation[];
 
-    if (sprites) {
-      setSprites(sprites);
-    }
+    // Load spritesheets
+    const sheetItems = getAll(localStorageKeys.SPRITESHEET);
+    const sheets = (sheetItems
+      ?.map((item) => {
+        try {
+          const parsed = JSON.parse(item) as Spritesheet;
+          return { ...parsed, type: "sheet" as const };
+        } catch (e) {
+          return null;
+        }
+      })
+      .filter(Boolean) || []) as Creation[];
+
+    // Combine and sort by name
+    const allCreations = [...sprites, ...sheets].sort((a, b) =>
+      a.name.localeCompare(b.name)
+    );
+
+    setCreations(allCreations);
   }, []);
 
-  const handleView = (spriteId: string) => {
-    router.push(`/app/editor/sprite/${spriteId}`);
+  const handleView = (id: string, type: "sprite" | "sheet") => {
+    if (type === "sprite") {
+      router.push(`/app/editor/sprite/${id}`);
+    } else {
+      router.push(`/app/editor/sheet/${id}`);
+    }
   };
 
-  const handleShare = (spriteId: string) => {
-    const spriteData = sprites.find((sprite) => sprite.id === spriteId);
-    if (spriteData) {
-      const { n, a, s, d, p, f } = encodeUrlSprite(spriteData);
-
+  const handleShare = (id: string) => {
+    const creation = creations.find((item) => item.id === id);
+    if (creation && creation.type === "sprite") {
+      const sprite = creation as Sprite & { type: "sprite" };
+      const { n, a, s, d, p, f } = encodeUrlSprite(sprite);
       const params = `?n=${n}&a=${a}&s=${s}&d=${d}&p=${p}&f=${f}`;
       window.open(`/app/share${params}`, "_blank");
     }
   };
 
-  const handleDelete = (spriteId: string) => {
-    remove(`${localStorageKeys.SPRITE}-${spriteId}`);
-    setSprites(sprites.filter((sprite) => sprite.id !== spriteId));
+  const handleDelete = (id: string, type: "sprite" | "sheet") => {
+    if (type === "sprite") {
+      remove(`${localStorageKeys.SPRITE}-${id}`);
+    } else {
+      remove(`${localStorageKeys.SPRITESHEET}-${id}`);
+    }
+    setCreations(creations.filter((item) => item.id !== id));
   };
 
   return (
@@ -63,7 +100,7 @@ const Home: NextPage = () => {
 
       <Main centered padded>
         <SpriteGrid
-          sprites={sprites}
+          creations={creations}
           onView={handleView}
           onShare={handleShare}
           onDelete={handleDelete}
