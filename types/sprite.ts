@@ -11,15 +11,6 @@ export type Sprite = {
   fps?: number;
   palette: string[];
   frames: string[];
-  isLegacy?: boolean;
-};
-
-export type LegacySprite = {
-  id: string;
-  name: string;
-  description?: string;
-  size: number;
-  frames: string[];
 };
 
 export type CompressedSprite = {

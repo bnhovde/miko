@@ -718,6 +718,13 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
   };
 
   const onDrawChange = (frameIndex: number, isFirstClick?: boolean) => {
+    const isFillTool = state.currentTool === "fill";
+
+    // For fill tool, only process on first click
+    if (isFillTool && !isFirstClick) {
+      return;
+    }
+
     if (!state.isDrawingSprite && !isFirstClick) {
       console.log("not drawing");
       return;
@@ -751,6 +758,13 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
   };
 
   const onDrawChangeSheet = (frameIndex: number, isFirstClick?: boolean) => {
+    const isFillTool = state.currentSpriteTool === "fill";
+
+    // For fill tool, only process on first click
+    if (isFillTool && !isFirstClick) {
+      return;
+    }
+
     if (!state.isDrawingSheet && !isFirstClick) {
       return;
     }

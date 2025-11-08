@@ -1,6 +1,6 @@
 const localStorageKeys = {
   SPRITE: "@@miko/sprite",
-  SPRITESHEET: "@@miko/spritesheet",
+  SPRITESHEET: "@@miko/sheet",
   PACKAGE: "@@miko/package",
 };
 

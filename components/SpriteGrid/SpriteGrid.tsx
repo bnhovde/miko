@@ -12,13 +12,16 @@ const SpritePreviewPlayer = dynamic(
   }
 );
 
+const SheetPreview = dynamic(() => import("components/SheetPreview"), {
+  ssr: false,
+});
+
 import styles from "./SpriteGrid.module.css";
 import ButtonMore from "components/ButtonMore";
 
 type Creation = (Sprite | Spritesheet) & { type: "sprite" | "sheet" };
 
 type Props = {
-  sprites?: Sprite[];
   creations?: Creation[];
   onView?: (id: string, type: "sprite" | "sheet") => void;
   onDelete?: (id: string, type: "sprite" | "sheet") => void;
@@ -26,19 +29,12 @@ type Props = {
 };
 
 const SpriteGrid: React.FC<Props> = ({
-  sprites: legacySprites,
   creations,
   onView,
   onShare,
   onDelete,
 }) => {
   const [playSpriteId, setPlaySpriteId] = React.useState<string | null>(null);
-
-  // Support legacy sprites prop or new creations prop
-  const items =
-    creations ||
-    legacySprites?.map((s) => ({ ...s, type: "sprite" as const })) ||
-    [];
 
   const gridClass = classNames({
     [styles["grid"]]: true,
@@ -47,18 +43,15 @@ const SpriteGrid: React.FC<Props> = ({
   return (
     <section className={gridClass}>
       <ul className={styles.list}>
-        {items.map((item) => {
-          const isSheet = item.type === "sheet";
-          const displaySprite = isSheet
-            ? (item as Spritesheet).sprites?.[0]
-            : (item as Sprite);
+        {creations?.map((creation) => {
+          const isSheet = creation.type === "sheet";
 
           return (
             <li
-              key={item.id}
+              key={creation.id}
               className={styles.item}
-              onMouseEnter={() => setPlaySpriteId(item.id)}
-              onMouseLeave={() => setPlaySpriteId(item.id)}
+              onMouseEnter={() => setPlaySpriteId(creation.id)}
+              onMouseLeave={() => setPlaySpriteId(creation.id)}
             >
               <div className={styles.actions}>
                 <ButtonMore
@@ -66,19 +59,21 @@ const SpriteGrid: React.FC<Props> = ({
                   options={[
                     {
                       label: "View",
-                      onClick: () => onView && onView(item.id, item.type),
+                      onClick: () =>
+                        onView && onView(creation.id, creation.type),
                     },
-                    ...(item.type === "sprite"
+                    ...(creation.type === "sprite"
                       ? [
                           {
                             label: "Share",
-                            onClick: () => onShare && onShare(item.id),
+                            onClick: () => onShare && onShare(creation.id),
                           },
                         ]
                       : []),
                     {
                       label: "Delete",
-                      onClick: () => onDelete && onDelete(item.id, item.type),
+                      onClick: () =>
+                        onDelete && onDelete(creation.id, creation.type),
                     },
                   ]}
                 />
@@ -86,15 +81,20 @@ const SpriteGrid: React.FC<Props> = ({
               <div className={styles.inner}>
                 <Link
                   href={`/app/editor/${
-                    item.type === "sprite" ? "sprite" : "sheet"
-                  }/${item.id}`}
+                    creation.type === "sprite" ? "sprite" : "sheet"
+                  }/${creation.id}`}
                 >
                   <a className={styles.link}>
                     <div className={styles.sprite}>
-                      {displaySprite && (
+                      {isSheet ? (
+                        <SheetPreview
+                          sheet={creation as Spritesheet}
+                          isPlaying={playSpriteId === creation.id}
+                        />
+                      ) : (
                         <SpritePreviewPlayer
-                          sprite={displaySprite}
-                          isPlaying={playSpriteId === item.id}
+                          sprite={creation as Sprite}
+                          isPlaying={playSpriteId === creation.id}
                         />
                       )}
                     </div>
@@ -103,11 +103,8 @@ const SpriteGrid: React.FC<Props> = ({
               </div>
               <div className={styles.footer}>
                 <p>
-                  <span>{item.name}</span>
+                  <span>{creation.name}</span>
                   {isSheet && <span> (sheet)</span>}
-                  {!isSheet && (item as Sprite).isLegacy && (
-                    <span> (legacy)</span>
-                  )}
                 </p>
               </div>
             </li>

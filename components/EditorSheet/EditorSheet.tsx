@@ -22,17 +22,15 @@ const EditorSheet: React.FC = () => {
     <section className={editorClass}>
       <div className={styles.inner}>
         <div className={styles.colors}>
-          <ColorPicker />
+          <SpritePicker
+            onSelect={onSelectSpriteForSheet}
+            selecedItems={
+              state.currentSheetSprite ? [state.currentSheetSprite] : []
+            }
+          />
         </div>
 
         <div className={styles.canvases}>
-          <div className={styles.canvas}>
-            <Canvas />
-            <div className={styles.toolbar}>
-              <ToolPicker />
-            </div>
-          </div>
-
           <div className={styles.canvas}>
             <CanvasSheet />
             <div className={styles.toolbar}>
@@ -41,14 +39,7 @@ const EditorSheet: React.FC = () => {
           </div>
         </div>
 
-        <div className={styles.sprites}>
-          <SpritePicker
-            onSelect={onSelectSpriteForSheet}
-            selecedItems={
-              state.currentSheetSprite ? [state.currentSheetSprite] : []
-            }
-          />
-        </div>
+        <div className={styles.sprites}></div>
       </div>
     </section>
   );
