@@ -15,6 +15,28 @@ const CanvasSheet: React.FC = () => {
   const gridItems = state.sheetData?.items || [];
   const hashArray = getSpriteArray(hash || getDefaultHash(), gridItems);
 
+  // Get transform based on view mode
+  const getCanvasTransform = () => {
+    const mode = state.sheetViewMode || "2d";
+
+    switch (mode) {
+      case "2d":
+        return "none";
+      case "3d":
+        return "rotateX(40deg) rotateZ(30deg)";
+      case "front":
+        return "rotateX(40deg) rotateZ(0deg)";
+      case "right":
+        return "rotateX(40deg) rotateZ(90deg)";
+      case "back":
+        return "rotateX(40deg) rotateZ(180deg)";
+      case "left":
+        return "rotateX(40deg) rotateZ(-90deg)";
+      default:
+        return "none";
+    }
+  };
+
   const onMouseOver = (
     index: number,
     event: InputEvent,
@@ -67,7 +89,10 @@ const CanvasSheet: React.FC = () => {
     <div className={styles.wrapper}>
       <p className="label">Sheet {state.isDrawingSheet && " - drawing"}</p>
       <div className={styles.editor}>
-        <div className={styles.canvas}>
+        <div
+          className={styles.canvas}
+          style={{ transform: getCanvasTransform() }}
+        >
           {hashArray?.map((item, index) => (
             <button
               key={index}

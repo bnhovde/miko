@@ -1,0 +1,13 @@
+.wrapper {
+  position: absolute;
+  bottom: 14rem;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.inner {
+  display: block;
+}

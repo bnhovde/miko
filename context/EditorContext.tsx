@@ -1,6 +1,6 @@
 import React, { useReducer, useEffect, useContext } from "react";
 
-import { EditorState } from "types/editor";
+import { EditorState, ViewMode } from "types/editor";
 
 import localStorageKeys from "constants/localStorageKeys";
 import { set } from "utils/localStorage";
@@ -48,6 +48,7 @@ enum EditorActionTypes {
   SELECT_SHEET_CELL = "SELECT_SHEET_CELL",
   ROTATE_SHEET_CELL = "ROTATE_SHEET_CELL",
   FLIP_SHEET_CELL = "FLIP_SHEET_CELL",
+  SET_SHEET_VIEW_MODE = "SET_SHEET_VIEW_MODE",
 }
 
 type UiActionPayload = {
@@ -64,6 +65,7 @@ type UiActionPayload = {
   sprites?: Sprite[];
   spritesheet?: Spritesheet;
   spritePackage?: SpritePackage;
+  viewMode?: ViewMode;
 };
 
 type UiAction = {
@@ -495,6 +497,11 @@ export const uiReducer = (
         currentGrid: newFlipGridString,
         currentFlip: newFlip,
       };
+    case EditorActionTypes.SET_SHEET_VIEW_MODE:
+      return {
+        ...state,
+        sheetViewMode: action.payload?.viewMode || "2d",
+      };
     default:
       return state;
   }
@@ -529,6 +536,7 @@ type ContextProps = {
   onSelectSheetCell: (index: number) => void;
   onRotateSheetCell: () => void;
   onFlipSheetCell: (axis: "x" | "y") => void;
+  onSetSheetViewMode: (mode: ViewMode) => void;
 };
 
 const initialState: ContextProps = {
@@ -553,6 +561,7 @@ const initialState: ContextProps = {
     currentSheetSprite: undefined,
     currentRotation: 0,
     currentFlip: undefined,
+    sheetViewMode: "2d",
   },
   initSprite: () => null,
   initSheet: () => null,
@@ -577,6 +586,7 @@ const initialState: ContextProps = {
   onSelectSheetCell: () => null,
   onRotateSheetCell: () => null,
   onFlipSheetCell: () => null,
+  onSetSheetViewMode: () => null,
 };
 
 const EditorContext = React.createContext<ContextProps>(initialState);
@@ -984,6 +994,15 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
     });
   };
 
+  const onSetSheetViewMode = (mode: ViewMode) => {
+    dispatch({
+      type: EditorActionTypes.SET_SHEET_VIEW_MODE,
+      payload: {
+        viewMode: mode,
+      },
+    });
+  };
+
   return (
     <EditorContext.Provider
       value={{
@@ -1011,6 +1030,7 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
         onSelectSheetCell,
         onRotateSheetCell,
         onFlipSheetCell,
+        onSetSheetViewMode,
       }}
     >
       {children}

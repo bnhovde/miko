@@ -9,7 +9,9 @@ import ToolPickerSheet from "components/ToolPickerSheet";
 import styles from "./EditorSheet.module.css";
 import CanvasSheet from "components/CanvasSheet";
 import SpritePicker from "components/SpritePicker";
+import SheetControls from "components/SheetControls";
 import EditorContext from "context/EditorContext";
+import Toolbar from "components/Toolbar";
 
 const EditorSheet: React.FC = () => {
   const { state, onSelectSpriteForSheet } = useContext(EditorContext);
@@ -30,19 +32,18 @@ const EditorSheet: React.FC = () => {
           />
         </div>
 
-        <div className={styles.canvases}>
-          <div className={styles.canvas}>
-            <CanvasSheet />
-            <div className={styles.toolbar}>
-              <ToolPickerSheet />
-            </div>
-          </div>
+        <div className={styles.canvas}>
+          <CanvasSheet />
         </div>
 
         <div className={styles.controls}>
           <SheetControls />
         </div>
       </div>
+
+      <Toolbar>
+        <ToolPickerSheet />
+      </Toolbar>
     </section>
   );
 };

@@ -2,6 +2,8 @@ import { Sprite } from "./sprite";
 import { Spritesheet } from "./sheet";
 import { SpritePackage } from "./package";
 
+export type ViewMode = "2d" | "3d" | "front" | "right" | "back" | "left";
+
 export type EditorState = {
   debug: boolean;
   spriteData?: Sprite;
@@ -24,4 +26,5 @@ export type EditorState = {
   currentSheetSprite?: Sprite;
   currentRotation: number;
   currentFlip?: "x" | "y" | "xy" | "yx";
+  sheetViewMode: ViewMode;
 };
