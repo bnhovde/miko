@@ -1,7 +1,8 @@
 .wrapper {
   display: flex;
   flex-direction: column;
-  gap: var(--block-size-small);
+  align-items: center;
+  gap: var(--block-size-tiny);
 }
 
 .items {
@@ -9,7 +10,7 @@
   align-items: center;
   justify-content: flex-start;
   flex-wrap: wrap;
-  gap: var(--block-size-medium);
+  gap: var(--block-size-tiny);
 }
 
 .button {
@@ -21,8 +22,8 @@
 .sprite {
   display: block;
   position: relative;
-  width: 7.5rem;
-  height: 7.5rem;
+  width: 6rem;
+  height: 6rem;
   border: 0;
   transition: all 0.1s ease;
 }

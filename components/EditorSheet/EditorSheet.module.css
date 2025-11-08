@@ -14,14 +14,14 @@
   gap: var(--gutter-size);
 }
 
-.colors {
-  width: 100%;
-  max-width: 16.6rem;
-}
-
 .sprites {
   width: 100%;
-  max-width: 16.6rem;
+  max-width: 40rem;
+}
+
+.controls {
+  width: 100%;
+  max-width: 40rem;
 }
 
 .canvases {
@@ -39,4 +39,3 @@
 .toolbar {
   margin-top: var(--block-size);
 }
-

@@ -41,6 +41,9 @@ const SpritePicker: React.FC<Props> = ({ onSelect, selecedItems }) => {
 
   return (
     <div className={styles.wrapper}>
+      <p className="label" data-desktop>
+        Sprites
+      </p>
       <ul className={styles.items}>
         {sprites?.map((sprite) => (
           <li key={sprite.id} className={styles.item}>

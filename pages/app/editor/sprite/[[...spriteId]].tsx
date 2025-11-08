@@ -99,7 +99,6 @@ const Home: NextPage = () => {
         </Head>
 
         <Header
-          backUrl={query.spriteId ? "/app/my-creations" : "/"}
           action={{
             text: "Settings",
             url: query.spriteId

@@ -21,7 +21,7 @@ const EditorSheet: React.FC = () => {
   return (
     <section className={editorClass}>
       <div className={styles.inner}>
-        <div className={styles.colors}>
+        <div className={styles.sprites}>
           <SpritePicker
             onSelect={onSelectSpriteForSheet}
             selecedItems={
@@ -39,7 +39,9 @@ const EditorSheet: React.FC = () => {
           </div>
         </div>
 
-        <div className={styles.sprites}></div>
+        <div className={styles.controls}>
+          <SheetControls />
+        </div>
       </div>
     </section>
   );

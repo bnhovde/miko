@@ -33,19 +33,6 @@ const Home: NextPage = () => {
     onFlipSheetCell,
   } = useContext(EditorContext);
 
-  const blankSprite = {
-    id: guid(),
-    version: "2.0.0",
-    name: "Untitled",
-    description: "This is an example sprite",
-    palette: ["fff0"],
-    size: 11,
-    fps: 10,
-    frames: [
-      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-    ],
-  };
-
   const blankSpritesheet = {
     id: guid(),
     version: "2.0.0",
@@ -54,15 +41,10 @@ const Home: NextPage = () => {
     size: 11,
     fps: 10,
     grid: [
-      "a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
     ],
-    items: [
-      {
-        spriteId: blankSprite.id,
-        rotation: 0,
-      },
-    ],
-    sprites: [blankSprite],
+    items: [],
+    sprites: [],
   };
 
   useEffect(() => {
@@ -112,7 +94,6 @@ const Home: NextPage = () => {
 
         <Header
           title="New Spritesheet"
-          backUrl={query.spriteId ? "/app/my-creations" : "/"}
           action={{
             text: "Settings",
             url: "/about",
