@@ -1,8 +1,7 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import ColorButton from "components/ColorButton";
 
 import styles from "./SpritePicker.module.css";
-import EditorContext from "context/EditorContext";
 import { Sprite } from "types/sprite";
 import { getAll } from "utils/localStorage";
 import localStorageKeys from "constants/localStorageKeys";

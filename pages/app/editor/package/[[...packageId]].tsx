@@ -7,11 +7,9 @@ import Image from "next/image";
 import Main from "components/Main";
 import Footer from "components/Footer";
 
-import EditorContext from "context/EditorContext";
-
 import { getDefaultHash, getRandomHash, encodeUrlSprite } from "utils/hash";
 import dynamic from "next/dynamic";
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Timeline from "components/Timeline";
 import EditorSheet from "components/EditorSheet";
 import sprites from "data/sprite";
@@ -27,7 +25,9 @@ import html2canvas from "html2canvas";
 
 const Home: NextPage = () => {
   const { query, push } = useRouter();
-  const { state, initPackage } = useContext(EditorContext);
+  // TODO: Implement package store
+  const state = { packageData: null } as any;
+  const initPackage = (_data: any) => {};
   const printRef = useRef();
 
   const showEditMode = useMemo(() => {

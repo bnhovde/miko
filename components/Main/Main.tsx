@@ -4,7 +4,7 @@ import classNames from "classnames";
 import styles from "./Main.module.css";
 
 type Props = {
-  children: JSX.Element[] | JSX.Element | string;
+  children: React.ReactNode;
   padded?: boolean;
   centered?: boolean;
 };

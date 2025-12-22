@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React from "react";
 import classNames from "classnames";
 
 import ColorPicker from "components/ColorPicker";
@@ -10,11 +10,11 @@ import styles from "./EditorSheet.module.css";
 import CanvasSheet from "components/CanvasSheet";
 import SpritePicker from "components/SpritePicker";
 import SheetControls from "components/SheetControls";
-import EditorContext from "context/EditorContext";
 import Toolbar from "components/Toolbar";
+import { useSheetStore } from "src/stores/useSheetStore";
 
 const EditorSheet: React.FC = () => {
-  const { state, onSelectSpriteForSheet } = useContext(EditorContext);
+  const { selectedSprite, selectSprite } = useSheetStore();
 
   const editorClass = classNames({
     [styles["editor"]]: true,
@@ -25,9 +25,9 @@ const EditorSheet: React.FC = () => {
       <div className={styles.inner}>
         <div className={styles.sprites}>
           <SpritePicker
-            onSelect={onSelectSpriteForSheet}
+            onSelect={selectSprite}
             selecedItems={
-              state.currentSheetSprite ? [state.currentSheetSprite] : []
+              selectedSprite ? [selectedSprite] : []
             }
           />
         </div>

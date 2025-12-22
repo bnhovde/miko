@@ -1,15 +1,16 @@
-import React, { useContext } from "react";
+import React from "react";
 import classNames from "classnames";
 
 import SpritePicker from "components/SpritePicker";
 
 import styles from "./EditorPackage.module.css";
-import EditorContext from "context/EditorContext";
 import { Sprite } from "types/sprite";
 import Package from "components/Package";
 
 const EditorPackage: React.FC = () => {
-  const { state, onUpdatePackage } = useContext(EditorContext);
+  // TODO: Implement package store
+  const state = { packageData: null } as any;
+  const onUpdatePackage = (_data: any) => {};
 
   const editorClass = classNames({
     [styles["editor"]]: true,
@@ -19,11 +20,11 @@ const EditorPackage: React.FC = () => {
     if (!state.packageData) return;
 
     // Check if sprite is already in package
-    const exists = state.packageData.sprites.find((s) => s.id === sprite.id);
+    const exists = state.packageData.sprites.find((s: Sprite) => s.id === sprite.id);
     if (exists) {
       // Remove sprite
       const newSprites =
-        state.packageData.sprites.filter((s) => s.id !== sprite.id) || [];
+        state.packageData.sprites.filter((s: Sprite) => s.id !== sprite.id) || [];
       onUpdatePackage({ ...state.packageData, sprites: newSprites });
     } else {
       // Add sprite

@@ -1,22 +1,23 @@
-import React, { useContext, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { FiPlus } from "react-icons/fi";
 
 import styles from "./Timeline.module.css";
-import EditorContext from "context/EditorContext";
 import useKeyPressed from "hooks/useKey";
 import Item from "./Item";
 import useDrop from "hooks/useDrop";
+import { useSpriteStore } from "src/stores/useSpriteStore";
+import { useEditorStore } from "src/stores/useEditorStore";
 
 const Timeline: React.FC = () => {
-  const { state, onAddFrame, onChangeFrame, onDeleteFrame, onReorderFrames } =
-    useContext(EditorContext);
+  const { currentSprite, addFrame, deleteFrame, reorderFrames } = useSpriteStore();
+  const { currentFrame, setCurrentFrame } = useEditorStore();
 
   const dropRef = useRef<HTMLUListElement>(null);
   const [draggedIndex, setDraggedIndex] = useState(-1);
   const [draggedOverIndex, setDraggedOverIndex] = useState(-1);
 
   const onDrop = () => {
-    onReorderFrames(draggedIndex, draggedOverIndex);
+    reorderFrames(draggedIndex, draggedOverIndex);
 
     console.log(
       "draggedIndex, draggedOverIndex: ",
@@ -40,22 +41,22 @@ const Timeline: React.FC = () => {
   const shiftDown = useKeyPressed((ev: KeyboardEvent) => ev.shiftKey);
 
   const onlyOneFrame =
-    state.spriteData?.frames && state.spriteData?.frames?.length < 2;
+    currentSprite?.frames && currentSprite?.frames?.length < 2;
 
   const onFrameClickHandler = (frame: number) => {
     if (cmdDown) {
-      onAddFrame(frame, state.spriteData?.frames[frame]);
+      addFrame(frame);
     } else if (shiftDown && !onlyOneFrame) {
-      onDeleteFrame(frame);
+      deleteFrame(frame);
     } else {
-      onChangeFrame(frame);
+      setCurrentFrame(frame);
     }
   };
 
   const onAddFrameHandler = () => {
-    onAddFrame(
-      state.spriteData?.frames?.length !== undefined
-        ? state.spriteData?.frames?.length - 1
+    addFrame(
+      currentSprite?.frames?.length !== undefined
+        ? currentSprite?.frames?.length - 1
         : 0
     );
   };
@@ -65,14 +66,14 @@ const Timeline: React.FC = () => {
       <div className={styles.inner}>
         <span className={styles.line} aria-hidden />
         <ul className={styles.timeline} ref={dropRef}>
-          {state.spriteData?.frames.map((f, i) => (
+          {currentSprite?.frames.map((f, i) => (
             <Item
               key={`${i}-${f}`}
               order={i}
               hash={f}
-              palette={state.spriteData?.palette || []}
+              palette={currentSprite?.palette || []}
               isActive={isZoneActive}
-              isSelected={state.currentFrame === i}
+              isSelected={currentFrame === i}
               shiftDown={shiftDown}
               cmdDown={cmdDown}
               draggedIndex={draggedIndex}
