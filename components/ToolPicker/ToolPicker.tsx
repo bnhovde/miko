@@ -1,13 +1,13 @@
-import React, { useContext } from "react";
+import React from "react";
 import { RiMarkPenLine, RiEraserLine, RiPaintFill } from "react-icons/ri";
 
 import ToolButton from "components/ToolButton";
+import { useEditorStore } from "../../src/stores/useEditorStore";
 
 import styles from "./ToolPicker.module.css";
-import EditorContext from "context/EditorContext";
 
 const ToolPicker: React.FC = () => {
-  const { state, onSelectTool } = useContext(EditorContext);
+  const { currentTool, setTool } = useEditorStore();
 
   return (
     <div className={styles.wrapper}>
@@ -15,24 +15,24 @@ const ToolPicker: React.FC = () => {
       <ul className={styles.items}>
         <li className={styles.item}>
           <ToolButton
-            active={state.currentTool === "pencil"}
-            onClick={() => onSelectTool("pencil")}
+            active={currentTool === "pencil"}
+            onClick={() => setTool("pencil")}
           >
             <RiMarkPenLine />
           </ToolButton>
         </li>
         <li className={styles.item}>
           <ToolButton
-            active={state.currentTool === "eraser"}
-            onClick={() => onSelectTool("eraser")}
+            active={currentTool === "eraser"}
+            onClick={() => setTool("eraser")}
           >
             <RiEraserLine />
           </ToolButton>
         </li>
         <li className={styles.item}>
           <ToolButton
-            active={state.currentTool === "fill"}
-            onClick={() => onSelectTool("fill")}
+            active={currentTool === "fill"}
+            onClick={() => setTool("fill")}
           >
             <RiPaintFill />
           </ToolButton>

@@ -20,6 +20,7 @@ type Props = {
   action?: {
     text: string;
     url: string;
+    onClick?: () => void;
   };
   button?: {
     text: string;

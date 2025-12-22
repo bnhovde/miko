@@ -1,18 +1,18 @@
-import EditorContext from "context/EditorContext";
-import React, { useContext } from "react";
+import React from "react";
 
 import styles from "./Package.module.css";
 import Frame from "components/Frame";
 
 const Package: React.FC = () => {
-  const { state } = useContext(EditorContext);
+  // TODO: Implement package store
+  const state = { packageData: null } as any;
 
   const spritesToDraw = state.packageData?.sprites || [];
-  const framesToDraw = spritesToDraw.reduce((acc, sprite) => {
+  const framesToDraw = spritesToDraw.reduce((acc: string[], sprite: any) => {
     return [...acc, ...sprite.frames];
   }, [] as string[]);
 
-  const longestSprite = spritesToDraw.reduce((acc, sprite) => {
+  const longestSprite = spritesToDraw.reduce((acc: number, sprite: any) => {
     return sprite.frames.length > acc ? sprite.frames.length : acc;
   }, 0);
 
@@ -27,9 +27,9 @@ const Package: React.FC = () => {
           gridTemplateRows: `repeat(1, 1fr)`,
         }}
       >
-        {spritesToDraw.map((sprite) => {
+        {spritesToDraw.map((sprite: any) => {
           // Paint all frames of the sprite
-          return sprite.frames.map((frame) => (
+          return sprite.frames.map((frame: string) => (
             <Frame key={frame} hash={frame} palette={sprite.palette} />
           ));
         })}

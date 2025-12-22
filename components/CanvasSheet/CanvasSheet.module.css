@@ -13,7 +13,7 @@
   display: block;
   width: 100%;
   padding-bottom: 100%;
-  perspective: 1000px;
+  perspective: 1200px;
   transform-style: preserve-3d;
 }
 

@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React from "react";
 import {
   RiCursorFill,
   RiBrush2Fill,
@@ -8,13 +8,14 @@ import {
 import { MdRotateRight, MdFlip } from "react-icons/md";
 
 import ToolButton from "components/ToolButton";
-import EditorContext from "context/EditorContext";
+import { useEditorStore } from "../../src/stores/useEditorStore";
+import { useSheetManager } from "../../src/hooks/useSheetManager";
 
 import styles from "./ToolPickerSheet.module.css";
 
 const ToolPickerSheet: React.FC = () => {
-  const { state, onSelectToolSheet, onRotateSheetCell, onFlipSheetCell } =
-    useContext(EditorContext);
+  const { currentSpriteTool, setSpriteTool } = useEditorStore();
+  const { selectedSprite, handleRotate, handleFlip } = useSheetManager();
 
   return (
     <div className={styles.wrapper}>
@@ -22,59 +23,58 @@ const ToolPickerSheet: React.FC = () => {
       <ul className={styles.items}>
         <li className={styles.item}>
           <ToolButton
-            active={state.currentSpriteTool === "select"}
-            onClick={() => onSelectToolSheet("select")}
+            active={currentSpriteTool === "select"}
+            onClick={() => setSpriteTool("select")}
           >
             <RiCursorFill />
           </ToolButton>
         </li>
         <li className={styles.item}>
           <ToolButton
-            active={state.currentSpriteTool === "paint"}
-            onClick={() => onSelectToolSheet("paint")}
+            active={currentSpriteTool === "paint"}
+            onClick={() => setSpriteTool("paint")}
           >
             <RiBrush2Fill />
           </ToolButton>
         </li>
         <li className={styles.item}>
           <ToolButton
-            active={state.currentSpriteTool === "eraser"}
-            onClick={() => onSelectToolSheet("eraser")}
+            active={currentSpriteTool === "eraser"}
+            onClick={() => setSpriteTool("eraser")}
           >
             <RiEraserFill />
           </ToolButton>
         </li>
         <li className={styles.item}>
           <ToolButton
-            active={state.currentSpriteTool === "fill"}
-            onClick={() => onSelectToolSheet("fill")}
+            active={currentSpriteTool === "fill"}
+            onClick={() => setSpriteTool("fill")}
           >
             <RiPaintFill />
           </ToolButton>
         </li>
         <li className={styles.item}>
           <ToolButton
-            onClick={() => onRotateSheetCell()}
-            disabled={!state.currentSheetSprite}
+            onClick={() => handleRotate()}
+            disabled={!selectedSprite}
           >
             <MdRotateRight />
           </ToolButton>
         </li>
         <li className={styles.item}>
           <ToolButton
-            onClick={() => onFlipSheetCell("x")}
-            disabled={!state.currentSheetSprite}
+            onClick={() => handleFlip("x")}
+            disabled={!selectedSprite}
           >
             <MdFlip />
           </ToolButton>
         </li>
         <li className={styles.item}>
           <ToolButton
-            onClick={() => onFlipSheetCell("y")}
-            disabled={!state.currentSheetSprite}
-            rotation={90}
+            onClick={() => handleFlip("y")}
+            disabled={!selectedSprite}
           >
-            <MdFlip />
+            <MdFlip style={{ transform: "rotate(90deg)" }} />
           </ToolButton>
         </li>
       </ul>

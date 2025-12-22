@@ -3,172 +3,162 @@ import type { NextPage } from "next";
 import Header from "components/Header";
 import Screen from "components/Screen";
 import Head from "next/head";
-import Image from "next/image";
 import Main from "components/Main";
 import Footer from "components/Footer";
 
-import EditorContext from "context/EditorContext";
-
-import { getDefaultHash, getRandomHash, encodeUrlSprite } from "utils/hash";
-import dynamic from "next/dynamic";
-import { useContext, useEffect, useMemo, useState } from "react";
-import Timeline from "components/Timeline";
-import EditorSheet from "components/EditorSheet";
-import sprites from "data/sprite";
+import { useEffect, useMemo } from "react";
 import guid from "utils/guid";
 import Router, { useRouter } from "next/router";
-import { get } from "utils/localStorage";
-import localStorageKeys from "constants/localStorageKeys";
-import { Spritesheet } from "types/sheet";
 
-const Home: NextPage = () => {
-  const { query, push } = useRouter();
-  const {
-    state,
-    onDrawEnd,
-    initSheet,
-    onChangeFrame,
-    onAddFrame,
-    onRotateSheetCell,
-    onFlipSheetCell,
-  } = useContext(EditorContext);
+import EditorSheet from "components/EditorSheet";
+import { useSheetStore } from "../../../../src/stores/useSheetStore";
+import { useEditorStore } from "../../../../src/stores/useEditorStore";
+import { sheetRepository } from "../../../../src/repositories/SheetRepository";
 
-  const blankSpritesheet = {
-    id: guid(),
-    version: "2.0.0",
-    name: "Untitled",
-    description: "This is an example spritesheet",
-    size: 11,
-    fps: 10,
-    grid: [
-      "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-    ],
-    items: [],
-    sprites: [],
+const SheetPage: NextPage = () => {
+  const router = useRouter();
+  const { query, push } = router;
+  const { currentSheet, loadSheet, rotateCell, flipCell, selectedSprite } =
+    useSheetStore();
+  const { sheetViewMode, setSheetViewMode } = useEditorStore();
+
+  const sheetId = useMemo(() => {
+    return query.sheetId ? String(query.sheetId) : undefined;
+  }, [query.sheetId]);
+
+  // View rotation helpers (similar to SheetControls)
+  const rotationOrder: Array<"front" | "right" | "back" | "left"> = [
+    "front",
+    "right",
+    "back",
+    "left",
+  ];
+
+  const rotateViewLeft = () => {
+    const viewMode = sheetViewMode || "2d";
+    if (viewMode === "2d" || viewMode === "3d") {
+      setSheetViewMode("front");
+      return;
+    }
+    const currentIndex = rotationOrder.indexOf(viewMode as any);
+    const nextIndex =
+      (currentIndex - 1 + rotationOrder.length) % rotationOrder.length;
+    setSheetViewMode(rotationOrder[nextIndex]);
+  };
+
+  const rotateViewRight = () => {
+    const viewMode = sheetViewMode || "2d";
+    if (viewMode === "2d" || viewMode === "3d") {
+      setSheetViewMode("front");
+      return;
+    }
+    const currentIndex = rotationOrder.indexOf(viewMode as any);
+    const nextIndex = (currentIndex + 1) % rotationOrder.length;
+    setSheetViewMode(rotationOrder[nextIndex]);
   };
 
   useEffect(() => {
-    if (query.sheetId) {
-      const spriteData = get(
-        `${localStorageKeys.SPRITESHEET}-${query.sheetId}`
-      );
-      if (spriteData) {
-        const parsed = JSON.parse(spriteData) as Spritesheet;
-        initSheet(parsed);
+    const loadData = async () => {
+      if (sheetId) {
+        const sheet = await sheetRepository.load(sheetId);
+        if (sheet) {
+          loadSheet(sheet);
+        }
+      } else {
+        // Create new sheet
+        const newSheetId = guid();
+        const newSheet = {
+          id: newSheetId,
+          version: "2.0",
+          name: "Untitled Sheet",
+          description: "New spritesheet",
+          size: 11,
+          fps: 10,
+          grid: ["a".repeat(11 * 11)],
+          items: [],
+          sprites: [],
+        };
+
+        await sheetRepository.save(newSheet);
+        loadSheet(newSheet);
+
+        // Update URL with new sheet id
+        push(`/app/editor/sheet/${newSheetId}`, undefined, {
+          shallow: true,
+        });
       }
-    } else {
-      initSheet(blankSpritesheet);
+    };
 
-      // Update URL with new sprite id
-      push(`/app/editor/sheet/${blankSpritesheet.id}`, undefined, {
-        shallow: true,
-      });
-    }
-  }, [query]);
-
-  const onShare = () => {
-    if (state.spriteData) {
-      const { n, a, s, d, p, f } = encodeUrlSprite(state.spriteData);
-
-      const params = `?n=${n}&a=${a}&s=${s}&d=${d}&p=${p}&f=${f}`;
-      window.open(`/app/share${params}`, "_blank");
-    }
-  };
+    loadData();
+  }, [sheetId, loadSheet, push]);
 
   return (
-    <div
-      onMouseUp={onDrawEnd}
-      onTouchEnd={onDrawEnd}
-      onTouchCancel={onDrawEnd}
-      onMouseLeave={onDrawEnd}
-    >
-      <Screen>
-        <Head>
-          <title>Miko.app</title>
-          <meta
-            name="description"
-            content="Spritesheet animator and tilemap maker"
-          />
-          <link rel="icon" type="image/x-icon" id="favicon" />
-        </Head>
+    <Screen scrolling>
+      <Head>
+        <title>Sheet Editor</title>
+        <meta name="description" content="Spritesheet editor" />
+        <link rel="icon" type="image/x-icon" id="favicon" />
+      </Head>
 
-        <Header
-          title="New Spritesheet"
-          action={{
-            text: "Settings",
-            url: "/about",
-          }}
-        />
+      <Header
+        title={currentSheet?.name || "New Sheet"}
+        action={{
+          text: "Edit",
+          url: `/app/editor/sheet/${sheetId}?editMode=true`,
+        }}
+      />
 
-        <Main padded>
-          <EditorSheet />
-        </Main>
+      <Main padded>
+        <EditorSheet />
+      </Main>
 
-        <Footer
-          shortcuts={[
-            {
-              children: "←",
-              label: "Previous",
-              hotKeys: "left",
-              disabled: state.currentFrame === 0,
-              onToggle: () => onChangeFrame(state.currentFrame - 1),
-            },
-            {
-              children: "→",
-              label: "Next",
-              hotKeys: "right",
-              disabled:
-                state.spriteData &&
-                state.currentFrame === state?.spriteData?.frames.length - 1,
-              onToggle: () => onChangeFrame(state.currentFrame + 1),
-            },
-            {
-              children: "⌘ + D",
-              label: "Duplicate",
-              hotKeys: "cmd+d",
-              onToggle: () =>
-                onAddFrame(
-                  state.currentFrame,
-                  state.spriteData?.frames[state.currentFrame]
-                ),
-            },
-            {
-              children: "⌘ + F",
-              label: "Add blank",
-              hotKeys: "cmd+f",
-              onToggle: () =>
-                state.spriteData?.frames && onAddFrame(state.currentFrame),
-            },
-            {
-              children: "R",
-              label: "Rotate",
-              hotKeys: "r",
-              disabled: !state.currentSheetSprite,
-              onToggle: () => onRotateSheetCell(),
-            },
-            {
-              children: "H",
-              label: "Flip H",
-              hotKeys: "h",
-              disabled: !state.currentSheetSprite,
-              onToggle: () => onFlipSheetCell("x"),
-            },
-            {
-              children: "V",
-              label: "Flip V",
-              hotKeys: "v",
-              disabled: !state.currentSheetSprite,
-              onToggle: () => onFlipSheetCell("y"),
-            },
-          ]}
-          button={{
-            text: "Share",
-            onClick: () => onShare(),
-          }}
-        />
-      </Screen>
-    </div>
+      <Footer
+        action={{
+          text: "Share",
+          url: "#",
+          onClick: () => {
+            // TODO: Implement sheet sharing
+            console.log("Share sheet functionality coming soon!");
+          },
+        }}
+        shortcuts={[
+          {
+            children: "←",
+            label: "Rotate view left",
+            hotKeys: "left",
+            onToggle: rotateViewLeft,
+          },
+          {
+            children: "→",
+            label: "Rotate view right",
+            hotKeys: "right",
+            onToggle: rotateViewRight,
+          },
+          {
+            children: "R",
+            label: "Rotate cell",
+            hotKeys: "r",
+            disabled: !selectedSprite,
+            onToggle: rotateCell,
+          },
+          {
+            children: "X",
+            label: "Flip X",
+            hotKeys: "x",
+            disabled: !selectedSprite,
+            onToggle: () => flipCell("x"),
+          },
+          {
+            children: "Y",
+            label: "Flip Y",
+            hotKeys: "y",
+            disabled: !selectedSprite,
+            onToggle: () => flipCell("y"),
+          },
+        ]}
+      />
+    </Screen>
   );
 };
 
-export default Home;
+export default SheetPage;

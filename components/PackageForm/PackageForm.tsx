@@ -1,13 +1,14 @@
-import React, { useContext } from "react";
+import React from "react";
 import classNames from "classnames";
 
 import styles from "./PackageForm.module.css";
-import EditorContext from "context/EditorContext";
 import { useRouter } from "next/router";
 
 const PackageForm: React.FC = () => {
   const router = useRouter();
-  const { state, onUpdatePackage } = useContext(EditorContext);
+  // TODO: Implement package store
+  const state = { packageData: null } as any;
+  const onUpdatePackage = (_data: any) => {};
 
   const [name, setName] = React.useState(
     state?.packageData?.name || "New Package"

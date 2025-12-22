@@ -1,22 +1,22 @@
-import React, { useContext } from "react";
+import React from "react";
 import classNames from "classnames";
 
 import styles from "./SpriteForm.module.css";
-import EditorContext from "context/EditorContext";
 import { useRouter } from "next/router";
+import { useSpriteStore } from "src/stores/useSpriteStore";
 
 const SpriteForm: React.FC = () => {
   const router = useRouter();
-  const { state, onChangeName } = useContext(EditorContext);
+  const { currentSprite, updateName } = useSpriteStore();
 
   const [name, setName] = React.useState(
-    state?.spriteData?.name || "New Sprite"
+    currentSprite?.name || "New Sprite"
   );
-  const [fps, setFps] = React.useState(state?.spriteData?.fps || 10);
+  const [fps, setFps] = React.useState(currentSprite?.fps || 10);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    onChangeName(name);
+    updateName(name);
 
     router.push(
       router.query.spriteId

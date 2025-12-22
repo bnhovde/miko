@@ -1,15 +1,15 @@
-import React, { useContext } from "react";
+import React from "react";
 import { MdOutlineCropDin, MdOutlineRotate90DegreesCcw } from "react-icons/md";
 
 import ToolButton from "components/ToolButton";
-import EditorContext from "context/EditorContext";
+import { useEditorStore } from "../../src/stores/useEditorStore";
 
 import styles from "./SheetControls.module.css";
 
 const SheetControls: React.FC = () => {
-  const { state, onSetSheetViewMode } = useContext(EditorContext);
+  const { sheetViewMode, setSheetViewMode } = useEditorStore();
 
-  const viewMode = state.sheetViewMode || "2d";
+  const viewMode = sheetViewMode || "2d";
 
   // Rotation order: front (0°) -> right (90°) -> back (180°) -> left (-90°) -> front
   const rotationOrder: Array<"front" | "right" | "back" | "left"> = [
@@ -21,23 +21,23 @@ const SheetControls: React.FC = () => {
 
   const rotateLeft = () => {
     if (viewMode === "2d" || viewMode === "3d") {
-      onSetSheetViewMode("front");
+      setSheetViewMode("front");
       return;
     }
     const currentIndex = rotationOrder.indexOf(viewMode as any);
     const nextIndex =
       (currentIndex - 1 + rotationOrder.length) % rotationOrder.length;
-    onSetSheetViewMode(rotationOrder[nextIndex]);
+    setSheetViewMode(rotationOrder[nextIndex]);
   };
 
   const rotateRight = () => {
     if (viewMode === "2d" || viewMode === "3d") {
-      onSetSheetViewMode("front");
+      setSheetViewMode("front");
       return;
     }
     const currentIndex = rotationOrder.indexOf(viewMode as any);
     const nextIndex = (currentIndex + 1) % rotationOrder.length;
-    onSetSheetViewMode(rotationOrder[nextIndex]);
+    setSheetViewMode(rotationOrder[nextIndex]);
   };
 
   return (
@@ -54,7 +54,7 @@ const SheetControls: React.FC = () => {
         <li>
           <ToolButton
             active={viewMode === "2d"}
-            onClick={() => onSetSheetViewMode("2d")}
+            onClick={() => setSheetViewMode("2d")}
           >
             <MdOutlineCropDin />
           </ToolButton>

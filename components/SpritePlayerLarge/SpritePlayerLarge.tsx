@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { FaPause, FaPlay } from "react-icons/fa";
 import classNames from "classnames";
 
@@ -7,9 +7,9 @@ import useInterval from "hooks/useInterval";
 
 import styles from "./SpritePlayerLarge.module.css";
 import Shortcut from "components/Shortcut";
-import EditorContext from "context/EditorContext";
 import { Sprite } from "types/sprite";
 import { RiSpace } from "react-icons/ri";
+import { useEditorStore } from "src/stores/useEditorStore";
 
 type Props = {
   id?: string;
@@ -17,7 +17,7 @@ type Props = {
 };
 
 const SpritePlayerLarge: React.FC<Props> = ({ spriteData, id }) => {
-  const { state } = useContext(EditorContext);
+  const { debug } = useEditorStore();
 
   const [localFrame, setLocalFrame] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
@@ -48,7 +48,7 @@ const SpritePlayerLarge: React.FC<Props> = ({ spriteData, id }) => {
           <Frame
             hash={spriteData?.frames[isPlaying ? localFrame : 0]}
             palette={spriteData?.palette}
-            debug={state.debug}
+            debug={debug}
           />
         </div>
       </div>

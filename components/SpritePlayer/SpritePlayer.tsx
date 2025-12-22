@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { RiSpace } from "react-icons/ri";
 import classNames from "classnames";
 
@@ -7,7 +7,8 @@ import useInterval from "hooks/useInterval";
 
 import styles from "./SpritePlayer.module.css";
 import Shortcut from "components/Shortcut";
-import EditorContext from "context/EditorContext";
+import { useSpriteStore } from "src/stores/useSpriteStore";
+import { useEditorStore } from "src/stores/useEditorStore";
 
 type Props = {
   autoPlay?: boolean;
@@ -15,17 +16,18 @@ type Props = {
 };
 
 const SpritePlayer: React.FC<Props> = ({ autoPlay, preview }) => {
-  const { state } = useContext(EditorContext);
+  const { currentSprite } = useSpriteStore();
+  const { currentFrame } = useEditorStore();
 
-  const [localFrame, setLocalFrame] = useState(state.currentFrame || 0);
+  const [localFrame, setLocalFrame] = useState(currentFrame || 0);
   const [isPlaying, setIsPlaying] = useState(autoPlay);
   const [delay] = useState<number>(100);
 
   useInterval(
     () => {
-      if (state.spriteData) {
+      if (currentSprite) {
         setLocalFrame(
-          localFrame >= state.spriteData?.frames?.length - 1
+          localFrame >= currentSprite?.frames?.length - 1
             ? 0
             : localFrame + 1
         );
@@ -48,11 +50,11 @@ const SpritePlayer: React.FC<Props> = ({ autoPlay, preview }) => {
         <div className={styles["player-inner"]}>
           <Frame
             hash={
-              state.spriteData?.frames[
-                isPlaying ? localFrame : state.currentFrame || 0
+              currentSprite?.frames[
+                isPlaying ? localFrame : currentFrame || 0
               ]
             }
-            palette={state.spriteData?.palette}
+            palette={currentSprite?.palette}
           />
         </div>
       </div>
@@ -63,7 +65,7 @@ const SpritePlayer: React.FC<Props> = ({ autoPlay, preview }) => {
             hotKeys="space"
             onToggle={(newState) => setIsPlaying(newState)}
             isActive={isPlaying}
-            disabled={!state.spriteData?.frames}
+            disabled={!currentSprite?.frames}
           >
             <RiSpace />
           </Shortcut>

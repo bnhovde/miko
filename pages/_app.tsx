@@ -1,7 +1,7 @@
 import "backpack.css";
 import "styles/index.css";
 
-import { EditorProvider } from "context/EditorContext";
+import { EditorProvider } from "../src/providers/EditorProvider";
 import { outlineWatcher } from "utils/a11y";
 
 import type { AppProps } from "next/app";
