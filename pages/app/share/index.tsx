@@ -17,7 +17,7 @@ import SpritePlayerLarge from "components/SpritePlayerLarge";
 const decompress = (data?: string | string[]): Sprite | null => {
   try {
     const decompressedString = LZString.decompressFromEncodedURIComponent(
-      String(data)
+      String(data),
     );
     if (decompressedString) {
       const spriteData = JSON.parse(decompressedString);
@@ -53,23 +53,25 @@ const Home: NextPage = () => {
 
   const copySvg = async (sprite: Sprite | null) => {
     if (!sprite) return;
-    const frame = sprite.frames[0];
-    const hashArray = getHashArray(frame, sprite.palette);
-    const size = Math.sqrt(hashArray.length);
-    const rects: string[] = [];
-    for (let row = 0; row < size; row++) {
-      let col = 0;
-      while (col < size) {
-        const hex = hashArray[row * size + col];
-        if (hex.length === 4 && hex[3] === "0") { col++; continue; }
-        let width = 1;
-        while (col + width < size && hashArray[row * size + col + width] === hex) width++;
-        rects.push(`<rect x="${col}" y="${row}" width="${width}" height="1" fill="#${hex}"/>`);
-        col += width;
+    const size = Math.sqrt(sprite.frames[0].length);
+    const groups = sprite.frames.map((frame, i) => {
+      const hashArray = getHashArray(frame, sprite.palette);
+      const rects: string[] = [];
+      for (let row = 0; row < size; row++) {
+        let col = 0;
+        while (col < size) {
+          const hex = hashArray[row * size + col];
+          if (hex.length === 4 && hex[3] === "0") { col++; continue; }
+          let width = 1;
+          while (col + width < size && hashArray[row * size + col + width] === hex) width++;
+          rects.push(`<rect x="${col}" y="${row}" width="${width}" height="1" fill="#${hex}"/>`);
+          col += width;
+        }
       }
-    }
-    const rectsStr = rects.join("");
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}">${rectsStr}</svg>`;
+      return `<svg x="${i * size}" y="0" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${rects.join("")}</svg>`;
+    });
+    const totalWidth = size * sprite.frames.length;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${totalWidth} ${size}">${groups.join("")}</svg>`;
     try {
       await navigator.clipboard.writeText(svg);
       setIsSvgCopied(true);
