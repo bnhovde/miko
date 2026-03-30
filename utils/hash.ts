@@ -162,7 +162,7 @@ const updateHash = (
   }
 
   const newColorChar = isErasing
-    ? "a"
+    ? String.fromCharCode(newPalette.indexOf("fff0") + 97)
     : String.fromCharCode(newPalette.indexOf(newColor) + 97);
 
   // Handle fill tool with flood fill algorithm
