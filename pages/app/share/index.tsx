@@ -56,7 +56,9 @@ const Home: NextPage = () => {
     const size = Math.sqrt(sprite.frames[0].length);
     const groups = sprite.frames.map((frame, i) => {
       const hashArray = getHashArray(frame, sprite.palette);
-      const rects: string[] = [];
+      type Rect = { x: number; y: number; width: number; height: number; hex: string };
+      const rectList: Rect[] = [];
+      const lastRect = new Map<string, Rect>();
       for (let row = 0; row < size; row++) {
         let col = 0;
         while (col < size) {
@@ -64,14 +66,23 @@ const Home: NextPage = () => {
           if (hex.length === 4 && hex[3] === "0") { col++; continue; }
           let width = 1;
           while (col + width < size && hashArray[row * size + col + width] === hex) width++;
-          rects.push(`<rect x="${col}" y="${row}" width="${width}" height="1" fill="#${hex}"/>`);
+          const key = `${col},${width},${hex}`;
+          const prev = lastRect.get(key);
+          if (prev && prev.y + prev.height === row) {
+            prev.height++;
+          } else {
+            const rect: Rect = { x: col, y: row, width, height: 1, hex };
+            rectList.push(rect);
+            lastRect.set(key, rect);
+          }
           col += width;
         }
       }
+      const rects = rectList.map(r => `<rect x="${r.x}" y="${r.y}" width="${r.width}" height="${r.height}" fill="#${r.hex}"/>`);
       return `<svg x="${i * size}" y="0" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${rects.join("")}</svg>`;
     });
     const totalWidth = size * sprite.frames.length;
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${totalWidth} ${size}">${groups.join("")}</svg>`;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${totalWidth} ${size}"><style>rect { shape-rendering: crispEdges; }</style>${groups.join("")}</svg>`;
     try {
       await navigator.clipboard.writeText(svg);
       setIsSvgCopied(true);
