@@ -56,15 +56,20 @@ const Home: NextPage = () => {
     const frame = sprite.frames[0];
     const hashArray = getHashArray(frame, sprite.palette);
     const size = Math.sqrt(hashArray.length);
-    const rects = hashArray
-      .map((hex, index) => {
-        if (hex.length === 4 && hex[3] === "0") return "";
-        const col = index % size;
-        const row = Math.floor(index / size);
-        return `<rect x="${col}" y="${row}" width="1" height="1" fill="#${hex}"/>`;
-      })
-      .join("");
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}">${rects}</svg>`;
+    const rects: string[] = [];
+    for (let row = 0; row < size; row++) {
+      let col = 0;
+      while (col < size) {
+        const hex = hashArray[row * size + col];
+        if (hex.length === 4 && hex[3] === "0") { col++; continue; }
+        let width = 1;
+        while (col + width < size && hashArray[row * size + col + width] === hex) width++;
+        rects.push(`<rect x="${col}" y="${row}" width="${width}" height="1" fill="#${hex}"/>`);
+        col += width;
+      }
+    }
+    const rectsStr = rects.join("");
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}">${rectsStr}</svg>`;
     try {
       await navigator.clipboard.writeText(svg);
       setIsSvgCopied(true);
