@@ -1,22 +1,21 @@
-import React, { useContext } from "react";
+"use client";
+
+import React from "react";
 import ColorButton from "components/ColorButton";
 
 import styles from "./ColorPicker.module.css";
-import EditorContext from "context/EditorContext";
 import Shortcut from "components/Shortcut";
-import Palette from "utils/colors";
+import { randomHexColors } from "lib/palette";
+import { useSpriteStore } from "stores/sprite";
+import { useDrawingStore } from "stores/drawing";
 
 const ColorPicker: React.FC = () => {
-  const { state, onSelectColor, onReplacePalette } = useContext(EditorContext);
+  const { colors, replacePalette } = useSpriteStore();
+  const { currentColor, setColor } = useDrawingStore();
 
   const onNewPalette = () => {
-    const newPalette = Palette.randomHexColors({
-      numColors: 8,
-      hRange: undefined,
-      sRange: [0, 0.6],
-    }) as string[];
-
-    onReplacePalette(["fff0", "000", "fff", ...newPalette]);
+    const newPalette = randomHexColors({ numColors: 8, sRange: [0, 0.6] });
+    replacePalette(["fff0", "000", "fff", ...newPalette]);
   };
 
   return (
@@ -25,14 +24,14 @@ const ColorPicker: React.FC = () => {
         Palette
       </p>
       <ul className={styles.items}>
-        {state.colors
-          ?.filter((c) => c !== "fff0")
+        {colors
+          .filter((c) => c !== "fff0")
           .map((color, index) => (
             <li key={index} className={styles.item}>
               <ColorButton
                 hex={color}
-                active={state.currentColor === color}
-                onClick={onSelectColor}
+                active={currentColor === color}
+                onClick={setColor}
               />
             </li>
           ))}

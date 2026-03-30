@@ -1,39 +1,49 @@
+"use client";
+
+import React from "react";
 import SpritePreview from "components/SpritePreview";
-import EditorContext from "context/EditorContext";
-import React, { useContext } from "react";
 import { InputEvent } from "types/input";
-import { getSpriteArray } from "utils/sprite";
+import { getSpriteArray } from "lib/sprite";
+import { getDefaultHash } from "lib/encoding/hash";
+import { useSheetStore } from "stores/sheet";
+import { useDrawingStore } from "stores/drawing";
 
 import styles from "./CanvasSheet.module.css";
-import { getDefaultHash } from "utils/hash";
 
 const CanvasSheet: React.FC = () => {
-  const { state, onDrawChangeSheet, onSelectSheetCell } =
-    useContext(EditorContext);
+  const {
+    sheetData,
+    unsavedGrid,
+    currentGrid,
+    isDrawingSheet: _isDrawingSheet,
+    currentSheetIndex,
+    sheetViewMode,
+    selectSheetCell,
+    updateDrag,
+    startDrawingSheet: _startDrawing,
+  } = useSheetStore();
+  const { isDrawingSheet, startDrawingSheet, currentSpriteTool } = useDrawingStore();
 
-  const hash = state.unsavedGrid || state.currentGrid;
-  const gridItems = state.sheetData?.items || [];
-  const hashArray = getSpriteArray(hash || getDefaultHash(), gridItems);
+  const hash = unsavedGrid || currentGrid;
+  const hashArray = getSpriteArray(hash || getDefaultHash(), sheetData?.items ?? []);
 
-  // Get transform based on view mode
   const getCanvasTransform = () => {
-    const mode = state.sheetViewMode || "2d";
+    switch (sheetViewMode ?? "2d") {
+      case "3d": return "rotateX(40deg) rotateZ(30deg)";
+      case "front": return "rotateX(40deg) rotateZ(0deg)";
+      case "right": return "rotateX(40deg) rotateZ(90deg)";
+      case "back": return "rotateX(40deg) rotateZ(180deg)";
+      case "left": return "rotateX(40deg) rotateZ(-90deg)";
+      default: return "none";
+    }
+  };
 
-    switch (mode) {
-      case "2d":
-        return "none";
-      case "3d":
-        return "rotateX(40deg) rotateZ(30deg)";
-      case "front":
-        return "rotateX(40deg) rotateZ(0deg)";
-      case "right":
-        return "rotateX(40deg) rotateZ(90deg)";
-      case "back":
-        return "rotateX(40deg) rotateZ(180deg)";
-      case "left":
-        return "rotateX(40deg) rotateZ(-90deg)";
-      default:
-        return "none";
+  const handleCellAction = (index: number, isFirstClick?: boolean) => {
+    if (currentSpriteTool === "select") {
+      selectSheetCell(index);
+    } else {
+      if (isFirstClick) startDrawingSheet();
+      updateDrag(index, currentSpriteTool);
     }
   };
 
@@ -43,90 +53,58 @@ const CanvasSheet: React.FC = () => {
     isFirstClick?: boolean,
     isTouch?: boolean
   ) => {
-    // Check for touch
     if (isTouch && typeof event === "object" && "touches" in event) {
-      // Handle touch move event
       const touch = event.touches[0];
-      const targetButton = document.elementFromPoint(
-        touch.clientX,
-        touch.clientY
-      );
-
-      if (targetButton) {
-        const targetIndex = parseInt(targetButton.id);
-        if ((state.isDrawingSheet || isFirstClick) && !isNaN(targetIndex)) {
+      const target = document.elementFromPoint(touch.clientX, touch.clientY);
+      if (target) {
+        const targetIndex = parseInt(target.id);
+        if ((isDrawingSheet || isFirstClick) && !isNaN(targetIndex)) {
           handleCellAction(targetIndex, isFirstClick);
         }
       }
-
       return;
     }
 
-    // Handle non-touch
     event.preventDefault();
-
-    // Skip action for right click
-    if ("button" in event && event.button === 2) {
-      return;
-    }
-
-    if (state.isDrawingSheet || isFirstClick) {
-      handleCellAction(index, isFirstClick);
-    }
-  };
-
-  const handleCellAction = (index: number, isFirstClick?: boolean) => {
-    if (state.currentSpriteTool === "select") {
-      // Select tool: just select the cell
-      onSelectSheetCell && onSelectSheetCell(index);
-    } else {
-      // Paint/Eraser tool: modify the grid
-      onDrawChangeSheet && onDrawChangeSheet(index, isFirstClick);
-    }
+    if ("button" in event && event.button === 2) return;
+    if (isDrawingSheet || isFirstClick) handleCellAction(index, isFirstClick);
   };
 
   return (
     <div className={styles.wrapper}>
-      <p className="label">Sheet {state.isDrawingSheet && " - drawing"}</p>
+      <p className="label">Sheet</p>
       <div className={styles.editor}>
         <div
           className={styles.canvas}
           style={{ transform: getCanvasTransform() }}
         >
-          {hashArray?.map((item, index) => (
+          {hashArray.map((item, index) => (
             <button
               key={index}
               id={index.toString()}
               className={styles.pixel}
-              onMouseOver={(event) => onMouseOver(index, event)}
-              onFocus={(event) => onMouseOver(index, event)}
-              onTouchMove={(event) => onMouseOver(index, event, false, true)}
-              onMouseDown={(event) => onMouseOver(index, event, true)}
-              onTouchStart={(event) => onMouseOver(index, event, true, true)}
-              data-active={state.currentSheetIndex === index}
+              onMouseOver={(e) => onMouseOver(index, e)}
+              onFocus={(e) => onMouseOver(index, e)}
+              onTouchMove={(e) => onMouseOver(index, e, false, true)}
+              onMouseDown={(e) => onMouseOver(index, e, true)}
+              onTouchStart={(e) => onMouseOver(index, e, true, true)}
+              data-active={currentSheetIndex === index}
               data-empty={!item}
             >
               {item && (
                 <SpritePreview
                   hash={
-                    state.sheetData?.sprites?.find(
-                      (s) => s.id === item.spriteId
-                    )?.frames[0]
+                    sheetData?.sprites?.find((s) => s.id === item.spriteId)
+                      ?.frames[0]
                   }
                   palette={
-                    state.sheetData?.sprites?.find(
-                      (s) => s.id === item.spriteId
-                    )?.palette
+                    sheetData?.sprites?.find((s) => s.id === item.spriteId)
+                      ?.palette
                   }
                   rotation={item.rotation}
                   flip={item.flip}
                 />
               )}
-              <>
-                {state.debug && (
-                  <span className={styles["debug-pixel"]}>{hash[index]}</span>
-                )}
-              </>
             </button>
           ))}
         </div>

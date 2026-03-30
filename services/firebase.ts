@@ -24,7 +24,6 @@ const signInWithGoogle = async () => {
 
     const userInfo = getAdditionalUserInfo(res);
 
-    console.log("userInfo:", userInfo);
 
     if (userInfo?.isNewUser) {
       await addDoc(collection(db, "users"), {

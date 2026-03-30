@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import classNames from "classnames";
 
@@ -28,7 +30,7 @@ const ColorButton: React.FC<Props> = ({
   return (
     <button
       className={buttonClass}
-      style={{ background: `#${hex}` }}
+      style={{ backgroundColor: `#${hex}` }}
       onClick={() => onClick && onClick(hex)}
     >
       <div className={styles.inner}>{hex}</div>

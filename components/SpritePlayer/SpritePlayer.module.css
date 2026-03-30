@@ -5,7 +5,6 @@
   gap: var(--block-size-small);
 }
 
-
 .player {
   display: flex;
   align-items: center;
@@ -25,10 +24,21 @@
   height: 8rem;
 }
 
+/* Large variant — used on the share page */
+.-large .player {
+  border: none;
+}
+
+.-large .player-inner {
+  top: calc(50% - 10rem);
+  left: calc(50% - 10rem);
+  width: 20rem;
+  height: 20rem;
+}
+
 .actions {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: var(--block-size);
 }
-

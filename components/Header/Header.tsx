@@ -1,10 +1,10 @@
-import React, { useEffect, useMemo } from "react";
-import classNames from "classnames";
-import { CgChevronLeftR } from "react-icons/cg";
+"use client";
 
+import React, { useEffect, useState } from "react";
+import classNames from "classnames";
 import styles from "./Header.module.css";
 import Link from "next/link";
-import { getRandomHash, getRandomPalette } from "utils/hash";
+import { getRandomHash, getRandomPalette } from "lib/encoding/hash";
 import SpritePreview from "components/SpritePreview";
 import html2canvas from "html2canvas";
 
@@ -22,13 +22,11 @@ const Header: React.FC<Props> = ({ title, backUrl, action }) => {
     [styles["header"]]: true,
   });
 
-  const randomSprite = useMemo(
-    () => ({
-      hash: getRandomHash(4),
-      palette: getRandomPalette(),
-    }),
-    []
-  );
+  const [randomSprite, setRandomSprite] = useState<{ hash: string; palette: string[] } | null>(null);
+
+  useEffect(() => {
+    setRandomSprite({ hash: getRandomHash(4), palette: getRandomPalette() });
+  }, []);
 
   const setFavicon = async () => {
     const headerSprite = document.getElementById("header-sprite");
@@ -59,27 +57,25 @@ const Header: React.FC<Props> = ({ title, backUrl, action }) => {
     <header className={headerClass}>
       <div className={styles.left}>
         <Link href={backUrl || "/"}>
-          <a>
-            <span className={styles.logo}>
-              <div className={styles.avatar}>
+          <span className={styles.logo}>
+            <div className={styles.avatar}>
+              {randomSprite && (
                 <SpritePreview
                   id="header-sprite"
                   hash={randomSprite.hash}
                   palette={randomSprite.palette}
                 />
-              </div>
-              miko
-            </span>
-          </a>
+              )}
+            </div>
+            miko
+          </span>
         </Link>
       </div>
       <h1 className={styles.title}>{title && title}</h1>
       <div className={styles.right}>
         {action && (
           <Link href={action.url}>
-            <a>
-              <span className={styles.text}>{action.text}</span>
-            </a>
+            <span className={styles.text}>{action.text}</span>
           </Link>
         )}
       </div>

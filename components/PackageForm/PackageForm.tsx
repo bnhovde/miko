@@ -1,58 +1,33 @@
-import React, { useContext } from "react";
+"use client";
+
+import React, { useState } from "react";
 import classNames from "classnames";
 
 import styles from "./PackageForm.module.css";
-import EditorContext from "context/EditorContext";
-import { useRouter } from "next/router";
+import { useRouter, useParams } from "next/navigation";
+import { usePackageStore } from "stores/package";
 
 const PackageForm: React.FC = () => {
   const router = useRouter();
-  const { state, onUpdatePackage } = useContext(EditorContext);
+  const params = useParams();
+  const { packageData, updatePackage } = usePackageStore();
 
-  const [name, setName] = React.useState(
-    state?.packageData?.name || "New Package"
-  );
+  const [name, setName] = useState(packageData?.name ?? "New Package");
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    if (!state.packageData) return;
-
+    if (!packageData) return;
     event.preventDefault();
-    const newPackage = {
-      ...state.packageData,
-      name,
-    };
-
-    onUpdatePackage(newPackage);
-
-    router.push(
-      router.query.packageId
-        ? `/app/editor/package/${router.query.packageId}`
-        : `/app/editor/package`
-    );
+    updatePackage({ ...packageData, name });
+    const id = params.id ? String(Array.isArray(params.id) ? params.id[0] : params.id) : undefined;
+    router.push(id ? `/editor/package/${id}` : "/editor/package");
   };
 
-  const formClass = classNames({
-    [styles["form"]]: true,
-  });
-
   return (
-    <form className={formClass} onSubmit={handleSubmit}>
+    <form className={classNames(styles.form)} onSubmit={handleSubmit}>
       <label>
         Name:
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+        <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
       </label>
-      {/* <label>
-        FPS:
-        <input
-          type="number"
-          value={fps}
-          onChange={(e) => setFps(parseInt(e.target.value))}
-        />
-      </label> */}
       <input type="submit" value="Submit" />
     </form>
   );

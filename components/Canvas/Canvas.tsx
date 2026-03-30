@@ -1,17 +1,30 @@
-import EditorContext from "context/EditorContext";
-import React, { useContext } from "react";
+"use client";
+
+import React from "react";
 import { InputEvent } from "types/input";
-import { getDefaultHash, getHashArray, updateHash } from "utils/hash";
+import { getDefaultHash, getHashArray } from "lib/encoding/hash";
+import { useSpriteStore } from "stores/sprite";
+import { useDrawingStore } from "stores/drawing";
 
 import styles from "./Canvas.module.css";
 
 const Canvas: React.FC = () => {
-  const { state, onDrawChange, onSelectColor } = useContext(EditorContext);
+  const { spriteData, unsavedHash, currentHash, updateDrag, commitDraw } =
+    useSpriteStore();
+  const { isDrawingSprite, startDrawingSprite, currentTool, setColor } =
+    useDrawingStore();
 
-  const hash = state.unsavedHash || state.currentHash;
-  const spritePalette = state.spriteData?.palette || [];
-  const hashArray = getHashArray(hash || getDefaultHash(), spritePalette);
-  // const onionHashArray = onionskinHash ? getHashArray(onionskinHash) : [];
+  const hash = unsavedHash || currentHash;
+  const hashArray = getHashArray(hash || getDefaultHash(), spriteData?.palette ?? []);
+
+  const handlePixel = (index: number, isFirstClick?: boolean) => {
+    const isFill = currentTool === "fill";
+    if (isFill && !isFirstClick) return;
+    if (!isDrawingSprite && !isFirstClick) return;
+
+    if (isFirstClick) startDrawingSprite();
+    updateDrag(index, currentTool);
+  };
 
   const onMouseOver = (
     index: number,
@@ -19,47 +32,30 @@ const Canvas: React.FC = () => {
     isFirstClick?: boolean,
     isTouch?: boolean
   ) => {
-    // Check for touch
     if (isTouch && typeof event === "object" && "touches" in event) {
-      // Handle touch move event
       const touch = event.touches[0];
-      const targetButton = document.elementFromPoint(
-        touch.clientX,
-        touch.clientY
-      );
-
-      if ((state.isDrawingSprite || isFirstClick) && targetButton) {
-        onDrawChange && onDrawChange(parseInt(targetButton.id), isFirstClick);
+      const target = document.elementFromPoint(touch.clientX, touch.clientY);
+      if ((isDrawingSprite || isFirstClick) && target) {
+        handlePixel(parseInt(target.id), isFirstClick);
       }
-
       return;
     }
 
-    // Handle non-touch
     event.preventDefault();
-
-    // Skip action for right click
-    if ("button" in event && event.button === 2) {
-      console.log("skip!", event.button);
-      return;
-    }
-
-    if (state.isDrawingSprite || isFirstClick) {
-      onDrawChange && onDrawChange(index, isFirstClick);
-    }
+    if ("button" in event && event.button === 2) return;
+    handlePixel(index, isFirstClick);
   };
 
   const onContextMenu = (event: InputEvent, hex: string) => {
     event.preventDefault();
     event.stopPropagation();
-
-    onSelectColor(hex);
+    setColor(hex);
   };
 
   return (
     <div className={styles.wrapper}>
       <p className="label" data-desktop>
-        {state.spriteData?.name || "New Sprite"}
+        {spriteData?.name ?? "New Sprite"}
       </p>
       <div className={styles.editor}>
         <div
@@ -75,27 +71,15 @@ const Canvas: React.FC = () => {
               key={index}
               id={index.toString()}
               className={styles.pixel}
-              onContextMenu={(event) => onContextMenu(event, hex)}
-              onMouseOver={(event) => onMouseOver(index, event)}
-              onFocus={(event) => onMouseOver(index, event)}
-              onTouchMove={(event) => onMouseOver(index, event, false, true)}
-              onMouseDown={(event) => onMouseOver(index, event, true)}
-              onTouchStart={(event) => onMouseOver(index, event, true, true)}
-              style={{ background: `#${hex}` }}
-              data-empty={hex == "fff0"}
-            >
-              <>
-                {state.debug && (
-                  <span className={styles["debug-pixel"]}>{hash[index]}</span>
-                )}
-              </>
-              {/* {onionHashArray[index] && (
-                <div
-                  className={styles["onion-skin"]}
-                  style={{ background: `${onionHashArray[index]}` }}
-                ></div>
-              )} */}
-            </button>
+              onContextMenu={(e) => onContextMenu(e, hex)}
+              onMouseOver={(e) => onMouseOver(index, e)}
+              onFocus={(e) => onMouseOver(index, e)}
+              onTouchMove={(e) => onMouseOver(index, e, false, true)}
+              onMouseDown={(e) => onMouseOver(index, e, true)}
+              onTouchStart={(e) => onMouseOver(index, e, true, true)}
+              style={{ backgroundColor: `#${hex}` }}
+              data-empty={hex === "fff0"}
+            />
           ))}
         </div>
       </div>

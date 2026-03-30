@@ -1,46 +1,34 @@
-import React, { useContext } from "react";
+"use client";
+
+import React from "react";
 import classNames from "classnames";
 
 import SpritePicker from "components/SpritePicker";
-
-import styles from "./EditorPackage.module.css";
-import EditorContext from "context/EditorContext";
-import { Sprite } from "types/sprite";
 import Package from "components/Package";
 
-const EditorPackage: React.FC = () => {
-  const { state, onUpdatePackage } = useContext(EditorContext);
+import styles from "./EditorPackage.module.css";
+import { usePackageStore } from "stores/package";
+import { Sprite } from "types/sprite";
 
-  const editorClass = classNames({
-    [styles["editor"]]: true,
-  });
+const EditorPackage: React.FC = () => {
+  const { packageData, updatePackage } = usePackageStore();
 
   const handleToggleSprite = (sprite: Sprite) => {
-    if (!state.packageData) return;
-
-    // Check if sprite is already in package
-    const exists = state.packageData.sprites.find((s) => s.id === sprite.id);
-    if (exists) {
-      // Remove sprite
-      const newSprites =
-        state.packageData.sprites.filter((s) => s.id !== sprite.id) || [];
-      onUpdatePackage({ ...state.packageData, sprites: newSprites });
-    } else {
-      // Add sprite
-      onUpdatePackage({
-        ...state.packageData,
-        sprites: [...state.packageData.sprites, sprite],
-      });
-    }
+    if (!packageData) return;
+    const exists = packageData.sprites.find((s) => s.id === sprite.id);
+    const newSprites = exists
+      ? packageData.sprites.filter((s) => s.id !== sprite.id)
+      : [...packageData.sprites, sprite];
+    updatePackage({ ...packageData, sprites: newSprites });
   };
 
   return (
-    <section className={editorClass}>
+    <section className={classNames(styles.editor)}>
       <div className={styles.inner}>
         <div className={styles.sprites}>
           <div className={styles["sprites-inner"]}>
             <SpritePicker
-              selecedItems={state.packageData?.sprites}
+              selecedItems={packageData?.sprites}
               onSelect={handleToggleSprite}
             />
           </div>

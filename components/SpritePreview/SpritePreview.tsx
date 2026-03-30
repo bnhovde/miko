@@ -1,7 +1,9 @@
+"use client";
+
 import { defaultColors } from "data/palettes";
 import React from "react";
 import { User } from "types/user";
-import { getDefaultHash, getHashArray, getRandomPalette } from "utils/hash";
+import { getDefaultHash, getHashArray } from "lib/encoding/hash";
 
 import styles from "./SpritePreview.module.css";
 
@@ -32,7 +34,7 @@ const SpritePreview: React.FC<Props> = ({
 }) => {
   const hashArray = getHashArray(
     hash || getDefaultHash(),
-    palette || defaultColors
+    palette || defaultColors,
   );
   const showFooter = title || author;
 
@@ -74,7 +76,7 @@ const SpritePreview: React.FC<Props> = ({
             <div
               className={styles.pixel}
               key={index}
-              style={{ background: `#${hex}` }}
+              style={{ backgroundColor: `#${hex}` }}
             />
           ))}
         </div>

@@ -1,34 +1,27 @@
-import React, { useContext } from "react";
+"use client";
+
+import React from "react";
 import classNames from "classnames";
 
-import ColorPicker from "components/ColorPicker";
-import Canvas from "components/Canvas";
-import ToolPicker from "components/ToolPicker";
-import ToolPickerSheet from "components/ToolPickerSheet";
-
-import styles from "./EditorSheet.module.css";
-import CanvasSheet from "components/CanvasSheet";
 import SpritePicker from "components/SpritePicker";
 import SheetControls from "components/SheetControls";
-import EditorContext from "context/EditorContext";
+import CanvasSheet from "components/CanvasSheet";
+import ToolPickerSheet from "components/ToolPickerSheet";
 import Toolbar from "components/Toolbar";
 
-const EditorSheet: React.FC = () => {
-  const { state, onSelectSpriteForSheet } = useContext(EditorContext);
+import styles from "./EditorSheet.module.css";
+import { useSheetStore } from "stores/sheet";
 
-  const editorClass = classNames({
-    [styles["editor"]]: true,
-  });
+const EditorSheet: React.FC = () => {
+  const { selectSpriteForSheet, currentSheetSprite } = useSheetStore();
 
   return (
-    <section className={editorClass}>
+    <section className={classNames(styles.editor)}>
       <div className={styles.inner}>
         <div className={styles.sprites}>
           <SpritePicker
-            onSelect={onSelectSpriteForSheet}
-            selecedItems={
-              state.currentSheetSprite ? [state.currentSheetSprite] : []
-            }
+            onSelect={selectSpriteForSheet}
+            selecedItems={currentSheetSprite ? [currentSheetSprite] : []}
           />
         </div>
 

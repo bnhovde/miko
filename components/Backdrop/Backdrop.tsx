@@ -1,7 +1,5 @@
-import React from 'react';
-import { CSSTransition } from 'react-transition-group';
-
-import styles from './Backdrop.module.css';
+import React, { useEffect, useState } from "react";
+import styles from "./Backdrop.module.css";
 
 type Props = {
   isVisible: boolean;
@@ -9,32 +7,45 @@ type Props = {
   onClick?: () => void;
 };
 
+/**
+ * Full-screen backdrop overlay with enter/exit CSS animations.
+ * Unmounts from DOM after the exit animation completes.
+ */
 const Backdrop: React.FC<Props> = ({ isVisible, transparent, onClick }) => {
+  const [mounted, setMounted] = useState(isVisible);
+  const [animState, setAnimState] = useState<"enter" | "visible" | "exit">(
+    isVisible ? "visible" : "exit"
+  );
+
+  useEffect(() => {
+    if (isVisible) {
+      setMounted(true);
+      setAnimState("enter");
+    } else if (mounted) {
+      setAnimState("exit");
+    }
+  }, [isVisible]);
+
+  const handleAnimationEnd = () => {
+    if (animState === "enter") {
+      setAnimState("visible");
+    } else if (animState === "exit") {
+      setMounted(false);
+    }
+  };
+
+  if (!mounted) return null;
+
   return (
-    <CSSTransition
-      in={isVisible}
-      unmountOnExit
-      key="backdrop"
-      timeout={{
-        appear: 400,
-        enter: 400,
-        exit: 300,
-      }}
-      classNames={{
-        enterActive: `${styles.backdrop} ${styles[`-enter`]}`,
-        exitActive: `${styles.backdrop} ${styles[`-exit`]}`,
-        enterDone: `${styles.backdrop} ${styles[`-visible`]}`,
-        exitDone: styles[`-hidden`],
-        appearActive: `${styles.backdrop} ${styles[`-enter`]}`,
-        appearDone: `${styles.backdrop} ${styles[`-visible`]}`,
-      }}
+    <span
+      className={`${styles.backdrop} ${styles[`-${animState}`]}`}
+      data-transparent={transparent}
+      onAnimationEnd={handleAnimationEnd}
     >
-      <span className={styles.backdrop} data-transparent={transparent}>
-        {isVisible && (
-          <button aria-label="Lukk" onClick={onClick} className={styles.button}></button>
-        )}
-      </span>
-    </CSSTransition>
+      {isVisible && (
+        <button aria-label="Lukk" onClick={onClick} className={styles.button} />
+      )}
+    </span>
   );
 };
 

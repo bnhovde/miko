@@ -34,10 +34,7 @@ const ToolButton: React.FC<Props> = ({
   return (
     <button
       className={buttonClass}
-      onClick={() => {
-        onClick();
-        console.log("Button clicked");
-      }}
+      onClick={onClick}
       disabled={disabled}
     >
       <div className={styles.icon} style={inlineStyle}>

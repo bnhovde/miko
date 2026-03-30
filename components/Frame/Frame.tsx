@@ -1,6 +1,8 @@
+"use client";
+
 import React from "react";
 import { defaultColors } from "data/palettes";
-import { getDefaultHash, getHashArray } from "utils/hash";
+import { getDefaultHash, getHashArray } from "lib/encoding/hash";
 
 import styles from "./Frame.module.css";
 
@@ -29,7 +31,7 @@ const Frame: React.FC<Props> = ({ hash, palette, debug }) => {
           <div
             className={styles.pixel}
             key={index}
-            style={{ background: `#${hex}` }}
+            style={{ backgroundColor: `#${hex}` }}
           >
             <>
               {debug && (

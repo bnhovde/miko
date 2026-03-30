@@ -20,10 +20,8 @@ const ButtonLink: React.FC<Props> = ({ children, full, secondary, href }) => {
   });
 
   return (
-    <Link href={href}>
-      <a className={buttonClass}>
-        <span>{children}</span>
-      </a>
+    <Link href={href} className={buttonClass}>
+      <span>{children}</span>
     </Link>
   );
 };

@@ -1,52 +1,32 @@
-import React, { useContext } from "react";
+"use client";
+
+import React, { useState } from "react";
 import classNames from "classnames";
 
 import styles from "./SpriteForm.module.css";
-import EditorContext from "context/EditorContext";
-import { useRouter } from "next/router";
+import { useRouter, useParams } from "next/navigation";
+import { useSpriteStore } from "stores/sprite";
 
 const SpriteForm: React.FC = () => {
   const router = useRouter();
-  const { state, onChangeName } = useContext(EditorContext);
+  const params = useParams();
+  const { spriteData, changeName } = useSpriteStore();
 
-  const [name, setName] = React.useState(
-    state?.spriteData?.name || "New Sprite"
-  );
-  const [fps, setFps] = React.useState(state?.spriteData?.fps || 10);
+  const [name, setName] = useState(spriteData?.name ?? "New Sprite");
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    onChangeName(name);
-
-    router.push(
-      router.query.spriteId
-        ? `/app/editor/sprite/${router.query.spriteId}`
-        : `/app/editor/sprite`
-    );
+    changeName(name);
+    const id = params.id ? String(Array.isArray(params.id) ? params.id[0] : params.id) : undefined;
+    router.push(id ? `/editor/sprite/${id}` : "/editor/sprite");
   };
 
-  const formClass = classNames({
-    [styles["form"]]: true,
-  });
-
   return (
-    <form className={formClass} onSubmit={handleSubmit}>
+    <form className={classNames(styles.form)} onSubmit={handleSubmit}>
       <label>
         Name:
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+        <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
       </label>
-      {/* <label>
-        FPS:
-        <input
-          type="number"
-          value={fps}
-          onChange={(e) => setFps(parseInt(e.target.value))}
-        />
-      </label> */}
       <input type="submit" value="Submit" />
     </form>
   );

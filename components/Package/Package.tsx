@@ -1,38 +1,31 @@
-import EditorContext from "context/EditorContext";
-import React, { useContext } from "react";
+"use client";
+
+import React from "react";
 
 import styles from "./Package.module.css";
 import Frame from "components/Frame";
+import { usePackageStore } from "stores/package";
 
 const Package: React.FC = () => {
-  const { state } = useContext(EditorContext);
-
-  const spritesToDraw = state.packageData?.sprites || [];
-  const framesToDraw = spritesToDraw.reduce((acc, sprite) => {
-    return [...acc, ...sprite.frames];
-  }, [] as string[]);
-
-  const longestSprite = spritesToDraw.reduce((acc, sprite) => {
-    return sprite.frames.length > acc ? sprite.frames.length : acc;
-  }, 0);
+  const { packageData } = usePackageStore();
+  const sprites = packageData?.sprites ?? [];
 
   return (
     <div className={styles.wrapper}>
       <div
         className={styles.body}
         id="package-body"
-        data-has-items={framesToDraw.length > 0}
+        data-has-items={sprites.length > 0}
         style={{
-          gridTemplateColumns: `repeat(12, 1fr)`,
-          gridTemplateRows: `repeat(1, 1fr)`,
+          gridTemplateColumns: "repeat(12, 1fr)",
+          gridTemplateRows: "repeat(1, 1fr)",
         }}
       >
-        {spritesToDraw.map((sprite) => {
-          // Paint all frames of the sprite
-          return sprite.frames.map((frame) => (
+        {sprites.map((sprite) =>
+          sprite.frames.map((frame) => (
             <Frame key={frame} hash={frame} palette={sprite.palette} />
-          ));
-        })}
+          ))
+        )}
       </div>
     </div>
   );

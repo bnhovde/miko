@@ -4,7 +4,7 @@ import ColorButton from "components/ColorButton";
 import styles from "./SpritePicker.module.css";
 import EditorContext from "context/EditorContext";
 import { Sprite } from "types/sprite";
-import { getAll } from "utils/localStorage";
+import { getAll } from "lib/storage";
 import localStorageKeys from "constants/localStorageKeys";
 import SpritePreview from "components/SpritePreview";
 

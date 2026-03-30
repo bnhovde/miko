@@ -9,7 +9,7 @@ const SpritePreviewPlayer = dynamic(
   () => import("components/SpritePreviewPlayer"),
   {
     ssr: false,
-  }
+  },
 );
 
 const SheetPreview = dynamic(() => import("components/SheetPreview"), {
@@ -83,22 +83,21 @@ const SpriteGrid: React.FC<Props> = ({
                   href={`/app/editor/${
                     creation.type === "sprite" ? "sprite" : "sheet"
                   }/${creation.id}`}
+                  className={styles.link}
                 >
-                  <a className={styles.link}>
-                    <div className={styles.sprite}>
-                      {isSheet ? (
-                        <SheetPreview
-                          sheet={creation as Spritesheet}
-                          isPlaying={playSpriteId === creation.id}
-                        />
-                      ) : (
-                        <SpritePreviewPlayer
-                          sprite={creation as Sprite}
-                          isPlaying={playSpriteId === creation.id}
-                        />
-                      )}
-                    </div>
-                  </a>
+                  <div className={styles.sprite}>
+                    {isSheet ? (
+                      <SheetPreview
+                        sheet={creation as Spritesheet}
+                        isPlaying={playSpriteId === creation.id}
+                      />
+                    ) : (
+                      <SpritePreviewPlayer
+                        sprite={creation as Sprite}
+                        isPlaying={playSpriteId === creation.id}
+                      />
+                    )}
+                  </div>
                 </Link>
               </div>
               <div className={styles.footer}>
