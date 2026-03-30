@@ -8,7 +8,7 @@ import Head from "next/head";
 import Main from "components/Main";
 import Footer from "components/Footer";
 
-import { decodeUrlSprite, getRandomHash } from "utils/hash";
+import { decodeUrlSprite, getHashArray, getRandomHash } from "utils/hash";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import { Sprite, URLSprite } from "types/sprite";
@@ -47,8 +47,31 @@ const Home: NextPage = () => {
   const router = useRouter();
   const { query } = router;
   const [isCopied, setIsCopied] = useState(false);
+  const [isSvgCopied, setIsSvgCopied] = useState(false);
 
   const spriteData = decompress(query.d);
+
+  const copySvg = async (sprite: Sprite | null) => {
+    if (!sprite) return;
+    const frame = sprite.frames[0];
+    const hashArray = getHashArray(frame, sprite.palette);
+    const size = Math.sqrt(hashArray.length);
+    const rects = hashArray
+      .map((hex, index) => {
+        if (hex.length === 4 && hex[3] === "0") return "";
+        const col = index % size;
+        const row = Math.floor(index / size);
+        return `<rect x="${col}" y="${row}" width="1" height="1" fill="#${hex}"/>`;
+      })
+      .join("");
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}">${rects}</svg>`;
+    try {
+      await navigator.clipboard.writeText(svg);
+      setIsSvgCopied(true);
+    } catch (err) {
+      console.error("Failed to copy SVG: ", err);
+    }
+  };
 
   const copyData = async (data?: string | string[]) => {
     try {
@@ -116,6 +139,13 @@ const Home: NextPage = () => {
             hotKeys: "cmd+c",
             isActive: isCopied,
             onToggle: () => copyData(query.d),
+          },
+          {
+            children: "SVG",
+            label: "Copy SVG",
+            hotKeys: "s",
+            isActive: isSvgCopied,
+            onToggle: () => copySvg(spriteData),
           },
         ]}
         action={{ text: "Let me try!", url: "/app/editor/sprite" }}

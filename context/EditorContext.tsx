@@ -531,6 +531,7 @@ type ContextProps = {
   onReorderFrames: (oldIndex: number, newIndex: number) => void;
   onChangeSprite: (newSprite: Sprite) => void;
   onChangeName: (newName: string) => void;
+  onChangeSize: (newSize: number) => void;
   onUpdatePackage: (spritePackage: SpritePackage) => void;
   onSelectSpriteForSheet: (sprite: Sprite) => void;
   onSelectSheetCell: (index: number) => void;
@@ -580,6 +581,7 @@ const initialState: ContextProps = {
   onReplacePalette: () => null,
   onReorderFrames: () => null,
   onChangeName: () => null,
+  onChangeSize: () => null,
   onChangeSprite: () => null,
   onUpdatePackage: () => null,
   onSelectSpriteForSheet: () => null,
@@ -927,6 +929,31 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
     });
   };
 
+  const onChangeSize = (newSize: number) => {
+    if (!state.spriteData) return;
+    const oldSize = state.spriteData.size;
+    const resizeHash = (hash: string): string => {
+      let result = "";
+      for (let row = 0; row < newSize; row++) {
+        for (let col = 0; col < newSize; col++) {
+          result +=
+            row < oldSize && col < oldSize ? hash[row * oldSize + col] : "a";
+        }
+      }
+      return result;
+    };
+    const newFrames = state.spriteData.frames.map(resizeHash);
+    const newSprite = { ...state.spriteData, size: newSize, frames: newFrames };
+    set(
+      `${localStorageKeys.SPRITE}-${state.spriteData.id}`,
+      JSON.stringify(newSprite)
+    );
+    dispatch({
+      type: EditorActionTypes.CHANGE_SPRITE,
+      payload: { sprite: newSprite },
+    });
+  };
+
   const onChangeSprite = (newSprite: Sprite) => {
     dispatch({
       type: EditorActionTypes.CHANGE_SPRITE,
@@ -1024,6 +1051,7 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
         onReplacePalette,
         onReorderFrames,
         onChangeName,
+        onChangeSize,
         onChangeSprite,
         onUpdatePackage,
         onSelectSpriteForSheet,

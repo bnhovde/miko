@@ -7,16 +7,20 @@ import { useRouter } from "next/router";
 
 const SpriteForm: React.FC = () => {
   const router = useRouter();
-  const { state, onChangeName } = useContext(EditorContext);
+  const { state, onChangeName, onChangeSize } = useContext(EditorContext);
 
   const [name, setName] = React.useState(
     state?.spriteData?.name || "New Sprite"
   );
   const [fps, setFps] = React.useState(state?.spriteData?.fps || 10);
+  const [size, setSize] = React.useState(state?.spriteData?.size || 11);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     onChangeName(name);
+    if (size !== state?.spriteData?.size) {
+      onChangeSize(size);
+    }
 
     router.push(
       router.query.spriteId
@@ -39,14 +43,16 @@ const SpriteForm: React.FC = () => {
           onChange={(e) => setName(e.target.value)}
         />
       </label>
-      {/* <label>
-        FPS:
+      <label>
+        Grid size:
         <input
           type="number"
-          value={fps}
-          onChange={(e) => setFps(parseInt(e.target.value))}
+          value={size}
+          min={4}
+          max={64}
+          onChange={(e) => setSize(parseInt(e.target.value))}
         />
-      </label> */}
+      </label>
       <input type="submit" value="Submit" />
     </form>
   );
