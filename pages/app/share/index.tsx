@@ -63,7 +63,7 @@ const Home: NextPage = () => {
         let col = 0;
         while (col < size) {
           const hex = hashArray[row * size + col];
-          if (hex.length === 4 && hex[3] === "0") { col++; continue; }
+          if (!hex || (hex.length === 4 && hex[3] === "0")) { col++; continue; }
           let width = 1;
           while (col + width < size && hashArray[row * size + col + width] === hex) width++;
           const key = `${col},${width},${hex}`;
