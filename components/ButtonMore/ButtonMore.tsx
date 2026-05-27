@@ -37,9 +37,9 @@ const ButtonMore: React.FC<Props> = ({ label, disabled, options = [] }) => {
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <circle cx="1.5" cy="1.5" r="1.5" fill="black" />
-          <circle cx="1.5" cy="7.5" r="1.5" fill="black" />
-          <circle cx="1.5" cy="13.5" r="1.5" fill="black" />
+          <circle cx="1.5" cy="1.5" r="1.5" fill="currentColor" />
+          <circle cx="1.5" cy="7.5" r="1.5" fill="currentColor" />
+          <circle cx="1.5" cy="13.5" r="1.5" fill="currentColor" />
         </svg>
         <p className="sr">{label}</p>
       </button>

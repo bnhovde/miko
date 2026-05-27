@@ -20,6 +20,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  gap: var(--spacing-4);
 }
 
 .title {
@@ -45,4 +46,5 @@
 
 .header a {
   text-decoration: none;
+  white-space: nowrap;
 }

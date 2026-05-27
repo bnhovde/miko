@@ -45,7 +45,7 @@ a,
 
 a:hover,
 .link:hover {
-  color: #FFC8DD;
+  color: var(--col-1);
 }
 
 a:active,

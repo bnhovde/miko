@@ -1,9 +1,11 @@
 import React from "react";
 import classNames from "classnames";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { Sprite } from "types/sprite";
 import { Spritesheet } from "types/sheet";
-import dynamic from "next/dynamic";
+import styles from "./SpriteGrid.module.css";
+import ButtonMore from "components/ButtonMore";
 
 const SpritePreviewPlayer = dynamic(
   () => import("components/SpritePreviewPlayer"),
@@ -15,9 +17,6 @@ const SpritePreviewPlayer = dynamic(
 const SheetPreview = dynamic(() => import("components/SheetPreview"), {
   ssr: false,
 });
-
-import styles from "./SpriteGrid.module.css";
-import ButtonMore from "components/ButtonMore";
 
 type Creation = (Sprite | Spritesheet) & { type: "sprite" | "sheet" };
 

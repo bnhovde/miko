@@ -6,6 +6,8 @@ import styles from "./Header.module.css";
 import Link from "next/link";
 import { getRandomHash, getRandomPalette } from "utils/hash";
 import SpritePreview from "components/SpritePreview";
+import ThemeToggle from "components/ThemeToggle";
+import useTheme from "hooks/useTheme";
 import html2canvas from "html2canvas";
 
 type Props = {
@@ -18,6 +20,7 @@ type Props = {
 };
 
 const Header: React.FC<Props> = ({ title, backUrl, action }) => {
+  const { resolved, toggle } = useTheme();
   const headerClass = classNames({
     [styles["header"]]: true,
   });
@@ -82,6 +85,7 @@ const Header: React.FC<Props> = ({ title, backUrl, action }) => {
             </a>
           </Link>
         )}
+        <ThemeToggle isDark={resolved === "dark"} onToggle={toggle} />
       </div>
     </header>
   );

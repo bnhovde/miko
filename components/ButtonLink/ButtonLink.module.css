@@ -13,7 +13,8 @@
   padding: 0;
   font-family: var(--font-family);
   font-size: var(--base-font-size);
-  background: white;
+  background: var(--col-bg);
+  color: var(--col-text);
   text-transform: uppercase;
   text-align: center;
   text-decoration: none;
@@ -22,7 +23,7 @@
 .button:hover {
   border-color: var(--col-1);
   text-decoration: underline;
-  color: black;
+  color: var(--col-text);
 }
 .button:active {
   background-color: var(--col-1);
@@ -39,5 +40,5 @@
 }
 
 .-secondary > span {
-  background-color: #eafee7;
+  background-color: var(--col-active);
 }

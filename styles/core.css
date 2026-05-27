@@ -22,6 +22,7 @@ body {
   color: var(--col-text);
   font-size: var(--base-font-size);
   background-color: var(--col-bg);
+  transition: background-color 0.3s ease, color 0.3s ease;
 
   min-height: 100vh; /* Fill entire height of page */
   min-height: -webkit-fill-available; /* Safari viewport bug fix */
@@ -31,8 +32,8 @@ body {
 :-webkit-autofill,
 :-webkit-autofill:hover,
 :-webkit-autofill:focus {
-  -webkit-text-fill-color: black;
-  -webkit-box-shadow: 0 0 0 1000px white inset;
+  -webkit-text-fill-color: var(--col-text);
+  -webkit-box-shadow: 0 0 0 1000px var(--col-bg) inset;
 }
 
 h1,
@@ -66,7 +67,7 @@ fieldset {
 
 hr {
   margin: var(--spacing-2) auto;
-  color: black;
+  color: var(--col-text);
   max-width: 10rem;
 }
 
@@ -82,7 +83,7 @@ hr {
 
 /* Accessibility styles (when using keyboard) */
 .body--a11y *:focus {
-  outline: 4px solid #000000;
+  outline: 4px solid var(--col-text);
   outline-offset: 4px;
 }
 

@@ -53,5 +53,5 @@
   opacity: 0.5;
 }
 .-disabled:hover .badge {
-  background: white;
+  background: var(--col-bg);
 }

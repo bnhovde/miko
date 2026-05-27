@@ -13,6 +13,11 @@ class MyDocument extends Document {
           />
         </Head>
         <body>
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `(function(){try{var t=localStorage.getItem('miko-theme');var d=t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme:dark)').matches);document.documentElement.setAttribute('data-theme',d?'dark':'light')}catch(e){}})()`,
+            }}
+          />
           <Main />
           <NextScript />
         </body>

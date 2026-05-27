@@ -31,6 +31,11 @@
   --col-text: black;
   --col-line: rgba(0, 0, 0, 0.1);
   --col-focus: #ffc8dd;
+  --col-light: #f5f5f5;
+  --col-light-gray: #e0e0e0;
+  --col-active: #ffeef5;
+  --col-link: #d4619b;
+  --col-shadow: rgb(0 0 0 / 10%);
 
   /**
  * Spacing.
@@ -78,6 +83,27 @@
   --max-medium: "(max-width: 47.938em)" /* from 0 to 768px */;
   --max-large: "(max-width: 67.438em)" /* from 0 to 1080px */;
   --max-xlarge: "(max-width: 82.938em)"; /* from 0 to 1328px */
+}
+
+/**
+ * Dark theme.
+ */
+
+[data-theme="dark"] {
+  --col-bg: #1e1e2e;
+  --col-1: #ffacc7;
+  --col-white: #242444;
+  --col-gray: #8888a0;
+  --col-dark: #b0b0c0;
+  --col-black: #f0f0f0;
+  --col-text: #e8e8f0;
+  --col-line: rgba(255, 255, 255, 0.1);
+  --col-focus: #4a3050;
+  --col-light: #2a2a4a;
+  --col-light-gray: #333358;
+  --col-active: #3a2040;
+  --col-link: #ffacc7;
+  --col-shadow: rgb(0 0 0 / 30%);
 }
 
 /**
