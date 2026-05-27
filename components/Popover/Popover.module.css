@@ -1,0 +1,92 @@
+.outer {
+  position: relative;
+}
+
+.popover {
+  display: none;
+  position: absolute;
+  margin: var(--spacing-1) 0;
+  background-color: var(--col-white);
+  border: 1px solid var(--col-gray);
+  box-shadow: 0px 2px 30px rgb(0 0 0 / 10%);
+  border-radius: var(--border-radius);
+  z-index: 400;
+  overflow: hidden;
+}
+
+.popover.-visible {
+  display: block;
+}
+
+.popover.-hidden {
+  display: none;
+}
+
+.popover.-enter {
+  display: block;
+  animation: enter 0.4s cubic-bezier(0.19, 1, 0.22, 1) both;
+}
+
+.popover.-exit {
+  display: block;
+  animation: exit 0.3s cubic-bezier(0.86, 0, 0.4, 1) both;
+}
+
+/* Placement */
+
+.popover.-top {
+  bottom: 100%;
+}
+
+.popover.-bottom {
+  top: 100%;
+}
+
+.popover.-left {
+  left: 0;
+  transform-origin: top left;
+}
+
+.popover.-right {
+  right: 0;
+  transform-origin: top right;
+}
+
+.popover.-top.-left {
+  transform-origin: bottom left;
+}
+
+.popover.-top.-right {
+  transform-origin: bottom right;
+}
+
+/* Expanded state */
+
+.-expanded .inner {
+  position: relative;
+  z-index: 400;
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes exit {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}

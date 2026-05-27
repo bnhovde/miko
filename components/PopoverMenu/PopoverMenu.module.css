@@ -1,0 +1,58 @@
+.item {
+  display: block;
+}
+
+.item.-appear {
+  animation: slide-in 0.4s cubic-bezier(0.19, 1, 0.22, 1) both;
+}
+
+.item-button {
+  display: block;
+  width: 100%;
+  padding: var(--spacing-1) var(--spacing-4);
+  font-size: 1.6rem;
+  font-family: var(--font-family);
+  border: 0;
+  transition: background 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.item-button:hover {
+  background: var(--col-1);
+}
+
+.item-button[aria-selected='true'] {
+  position: relative;
+  background: var(--col-active);
+}
+
+.item-button[aria-selected='true']::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: var(--spacing-2);
+  background: var(--col-1);
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.list li:first-child .item-button {
+  padding-top: var(--spacing-3);
+}
+
+.list li:last-child .item-button {
+  padding-bottom: var(--spacing-3);
+}
+
+.item-button[disabled] {
+  cursor: not-allowed;
+  opacity: 0.2;
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-1.6rem);
+  }
+}
