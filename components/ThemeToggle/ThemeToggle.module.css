@@ -1,57 +1,32 @@
 .toggle {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
+  gap: 0;
   padding: 0;
   border: none;
   background: none;
   cursor: pointer;
 }
 
-.track {
-  position: relative;
+.badge {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  width: 4.8rem;
+  justify-content: center;
   height: 2.6rem;
-  padding: 0 0.4rem;
-  background: var(--col-light);
+  width: 2.6rem;
+  color: var(--col-text);
   border: 1px solid var(--col-line);
-  border-radius: 1.3rem;
-  transition: background 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+  border-radius: var(--border-radius) 0 0 var(--border-radius);
+  transition: all 0.1s cubic-bezier(0.7, 0, 0.2, 1);
 }
 
-.thumb {
-  position: absolute;
-  top: 0.2rem;
-  left: 0.2rem;
-  width: 2rem;
-  height: 2rem;
-  background: var(--col-bg);
-  border-radius: 50%;
-  box-shadow: 0 1px 3px var(--col-shadow);
-  transition: transform 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+.badge + .badge {
+  margin-left: -1px;
+  border-radius: 0 var(--border-radius) var(--border-radius) 0;
 }
 
-.track[data-dark="true"] .thumb {
-  transform: translateX(2.2rem);
-}
-
-.sun {
-  color: var(--col-dark);
-  transition: opacity 0.2s;
-}
-
-.moon {
-  color: var(--col-dark);
-  transition: opacity 0.2s;
-}
-
-.track[data-dark="true"] .sun {
-  opacity: 0.3;
-}
-
-.track[data-dark="false"] .moon {
-  opacity: 0.3;
+.badge[data-active="true"] {
+  border-color: var(--col-black);
+  background-color: var(--col-black);
+  color: var(--col-light);
 }
