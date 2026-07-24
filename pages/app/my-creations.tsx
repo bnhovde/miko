@@ -5,20 +5,22 @@ import Screen from "components/Screen";
 import Head from "next/head";
 import Main from "components/Main";
 import Footer from "components/Footer";
-import { useEffect, useState } from "react";
-import { getAll, remove } from "utils/localStorage";
+import { useEffect, useRef, useState } from "react";
+import { getAll, remove, set } from "utils/localStorage";
 import localStorageKeys from "constants/localStorageKeys";
 import { Sprite } from "types/sprite";
 import { Spritesheet } from "types/sheet";
 import { useRouter } from "next/router";
 import SpriteGrid from "components/SpriteGrid";
 import { encodeUrlSprite } from "utils/hash";
+import { svgToSprite } from "utils/svg";
 
 type Creation = (Sprite | Spritesheet) & { type: "sprite" | "sheet" };
 
 const Home: NextPage = () => {
   const router = useRouter();
   const [creations, setCreations] = useState<Creation[]>([]);
+  const importInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     // Load sprites
@@ -82,6 +84,28 @@ const Home: NextPage = () => {
     setCreations(creations.filter((item) => item.id !== id));
   };
 
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
+    const text = await file.text();
+    const name = file.name.replace(/\.svg$/i, "") || "Untitled";
+    const sprite = svgToSprite(text, name);
+
+    if (!sprite) {
+      window.alert("Couldn't import this SVG file.");
+      return;
+    }
+
+    set(`${localStorageKeys.SPRITE}-${sprite.id}`, JSON.stringify(sprite));
+    setCreations(
+      [...creations, { ...sprite, type: "sprite" as const }].sort((a, b) =>
+        a.name.localeCompare(b.name)
+      )
+    );
+  };
+
   return (
     <Screen scrolling>
       <Head>
@@ -106,6 +130,13 @@ const Home: NextPage = () => {
           onDelete={handleDelete}
         />
       </Main>
+      <input
+        ref={importInputRef}
+        type="file"
+        accept=".svg,image/svg+xml"
+        onChange={handleImportFile}
+        style={{ display: "none" }}
+      />
       <Footer
         shortcuts={[
           {
@@ -119,6 +150,12 @@ const Home: NextPage = () => {
             label: "Draw",
             hotKeys: "enter",
             onToggle: () => router.push("/app/editor/sprite"),
+          },
+          {
+            children: "I",
+            label: "Import SVG",
+            hotKeys: "i",
+            onToggle: () => importInputRef.current?.click(),
           },
         ]}
         action={{ text: "Draw!", url: "/app/editor/sprite" }}

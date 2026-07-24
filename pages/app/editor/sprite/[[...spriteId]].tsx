@@ -8,7 +8,8 @@ import Footer from "components/Footer";
 
 import EditorContext from "context/EditorContext";
 
-import { getDefaultHash, getRandomHash, getHashArray, encodeUrlSprite } from "utils/hash";
+import { getDefaultHash, getRandomHash, encodeUrlSprite } from "utils/hash";
+import { frameToSvg } from "utils/svg";
 import LZString from "utils/lz";
 // import dynamic from "next/dynamic";
 import { useContext, useEffect, useMemo, useState } from "react";
@@ -84,34 +85,7 @@ const Home: NextPage = () => {
   const onSaveSvg = () => {
     if (!state.spriteData) return;
     const sprite = state.spriteData;
-    const frame = sprite.frames[state.currentFrame];
-    const size = sprite.size || Math.sqrt(frame.length);
-    const hashArray = getHashArray(frame, sprite.palette);
-
-    type Rect = { x: number; y: number; width: number; height: number; hex: string };
-    const rectList: Rect[] = [];
-    const lastRect = new Map<string, Rect>();
-    for (let row = 0; row < size; row++) {
-      let col = 0;
-      while (col < size) {
-        const hex = hashArray[row * size + col];
-        if (!hex || (hex.length === 4 && hex[3] === "0")) { col++; continue; }
-        let width = 1;
-        while (col + width < size && hashArray[row * size + col + width] === hex) width++;
-        const key = `${col},${width},${hex}`;
-        const prev = lastRect.get(key);
-        if (prev && prev.y + prev.height === row) {
-          prev.height++;
-        } else {
-          const rect: Rect = { x: col, y: row, width, height: 1, hex };
-          rectList.push(rect);
-          lastRect.set(key, rect);
-        }
-        col += width;
-      }
-    }
-    const rects = rectList.map(r => `<rect x="${r.x}" y="${r.y}" width="${r.width}" height="${r.height}" fill="#${r.hex}"/>`);
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}"><style>rect { shape-rendering: crispEdges; }</style>${rects.join("")}</svg>`;
+    const svg = frameToSvg(sprite, state.currentFrame);
 
     const blob = new Blob([svg], { type: "image/svg+xml" });
     const url = URL.createObjectURL(blob);
