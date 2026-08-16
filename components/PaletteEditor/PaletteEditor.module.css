@@ -76,47 +76,21 @@
   border-radius: calc(var(--border-radius) - 1px);
 }
 
-.swatch-remove {
-  position: absolute;
-  top: -0.6rem;
-  right: -0.6rem;
-  width: 1.6rem;
-  height: 1.6rem;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2rem;
-  line-height: 1;
-  cursor: pointer;
-  color: var(--col-text);
-  background: var(--col-bg);
-  border: 1px solid var(--col-line);
-  border-radius: 50%;
-}
-
-.swatch:hover .swatch-remove,
-.swatch-remove:focus {
-  display: flex;
-}
-
-.swatch-remove[disabled] {
-  display: none;
-}
-
-.add {
+/* Colours that are always in the palette and cannot be changed */
+.locked {
+  display: block;
   width: 100%;
   height: 100%;
-  font-size: 1.8rem;
-  line-height: 1;
-  cursor: pointer;
-  color: var(--col-text);
-  background: var(--col-light);
-  border: 1px dashed var(--col-gray);
+  border: 1px solid var(--col-line);
   border-radius: var(--border-radius);
 }
 
-.add:hover {
-  border-color: var(--col-1);
+.locked.-transparent {
+  --checker-size: 1.2rem;
+  background-color: var(--col-bg);
+  background-image: var(--checkerboard);
+  background-size: var(--checker-size) var(--checker-size);
+  background-position: var(--checkerboard-position);
 }
 
 /* Actions */
@@ -190,7 +164,7 @@
   border-color: var(--col-1);
 }
 
-.saved-button[aria-selected="true"] {
+.saved-button[aria-current="true"] {
   background: var(--col-active);
 }
 

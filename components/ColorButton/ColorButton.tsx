@@ -29,6 +29,7 @@ const ColorButton: React.FC<Props> = ({
     <button
       className={buttonClass}
       style={{ background: `#${hex}` }}
+      aria-label={`Color #${hex}`}
       onClick={() => onClick && onClick(hex)}
     >
       <div className={styles.inner}>{hex}</div>

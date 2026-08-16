@@ -53,6 +53,26 @@
  * General.
  */
 
+  /* Checkerboard used to show transparency */
+  --col-checker: #e6e6e6;
+  --checker-size: 1.6rem;
+  --checkerboard: linear-gradient(
+      45deg,
+      var(--col-checker) 25%,
+      transparent 25%,
+      transparent 75%,
+      var(--col-checker) 75%
+    ),
+    linear-gradient(
+      45deg,
+      var(--col-checker) 25%,
+      transparent 25%,
+      transparent 75%,
+      var(--col-checker) 75%
+    );
+  --checkerboard-position: 0 0,
+    calc(var(--checker-size) / 2) calc(var(--checker-size) / 2);
+
   --transition: 0.1s cubic-bezier(0, 0, 0.3, 0.9);
   --border-radius: 0.7rem;
   --border-radius-card: 2rem;
@@ -104,6 +124,7 @@
   --col-active: #3a2040;
   --col-link: #ffacc7;
   --col-shadow: rgb(0 0 0 / 30%);
+  --col-checker: #2a2a3f;
 }
 
 /**

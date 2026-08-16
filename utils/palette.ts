@@ -11,6 +11,23 @@ import { defaultColors } from "data/palettes";
 export const TRANSPARENT = "fff0";
 
 /**
+ * Black and transparent are always part of a palette: they cannot be
+ * edited, removed or reordered.
+ */
+export const BLACK = "000";
+
+const LOCKED_COLORS = [TRANSPARENT, BLACK];
+
+export const isLockedColor = (hex: string): boolean =>
+  LOCKED_COLORS.includes(hex);
+
+/**
+ * How many paintable swatches a palette holds. Always exactly this many:
+ * transparent is not one of them, black is.
+ */
+export const MAX_COLORS = 10;
+
+/**
  * The built in palette. It ships with the app rather than living in
  * localStorage, so it can never be edited away or deleted.
  */
@@ -66,13 +83,25 @@ export const fromHexInput = (value: string): string => {
 };
 
 /**
- * Makes sure the transparent sentinel is present, and only once, as the
- * first item of a palette.
+ * Puts a palette into the shape the editor expects: the locked colours
+ * first, no duplicates, and always exactly MAX_COLORS paintable swatches.
+ * Short palettes are topped up from the built in colours.
  */
-export const withTransparent = (items: string[]): string[] => [
-  TRANSPARENT,
-  ...items.filter((item) => item !== TRANSPARENT),
-];
+export const normalisePalette = (items: string[]): string[] => {
+  const editable = items.filter(
+    (item, index) => !isLockedColor(item) && items.indexOf(item) === index
+  );
+
+  const padding = defaultColors.filter(
+    (color) => !isLockedColor(color) && !editable.includes(color)
+  );
+
+  return [
+    ...LOCKED_COLORS,
+    // The locked colours already cover one of the paintable slots
+    ...[...editable, ...padding].slice(0, MAX_COLORS - 1),
+  ];
+};
 
 /**
  * Storage
@@ -106,7 +135,7 @@ export const savePalette = (palette: Palette): Palette => {
   const saved: Palette = {
     ...palette,
     id: !palette.id || isDefaultPalette(palette.id) ? guid() : palette.id,
-    items: withTransparent(palette.items),
+    items: normalisePalette(palette.items),
   };
 
   set(storageKey(saved.id), JSON.stringify(saved));

@@ -20,9 +20,10 @@ import {
   defaultPalette,
   getActivePalette,
   isDefaultPalette,
+  isLockedColor,
+  normalisePalette,
   savePalette,
   setActivePalette,
-  withTransparent,
 } from "utils/palette";
 import guid from "utils/guid";
 import { insertAtIndex, moveToIndex } from "utils/array";
@@ -54,9 +55,7 @@ enum EditorActionTypes {
   REPLACE_PALETTE = "REPLACE_PALETTE",
   LOAD_PALETTE = "LOAD_PALETTE",
   RENAME_PALETTE = "RENAME_PALETTE",
-  ADD_COLOR = "ADD_COLOR",
   UPDATE_COLOR = "UPDATE_COLOR",
-  REMOVE_COLOR = "REMOVE_COLOR",
   REORDER_FRAMES = "REORDER_FRAMES",
   CHANGE_NAME = "CHANGE_NAME",
   UPDATE_PACKAGE = "UPDATE_PACKAGE",
@@ -313,7 +312,7 @@ export const uiReducer = (
         unsavedGrid: "",
       };
     case EditorActionTypes.REPLACE_PALETTE:
-      const replacedColors = withTransparent(
+      const replacedColors = normalisePalette(
         action.payload?.palette || defaultColors
       );
       return {
@@ -328,7 +327,7 @@ export const uiReducer = (
       };
 
     case EditorActionTypes.LOAD_PALETTE:
-      const loadedColors = withTransparent(
+      const loadedColors = normalisePalette(
         action.payload?.paletteData?.items || defaultColors
       );
       return {
@@ -349,29 +348,17 @@ export const uiReducer = (
           action.payload?.value || "Custom palette"
         ),
       };
-    case EditorActionTypes.ADD_COLOR:
-      const addedColor = action.payload?.value || "000";
-
-      // Ignore colours already in the palette
-      if (state.colors.includes(addedColor)) {
-        return { ...state, currentColor: addedColor };
-      }
-
-      return {
-        ...state,
-        ...persistPalette(
-          [...state.colors, addedColor],
-          detach(state).paletteId,
-          detach(state).paletteName
-        ),
-        currentColor: addedColor,
-      };
     case EditorActionTypes.UPDATE_COLOR:
       const updatedIndex = action.payload?.index ?? -1;
       const updatedColor = action.payload?.value || "000";
       const replacedColor = state.colors[updatedIndex];
 
-      if (updatedIndex < 0 || replacedColor === undefined) {
+      // Transparent and black are fixed
+      if (
+        updatedIndex < 0 ||
+        replacedColor === undefined ||
+        isLockedColor(replacedColor)
+      ) {
         return state;
       }
 
@@ -388,35 +375,6 @@ export const uiReducer = (
         currentColor:
           state.currentColor === replacedColor
             ? updatedColor
-            : state.currentColor,
-      };
-    case EditorActionTypes.REMOVE_COLOR:
-      const removedIndex = action.payload?.index ?? -1;
-      const removedColor = state.colors[removedIndex];
-
-      // The transparent sentinel has to stay in the palette
-      if (removedIndex < 0 || removedColor === undefined) {
-        return state;
-      }
-
-      if (removedColor === TRANSPARENT) {
-        return state;
-      }
-
-      const remainingColors = state.colors.filter(
-        (_color, index) => index !== removedIndex
-      );
-
-      return {
-        ...state,
-        ...persistPalette(
-          remainingColors,
-          detach(state).paletteId,
-          detach(state).paletteName
-        ),
-        currentColor:
-          state.currentColor === removedColor
-            ? firstVisibleColor(remainingColors)
             : state.currentColor,
       };
     case EditorActionTypes.REORDER_FRAMES:
@@ -707,9 +665,7 @@ type ContextProps = {
   onReplacePalette: (newPalette: string[], name?: string) => void;
   onLoadPalette: (palette: Palette) => void;
   onRenamePalette: (newName: string) => void;
-  onAddColor: (hex: string) => void;
   onUpdateColor: (index: number, hex: string) => void;
-  onRemoveColor: (index: number) => void;
   onSavePalette: (name?: string, asNew?: boolean) => Palette | undefined;
   onReorderFrames: (oldIndex: number, newIndex: number) => void;
   onChangeSprite: (newSprite: Sprite) => void;
@@ -766,9 +722,7 @@ const initialState: ContextProps = {
   onReplacePalette: () => null,
   onLoadPalette: () => null,
   onRenamePalette: () => null,
-  onAddColor: () => null,
   onUpdateColor: () => null,
-  onRemoveColor: () => null,
   onSavePalette: () => undefined,
   onReorderFrames: () => null,
   onChangeName: () => null,
@@ -1134,30 +1088,12 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
     });
   };
 
-  const onAddColor = (hex: string) => {
-    dispatch({
-      type: EditorActionTypes.ADD_COLOR,
-      payload: {
-        value: hex,
-      },
-    });
-  };
-
   const onUpdateColor = (index: number, hex: string) => {
     dispatch({
       type: EditorActionTypes.UPDATE_COLOR,
       payload: {
         index,
         value: hex,
-      },
-    });
-  };
-
-  const onRemoveColor = (index: number) => {
-    dispatch({
-      type: EditorActionTypes.REMOVE_COLOR,
-      payload: {
-        index,
       },
     });
   };
@@ -1325,9 +1261,7 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
         onReplacePalette,
         onLoadPalette,
         onRenamePalette,
-        onAddColor,
         onUpdateColor,
-        onRemoveColor,
         onSavePalette,
         onReorderFrames,
         onChangeName,

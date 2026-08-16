@@ -5,11 +5,13 @@ import EditorContext from "context/EditorContext";
 import { Palette as PaletteType } from "types/palette";
 import ColorUtils from "utils/colors";
 import {
+  MAX_COLORS,
   TRANSPARENT,
   deletePalette,
   fromHexInput,
   getPalettes,
   isDefaultPalette,
+  isLockedColor,
   toHexInput,
 } from "utils/palette";
 
@@ -23,9 +25,7 @@ type Props = {
 const PaletteEditor: React.FC<Props> = ({ isOpen, onClose }) => {
   const {
     state,
-    onAddColor,
     onUpdateColor,
-    onRemoveColor,
     onRenamePalette,
     onReplacePalette,
     onLoadPalette,
@@ -42,8 +42,9 @@ const PaletteEditor: React.FC<Props> = ({ isOpen, onClose }) => {
   }, [isOpen]);
 
   const handleRandomize = () => {
+    // Black and white are added back below, so leave room for them
     const newColors = ColorUtils.randomHexColors({
-      numColors: 8,
+      numColors: MAX_COLORS - 2,
       hRange: undefined,
       sRange: [0, 0.6],
     }) as string[];
@@ -72,10 +73,7 @@ const PaletteEditor: React.FC<Props> = ({ isOpen, onClose }) => {
   // The built in palette can be copied, but never overwritten or deleted
   const isBuiltIn = isDefaultPalette(state.paletteId);
 
-  // The transparent sentinel is not a swatch the user can edit
-  const swatches = state.colors
-    .map((hex, index) => ({ hex, index }))
-    .filter(({ hex }) => hex !== TRANSPARENT);
+  const swatches = state.colors.map((hex, index) => ({ hex, index }));
 
   return (
     <Popover
@@ -98,38 +96,38 @@ const PaletteEditor: React.FC<Props> = ({ isOpen, onClose }) => {
         <div className={styles.section}>
           <p className="label">Colors</p>
           <ul className={styles.swatches}>
-            {swatches.map(({ hex, index }) => (
-              <li key={index} className={styles.swatch}>
-                <input
-                  className={styles["swatch-input"]}
-                  type="color"
-                  value={toHexInput(hex)}
-                  aria-label={`Color #${hex}`}
-                  onChange={(event) =>
-                    onUpdateColor(index, fromHexInput(event.target.value))
-                  }
-                />
-                <button
-                  className={styles["swatch-remove"]}
-                  type="button"
-                  aria-label={`Remove color #${hex}`}
-                  disabled={swatches.length < 2}
-                  onClick={() => onRemoveColor(index)}
-                >
-                  ×
-                </button>
-              </li>
-            ))}
-            <li className={styles.swatch}>
-              <button
-                className={styles.add}
-                type="button"
-                aria-label="Add color"
-                onClick={() => onAddColor("808080")}
-              >
-                +
-              </button>
-            </li>
+            {swatches.map(({ hex, index }) =>
+              // Transparent and black are always in the palette
+              isLockedColor(hex) ? (
+                <li key={index} className={styles.swatch}>
+                  <span
+                    className={`${styles.locked} ${
+                      hex === TRANSPARENT ? styles["-transparent"] : ""
+                    }`}
+                    style={
+                      hex === TRANSPARENT ? undefined : { background: `#${hex}` }
+                    }
+                    title={
+                      hex === TRANSPARENT
+                        ? "Transparent (always available)"
+                        : "Black (always available)"
+                    }
+                  />
+                </li>
+              ) : (
+                <li key={index} className={styles.swatch}>
+                  <input
+                    className={styles["swatch-input"]}
+                    type="color"
+                    value={toHexInput(hex)}
+                    aria-label={`Color #${hex}`}
+                    onChange={(event) =>
+                      onUpdateColor(index, fromHexInput(event.target.value))
+                    }
+                  />
+                </li>
+              )
+            )}
           </ul>
         </div>
 
@@ -168,13 +166,13 @@ const PaletteEditor: React.FC<Props> = ({ isOpen, onClose }) => {
                   <button
                     className={styles["saved-button"]}
                     type="button"
-                    aria-selected={palette.id === state.paletteId || undefined}
+                    aria-current={palette.id === state.paletteId || undefined}
                     onClick={() => handleLoad(palette)}
                   >
                     <span className={styles["saved-preview"]}>
                       {palette.items
                         .filter((hex) => hex !== TRANSPARENT)
-                        .slice(0, 8)
+                        .slice(0, MAX_COLORS)
                         .map((hex, index) => (
                           <span
                             key={index}

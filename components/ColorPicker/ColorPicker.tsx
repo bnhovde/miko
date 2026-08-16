@@ -18,7 +18,7 @@ const ColorPicker: React.FC = () => {
       </p>
       <ul className={styles.items}>
         {state.colors
-          ?.filter((c) => c !== TRANSPARENT)
+          ?.filter((color) => color !== TRANSPARENT)
           .map((color, index) => (
             <li key={index} className={styles.item}>
               <ColorButton
