@@ -14,6 +14,17 @@ import {
 import { InputEvent } from "types/input";
 import { Sprite } from "types/sprite";
 import { defaultColors } from "data/palettes";
+import { Palette } from "types/palette";
+import {
+  TRANSPARENT,
+  defaultPalette,
+  getActivePalette,
+  isDefaultPalette,
+  savePalette,
+  setActivePalette,
+  withTransparent,
+} from "utils/palette";
+import guid from "utils/guid";
 import { insertAtIndex, moveToIndex } from "utils/array";
 import { Spritesheet, SpritesheetItem } from "types/sheet";
 import { SpritePackage } from "types/package";
@@ -41,6 +52,11 @@ enum EditorActionTypes {
   COMMIT_DRAWING = "COMMIT_DRAWING",
   COMMIT_DRAWING_SHEET = "COMMIT_DRAWING_SHEET",
   REPLACE_PALETTE = "REPLACE_PALETTE",
+  LOAD_PALETTE = "LOAD_PALETTE",
+  RENAME_PALETTE = "RENAME_PALETTE",
+  ADD_COLOR = "ADD_COLOR",
+  UPDATE_COLOR = "UPDATE_COLOR",
+  REMOVE_COLOR = "REMOVE_COLOR",
   REORDER_FRAMES = "REORDER_FRAMES",
   CHANGE_NAME = "CHANGE_NAME",
   UPDATE_PACKAGE = "UPDATE_PACKAGE",
@@ -65,6 +81,7 @@ type UiActionPayload = {
   sprites?: Sprite[];
   spritesheet?: Spritesheet;
   spritePackage?: SpritePackage;
+  paletteData?: Palette;
   viewMode?: ViewMode;
 };
 
@@ -72,6 +89,62 @@ type UiAction = {
   type: EditorActionTypes;
   payload?: UiActionPayload;
 };
+
+/**
+ * The first colour that is actually paintable, used whenever the selected
+ * swatch disappears from under the user.
+ */
+const firstVisibleColor = (colors: string[]): string =>
+  colors.find((color) => color !== TRANSPARENT) || "000";
+
+/**
+ * Stores the working palette so it survives a reload, and returns the
+ * palette part of the new state.
+ */
+const persistPalette = (
+  colors: string[],
+  paletteId: string | undefined,
+  paletteName: string
+) => {
+  setActivePalette({
+    id: paletteId || "",
+    name: paletteName,
+    items: colors,
+  });
+
+  return { colors, paletteId, paletteName };
+};
+
+/**
+ * The built in palette cannot be edited, so changing its colours turns the
+ * working palette into an unsaved custom one.
+ */
+const detach = (state: EditorState) => ({
+  paletteId: isDefaultPalette(state.paletteId) ? undefined : state.paletteId,
+  paletteName: isDefaultPalette(state.paletteId)
+    ? "Custom palette"
+    : state.paletteName,
+});
+
+/**
+ * Keeps painting with the selected colour when the new palette still holds
+ * it, otherwise falls back to the first paintable swatch.
+ */
+const keepOrResetColor = (colors: string[], currentColor: string): string =>
+  colors.includes(currentColor) && currentColor !== TRANSPARENT
+    ? currentColor
+    : firstVisibleColor(colors);
+
+/**
+ * The palette belongs to the editor rather than to a single sprite, so it
+ * survives loading another sprite, sheet or package.
+ */
+const keepPalette = (state: EditorState) => ({
+  colors: state.colors,
+  paletteId: state.paletteId,
+  paletteName: state.paletteName,
+  currentColor: state.currentColor,
+});
 
 /**
  * Reducer
@@ -85,6 +158,7 @@ export const uiReducer = (
     case EditorActionTypes.INIT_SPRITE:
       return {
         ...initialState.state,
+        ...keepPalette(state),
         spriteData: action.payload?.sprite,
         currentHash: action.payload?.sprite?.frames[0] || "",
       };
@@ -239,10 +313,111 @@ export const uiReducer = (
         unsavedGrid: "",
       };
     case EditorActionTypes.REPLACE_PALETTE:
+      const replacedColors = withTransparent(
+        action.payload?.palette || defaultColors
+      );
       return {
         ...state,
-        colors: action.payload?.palette || defaultColors,
-        currentColor: "000",
+        // A generated palette is no longer tied to a saved one
+        ...persistPalette(
+          replacedColors,
+          undefined,
+          action.payload?.value || "Custom palette"
+        ),
+        currentColor: firstVisibleColor(replacedColors),
+      };
+
+    case EditorActionTypes.LOAD_PALETTE:
+      const loadedColors = withTransparent(
+        action.payload?.paletteData?.items || defaultColors
+      );
+      return {
+        ...state,
+        ...persistPalette(
+          loadedColors,
+          action.payload?.paletteData?.id,
+          action.payload?.paletteData?.name || "Custom palette"
+        ),
+        currentColor: keepOrResetColor(loadedColors, state.currentColor),
+      };
+    case EditorActionTypes.RENAME_PALETTE:
+      return {
+        ...state,
+        ...persistPalette(
+          state.colors,
+          detach(state).paletteId,
+          action.payload?.value || "Custom palette"
+        ),
+      };
+    case EditorActionTypes.ADD_COLOR:
+      const addedColor = action.payload?.value || "000";
+
+      // Ignore colours already in the palette
+      if (state.colors.includes(addedColor)) {
+        return { ...state, currentColor: addedColor };
+      }
+
+      return {
+        ...state,
+        ...persistPalette(
+          [...state.colors, addedColor],
+          detach(state).paletteId,
+          detach(state).paletteName
+        ),
+        currentColor: addedColor,
+      };
+    case EditorActionTypes.UPDATE_COLOR:
+      const updatedIndex = action.payload?.index ?? -1;
+      const updatedColor = action.payload?.value || "000";
+      const replacedColor = state.colors[updatedIndex];
+
+      if (updatedIndex < 0 || replacedColor === undefined) {
+        return state;
+      }
+
+      return {
+        ...state,
+        ...persistPalette(
+          state.colors.map((color, index) =>
+            index === updatedIndex ? updatedColor : color
+          ),
+          detach(state).paletteId,
+          detach(state).paletteName
+        ),
+        // Keep painting with the swatch that was just edited
+        currentColor:
+          state.currentColor === replacedColor
+            ? updatedColor
+            : state.currentColor,
+      };
+    case EditorActionTypes.REMOVE_COLOR:
+      const removedIndex = action.payload?.index ?? -1;
+      const removedColor = state.colors[removedIndex];
+
+      // The transparent sentinel has to stay in the palette
+      if (removedIndex < 0 || removedColor === undefined) {
+        return state;
+      }
+
+      if (removedColor === TRANSPARENT) {
+        return state;
+      }
+
+      const remainingColors = state.colors.filter(
+        (_color, index) => index !== removedIndex
+      );
+
+      return {
+        ...state,
+        ...persistPalette(
+          remainingColors,
+          detach(state).paletteId,
+          detach(state).paletteName
+        ),
+        currentColor:
+          state.currentColor === removedColor
+            ? firstVisibleColor(remainingColors)
+            : state.currentColor,
       };
     case EditorActionTypes.REORDER_FRAMES:
       const newIndex =
@@ -288,6 +463,7 @@ export const uiReducer = (
       const spriteData = action.payload?.spritesheet?.sprites?.[0];
       return {
         ...initialState.state,
+        ...keepPalette(state),
         spriteData: spriteData,
         sheetData: action.payload?.spritesheet,
         currentHash: spriteData?.frames[0] || "",
@@ -296,6 +472,7 @@ export const uiReducer = (
     case EditorActionTypes.INIT_PACKAGE:
       return {
         ...initialState.state,
+        ...keepPalette(state),
         packageData: action.payload?.spritePackage,
       };
     case EditorActionTypes.UPDATE_PACKAGE:
@@ -527,7 +704,13 @@ type ContextProps = {
   onDrawEnd: (e: InputEvent) => void;
   onDrawChange: (frameIndex: number, isFirstClick?: boolean) => void;
   onDrawChangeSheet: (frameIndex: number, isFirstClick?: boolean) => void;
-  onReplacePalette: (newPalette: string[]) => void;
+  onReplacePalette: (newPalette: string[], name?: string) => void;
+  onLoadPalette: (palette: Palette) => void;
+  onRenamePalette: (newName: string) => void;
+  onAddColor: (hex: string) => void;
+  onUpdateColor: (index: number, hex: string) => void;
+  onRemoveColor: (index: number) => void;
+  onSavePalette: (name?: string, asNew?: boolean) => Palette | undefined;
   onReorderFrames: (oldIndex: number, newIndex: number) => void;
   onChangeSprite: (newSprite: Sprite) => void;
   onChangeName: (newName: string) => void;
@@ -545,7 +728,9 @@ const initialState: ContextProps = {
     debug: false,
     spriteData: undefined,
     sheetData: undefined,
-    colors: defaultColors,
+    colors: defaultPalette.items,
+    paletteId: defaultPalette.id,
+    paletteName: defaultPalette.name,
     isDrawingSprite: false,
     isDrawingSheet: false,
     currentFrame: 0,
@@ -579,6 +764,12 @@ const initialState: ContextProps = {
   onDrawChangeSheet: () => null,
   onDrawEnd: () => null,
   onReplacePalette: () => null,
+  onLoadPalette: () => null,
+  onRenamePalette: () => null,
+  onAddColor: () => null,
+  onUpdateColor: () => null,
+  onRemoveColor: () => null,
+  onSavePalette: () => undefined,
   onReorderFrames: () => null,
   onChangeName: () => null,
   onChangeSize: () => null,
@@ -610,6 +801,20 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
       (window as any).state = state;
     }
   }, [state]);
+
+  // Restore the palette that was last used in the editor
+  useEffect(() => {
+    const palette = getActivePalette();
+
+    if (palette) {
+      dispatch({
+        type: EditorActionTypes.LOAD_PALETTE,
+        payload: {
+          paletteData: palette,
+        },
+      });
+    }
+  }, []);
 
   const getCurrentFrameHash = () => {
     return state.spriteData?.frames[state.currentFrame] || getDefaultHash();
@@ -901,13 +1106,82 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
     }
   };
 
-  const onReplacePalette = (newPalette: string[]) => {
+  const onReplacePalette = (newPalette: string[], name?: string) => {
     dispatch({
       type: EditorActionTypes.REPLACE_PALETTE,
       payload: {
         palette: newPalette,
+        value: name,
       },
     });
+  };
+
+  const onLoadPalette = (palette: Palette) => {
+    dispatch({
+      type: EditorActionTypes.LOAD_PALETTE,
+      payload: {
+        paletteData: palette,
+      },
+    });
+  };
+
+  const onRenamePalette = (newName: string) => {
+    dispatch({
+      type: EditorActionTypes.RENAME_PALETTE,
+      payload: {
+        value: newName,
+      },
+    });
+  };
+
+  const onAddColor = (hex: string) => {
+    dispatch({
+      type: EditorActionTypes.ADD_COLOR,
+      payload: {
+        value: hex,
+      },
+    });
+  };
+
+  const onUpdateColor = (index: number, hex: string) => {
+    dispatch({
+      type: EditorActionTypes.UPDATE_COLOR,
+      payload: {
+        index,
+        value: hex,
+      },
+    });
+  };
+
+  const onRemoveColor = (index: number) => {
+    dispatch({
+      type: EditorActionTypes.REMOVE_COLOR,
+      payload: {
+        index,
+      },
+    });
+  };
+
+  /**
+   * Persists the palette currently in the editor. Without `asNew` an already
+   * saved palette is updated in place, otherwise a copy is created.
+   */
+  const onSavePalette = (name?: string, asNew?: boolean) => {
+    const paletteName = (name || state.paletteName || "").trim();
+    const palette = savePalette({
+      id: asNew || !state.paletteId ? guid() : state.paletteId,
+      name: paletteName || "Untitled palette",
+      items: state.colors,
+    });
+
+    dispatch({
+      type: EditorActionTypes.LOAD_PALETTE,
+      payload: {
+        paletteData: palette,
+      },
+    });
+
+    return palette;
   };
 
   const onReorderFrames = (oldIndex: number, newIndex: number) => {
@@ -1049,6 +1323,12 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
         onDrawChangeSheet,
         onDrawEnd,
         onReplacePalette,
+        onLoadPalette,
+        onRenamePalette,
+        onAddColor,
+        onUpdateColor,
+        onRemoveColor,
+        onSavePalette,
         onReorderFrames,
         onChangeName,
         onChangeSize,

@@ -1,32 +1,24 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import ColorButton from "components/ColorButton";
 
 import styles from "./ColorPicker.module.css";
 import EditorContext from "context/EditorContext";
 import Shortcut from "components/Shortcut";
-import Palette from "utils/colors";
+import PaletteEditor from "components/PaletteEditor";
+import { TRANSPARENT } from "utils/palette";
 
 const ColorPicker: React.FC = () => {
-  const { state, onSelectColor, onReplacePalette } = useContext(EditorContext);
-
-  const onNewPalette = () => {
-    const newPalette = Palette.randomHexColors({
-      numColors: 8,
-      hRange: undefined,
-      sRange: [0, 0.6],
-    }) as string[];
-
-    onReplacePalette(["fff0", "000", "fff", ...newPalette]);
-  };
+  const { state, onSelectColor } = useContext(EditorContext);
+  const [isEditing, setIsEditing] = useState(false);
 
   return (
     <div className={styles.wrapper}>
       <p className="label" data-desktop>
-        Palette
+        {state.paletteName || "Palette"}
       </p>
       <ul className={styles.items}>
         {state.colors
-          ?.filter((c) => c !== "fff0")
+          ?.filter((c) => c !== TRANSPARENT)
           .map((color, index) => (
             <li key={index} className={styles.item}>
               <ColorButton
@@ -38,9 +30,15 @@ const ColorPicker: React.FC = () => {
           ))}
       </ul>
       <div className={styles.footer}>
-        <Shortcut label="randomize" hotKeys="cmd+c" onToggle={onNewPalette}>
+        <Shortcut
+          label="edit palette"
+          hotKeys="cmd+c"
+          isActive={isEditing}
+          onToggle={() => setIsEditing(!isEditing)}
+        >
           ⌘ + C
         </Shortcut>
+        <PaletteEditor isOpen={isEditing} onClose={() => setIsEditing(false)} />
       </div>
     </div>
   );

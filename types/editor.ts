@@ -10,6 +10,8 @@ export type EditorState = {
   sheetData?: Spritesheet;
   packageData?: SpritePackage;
   colors: string[];
+  paletteId?: string;
+  paletteName: string;
   undoHistory: string[];
   isDrawingSprite: boolean;
   isDrawingSheet: boolean;
