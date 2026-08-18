@@ -110,9 +110,14 @@ npm test
 npm run build   # esbuild bundle + tsc declarations -> dist/
 ```
 
-Note that `react` and `@types/react` are deliberately absent from
-`devDependencies`. React is a peer dependency, and a second copy of either
-the runtime or its types breaks hook identity and JSX type identity for the
-host app. This package is developed inside the [miko](https://github.com/bnhovde/miko)
-repo, where both come from the root install; the build marks `react`
-external and the tests are pure functions, so nothing here needs its own.
+Note that `react` itself is deliberately absent from `devDependencies` — it
+is a peer dependency, and a second copy of the runtime breaks hook identity
+for the host app. The build marks it external and the tests are pure
+functions, so nothing here needs its own; npm installs the peer for you.
+
+`@types/react` **is** a devDependency, because `tsc` cannot typecheck or emit
+declarations without it, but it is pinned to an exact version rather than a
+range. This package is developed inside the [miko](https://github.com/bnhovde/miko)
+repo, and a *different* version here would put two React type identities in
+one program and break the host app's build. Keep the pin in step with the
+app's `@types/react` when either moves.
