@@ -1,9 +1,17 @@
 import { Sprite, URLSprite } from "types/sprite";
-import { diffStrings } from "./string";
 import { SpritesheetItem } from "types/sheet";
 
-export const getRandomColor = () =>
-  `${Math.floor(Math.random() * 16777215).toString(16)}`;
+// The pixel-hash primitives live in @boxworld/miko now — the same code the
+// published editor runs on, so there is one implementation of flood fill,
+// hash expansion and palette generation rather than a copy here that can
+// drift. What stays in this file is the part the package has no opinion
+// about: this app's URL encoding and its spritesheet grid.
+import {
+  floodFill,
+  getHashArray,
+  getRandomPalette,
+  getDefaultHash as getDefaultHashOfSize,
+} from "@boxworld/miko";
 
 const getRandomHash = (gridSize?: number): string => {
   const cellCount = (gridSize || 11) * (gridSize || 11);
@@ -16,36 +24,10 @@ const getRandomHash = (gridSize?: number): string => {
   return `${cells.join("")}`;
 };
 
-const getRandomPalette = (): string[] => {
-  return [
-    "fff0",
-    "fff",
-    "000",
-    getRandomColor(),
-    getRandomColor(),
-    getRandomColor(),
-    getRandomColor(),
-    getRandomColor(),
-    getRandomColor(),
-  ];
-};
-
-const getDefaultHash = (gridSize?: number): string => {
-  const cellCount = (gridSize || 11) * (gridSize || 11);
-  const cells = new Array(cellCount + 1).join("a");
-  return cells;
-};
-
-const getHashArray = (hash: string, colors: string[]): string[] => {
-  const results = [];
-
-  for (var i = 0; i < hash.length; i++) {
-    const colorIndex = hash.charCodeAt(i) - 97;
-    results.push(colors[colorIndex]);
-  }
-
-  return results;
-};
+/** The package requires a size; almost every call site here relies on the
+ *  editor's default 11x11 grid, so the optional form is kept as a wrapper. */
+const getDefaultHash = (gridSize?: number): string =>
+  getDefaultHashOfSize(gridSize || 11);
 
 const decodeUrlSprite = (urlSprite: URLSprite): Sprite => {
   const { n, v, a, s, d, p, f } = urlSprite;
@@ -143,42 +125,6 @@ const encodeUrlSprite = (sprite: Sprite): URLSprite => {
   };
 };
 
-const updateHash = (
-  pixelIndex: number,
-  hash: string,
-  spritePalette: string[],
-  newColor: string,
-  selectedTool: string
-) => {
-  const isErasing = selectedTool === "eraser";
-  const isFilling = selectedTool === "fill";
-
-  let newHash = "";
-  const newPalette = [...spritePalette];
-
-  // Add new color if not existing
-  if (newPalette.indexOf(newColor) === -1) {
-    newPalette.push(newColor);
-  }
-
-  const newColorChar = isErasing
-    ? String.fromCharCode(newPalette.indexOf("fff0") + 97)
-    : String.fromCharCode(newPalette.indexOf(newColor) + 97);
-
-  // Handle fill tool with flood fill algorithm
-  if (isFilling) {
-    const gridSize = Math.sqrt(hash.length);
-    newHash = floodFill(hash, pixelIndex, newColorChar, gridSize);
-  } else {
-    // Update single pixel at index (pencil/eraser)
-    for (var i = 0; i < hash.length; i++) {
-      newHash += i === pixelIndex ? newColorChar : hash.charAt(i);
-    }
-  }
-
-  return { newHash, newPalette };
-};
-
 const updateHashSheet = (
   pixelIndex: number,
   hash: string,
@@ -260,121 +206,12 @@ const updateHashSheet = (
   return { newHash, newGrid: [newGridStringUpdated], newItems, newSprites };
 };
 
-const optimiseFrames = (frames: string[], spritePalette: string[]) => {
-  const newPalette = [...spritePalette] as string[];
-
-  const allColors = frames.reduce(
-    (sum, frame) => [...sum, ...getHashArray(frame, spritePalette)],
-    [] as string[]
-  );
-
-  // Sort palette by use
-  newPalette.sort((a, b) => {
-    const aCount = allColors.filter((c) => c === a).length;
-    const bCount = allColors.filter((c) => c === b).length;
-    return bCount - aCount;
-  });
-
-  const newFrames = frames.map((frame) => {
-    let newFrameHash = "";
-    for (var i = 0; i < frame.length; i++) {
-      const oldColorIndex = frame.charCodeAt(i) - 97;
-      const oldColor = spritePalette[oldColorIndex];
-      const newColorIndex = newPalette.indexOf(oldColor);
-      const newCharacter = String.fromCharCode(newColorIndex + 97);
-
-      newFrameHash += newCharacter;
-    }
-    return newFrameHash;
-  });
-
-  return { newFrames, newPalette };
-};
-
-/**
- * Flood fill algorithm for sprite pixels
- * @param hash - The current hash string representing the sprite
- * @param pixelIndex - The starting pixel index to fill from
- * @param newColorChar - The new color character to fill with
- * @param gridSize - The size of the grid (default 11x11 = 121 pixels)
- * @returns The new hash string with flood fill applied
- */
-const floodFill = (
-  hash: string,
-  pixelIndex: number,
-  newColorChar: string,
-  gridSize: number = 11
-): string => {
-  const targetChar = hash.charAt(pixelIndex);
-
-  // If the newColor is same as the existing, return the original hash
-  if (targetChar === newColorChar) {
-    return hash;
-  }
-
-  // Convert hash string to array for easier manipulation
-  const pixels = hash.split("");
-  const totalPixels = gridSize * gridSize;
-
-  // BFS queue for flood fill
-  const queue: number[] = [pixelIndex];
-  const visited = new Set<number>();
-
-  while (queue.length > 0) {
-    const currentIndex = queue.shift()!;
-
-    // Skip if already visited or out of bounds
-    if (
-      visited.has(currentIndex) ||
-      currentIndex < 0 ||
-      currentIndex >= totalPixels
-    ) {
-      continue;
-    }
-
-    // Skip if not the target color
-    if (pixels[currentIndex] !== targetChar) {
-      continue;
-    }
-
-    // Mark as visited and fill
-    visited.add(currentIndex);
-    pixels[currentIndex] = newColorChar;
-
-    // Get row and column
-    const row = Math.floor(currentIndex / gridSize);
-    const col = currentIndex % gridSize;
-
-    // Add neighbors (up, down, left, right)
-    // Up
-    if (row > 0) {
-      queue.push(currentIndex - gridSize);
-    }
-    // Down
-    if (row < gridSize - 1) {
-      queue.push(currentIndex + gridSize);
-    }
-    // Left
-    if (col > 0) {
-      queue.push(currentIndex - 1);
-    }
-    // Right
-    if (col < gridSize - 1) {
-      queue.push(currentIndex + 1);
-    }
-  }
-
-  return pixels.join("");
-};
-
 export {
   getDefaultHash,
   getRandomHash,
   getRandomPalette,
   getHashArray,
-  updateHash,
   updateHashSheet,
   encodeUrlSprite,
   decodeUrlSprite,
-  optimiseFrames,
 };

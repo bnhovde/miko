@@ -2,13 +2,18 @@
   "name": "miko",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "package"
+  ],
   "scripts": {
     "dev": "next dev",
+    "prebuild": "npm run build -w @boxworld/miko",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
+    "@boxworld/miko": "*",
     "firebase": "^9.8.3",
     "html2canvas": "^1.4.1",
     "next": "12.1.6",

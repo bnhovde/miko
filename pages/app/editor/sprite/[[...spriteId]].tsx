@@ -18,6 +18,7 @@ import Editor from "components/Editor";
 import sprites from "data/sprite";
 import guid from "utils/guid";
 import Router, { useRouter } from "next/router";
+import { useHotkeys } from "react-hotkeys-hook";
 import { get } from "utils/localStorage";
 import localStorageKeys from "constants/localStorageKeys";
 import { Sprite } from "types/sprite";
@@ -33,6 +34,10 @@ const Home: NextPage = () => {
     onChangeFrame,
     onAddFrame,
     onDeleteFrame,
+    onUndo,
+    onRedo,
+    canUndo,
+    canRedo,
   } = useContext(EditorContext);
 
   const spriteId = useMemo(() => {
@@ -72,6 +77,9 @@ const Home: NextPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [spriteId]);
 
+  const onDeleteCurrentFrame = () =>
+    state.spriteData?.frames && onDeleteFrame(state.currentFrame);
+
   const onShare = () => {
     if (state.spriteData) {
       const urlSprite = encodeUrlSprite(state.spriteData);
@@ -95,6 +103,19 @@ const Home: NextPage = () => {
     a.click();
     URL.revokeObjectURL(url);
   };
+
+  // Delete and Save SVG live in the Actions menu now. Their shortcuts used
+  // to be registered by the inline Shortcut buttons that rendered them, so
+  // they have to be bound here to keep working.
+  useHotkeys("cmd+e", (event) => {
+    event.preventDefault();
+    onDeleteCurrentFrame();
+  });
+
+  useHotkeys("cmd+s", (event) => {
+    event.preventDefault();
+    onSaveSvg();
+  });
 
   return (
     <div
@@ -132,10 +153,61 @@ const Home: NextPage = () => {
             text: "Share",
             onClick: () => onShare(),
           }}
+          actions={[
+            {
+              label: "Add blank frame  ⌘A",
+              onClick: () =>
+                state.spriteData?.frames && onAddFrame(state.currentFrame),
+            },
+            {
+              label: "Duplicate frame  ⌘D",
+              onClick: () =>
+                onAddFrame(
+                  state.currentFrame,
+                  state.spriteData?.frames[state.currentFrame]
+                ),
+            },
+            {
+              label: "Delete frame  ⌘E",
+              disabled:
+                state.spriteData && state.spriteData.frames.length < 2,
+              onClick: () => onDeleteCurrentFrame(),
+            },
+            {
+              label: "Previous frame  ←",
+              disabled: state.currentFrame === 0,
+              onClick: () => onChangeFrame(state.currentFrame - 1),
+            },
+            {
+              label: "Next frame  →",
+              disabled:
+                state.spriteData &&
+                state.currentFrame === state.spriteData.frames.length - 1,
+              onClick: () => onChangeFrame(state.currentFrame + 1),
+            },
+            {
+              label: "Undo  ⌘Z",
+              disabled: !canUndo,
+              onClick: () => onUndo(),
+            },
+            {
+              label: "Redo  ⌘⇧Z",
+              disabled: !canRedo,
+              onClick: () => onRedo(),
+            },
+            {
+              label: "Save as SVG  ⌘S",
+              onClick: () => onSaveSvg(),
+            },
+            {
+              label: "Share",
+              onClick: () => onShare(),
+            },
+          ]}
           shortcuts={[
             {
               children: "←",
-              label: "Previous",
+              label: "Prev",
               hotKeys: "left",
               disabled: state.currentFrame === 0,
               onToggle: () => onChangeFrame(state.currentFrame - 1),
@@ -167,17 +239,18 @@ const Home: NextPage = () => {
                 ),
             },
             {
-              children: "⌘ + E",
-              label: "Delete",
-              hotKeys: "cmd+e",
-              onToggle: () =>
-                state.spriteData?.frames && onDeleteFrame(state.currentFrame),
+              children: "⌘ + Z",
+              label: "Undo",
+              hotKeys: "cmd+z",
+              disabled: !canUndo,
+              onToggle: () => onUndo(),
             },
             {
-              children: "⌘ + S",
-              label: "Save SVG",
-              hotKeys: "cmd+s",
-              onToggle: () => onSaveSvg(),
+              children: "⌘ + ⇧ + Z",
+              label: "Redo",
+              hotKeys: "cmd+shift+z",
+              disabled: !canRedo,
+              onToggle: () => onRedo(),
             },
             // {
             //   children: "⇧ + ←",

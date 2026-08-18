@@ -1,0 +1,38 @@
+.outer {
+  position: relative;
+  display: inline-block;
+}
+
+/* Matches the shortcut badges it sits next to. */
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  height: 2.6rem;
+  min-width: 4.6rem;
+  padding: 0 1rem;
+  font-size: var(--font-size-small);
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--col-text);
+  background: var(--col-bg);
+  border: 1px solid var(--col-line);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all 0.1s cubic-bezier(0.7, 0, 0.2, 1);
+}
+
+.button:hover,
+.button:focus {
+  background-color: var(--col-1);
+}
+
+.icon {
+  flex-shrink: 0;
+}
+
+.-expanded {
+  border-color: var(--col-1);
+  background-color: var(--col-1);
+}

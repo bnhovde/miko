@@ -7,6 +7,8 @@ import Link from "next/link";
 import Shortcut from "components/Shortcut";
 import Button from "components/Button";
 import ButtonLink from "components/ButtonLink";
+import ButtonActions from "components/ButtonActions";
+import { type MenuOption } from "components/PopoverMenu/PopoverMenu";
 
 type Props = {
   shortcuts?: {
@@ -17,6 +19,9 @@ type Props = {
     isActive?: boolean;
     onToggle?: (newState: boolean) => void;
   }[];
+  /** The full set of editor actions, reachable from one menu. The inline
+   *  `shortcuts` row only has room for the most-used few. */
+  actions?: MenuOption[];
   action?: {
     text: string;
     url: string;
@@ -27,14 +32,16 @@ type Props = {
   };
 };
 
-const Footer: React.FC<Props> = ({ shortcuts, action, button }) => {
+const Footer: React.FC<Props> = ({ shortcuts, actions, action, button }) => {
   const footerClass = classNames({
     [styles["footer"]]: true,
   });
 
   return (
     <footer className={footerClass}>
-      <>
+      <div className={styles.left}>
+        {actions && actions.length > 0 && <ButtonActions options={actions} />}
+
         {shortcuts && (
           <ul className={styles.shortcuts}>
             {shortcuts.map((s) => (
@@ -52,10 +59,12 @@ const Footer: React.FC<Props> = ({ shortcuts, action, button }) => {
             ))}
           </ul>
         )}
-      </>
+      </div>
 
-      <>{button && <Button onClick={button.onClick}>{button.text}</Button>}</>
-      <>{action && <ButtonLink href={action.url}>{action.text}</ButtonLink>}</>
+      <div className={styles.buttons}>
+        {button && <Button onClick={button.onClick}>{button.text}</Button>}
+        {action && <ButtonLink href={action.url}>{action.text}</ButtonLink>}
+      </div>
     </footer>
   );
 };

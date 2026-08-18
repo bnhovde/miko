@@ -29,13 +29,94 @@
 }
 
 .shortcuts {
-  display: none;
+  display: flex;
   justify-content: flex-start;
   align-items: center;
   gap: var(--block-size);
 }
-@media (min-width: 1024px) {
-  .shortcuts {
-    display: flex;
+
+/* Shortcuts reveal one at a time, each at the width where it actually fits
+   next to Actions and Share. The thresholds are the measured widths of the
+   badges plus their labels, rounded up — so the row grows as the window
+   does and never wraps or collides. Anything not yet shown is still in the
+   Actions menu. */
+.shortcuts > li {
+  display: none;
+}
+
+@media (min-width: 580px) {
+  .shortcuts > li:nth-child(1) {
+    display: block;
   }
+}
+
+@media (min-width: 680px) {
+  .shortcuts > li:nth-child(2) {
+    display: block;
+  }
+}
+
+@media (min-width: 840px) {
+  .shortcuts > li:nth-child(3) {
+    display: block;
+  }
+}
+
+@media (min-width: 990px) {
+  .shortcuts > li:nth-child(4) {
+    display: block;
+  }
+}
+
+@media (min-width: 1110px) {
+  .shortcuts > li:nth-child(5) {
+    display: block;
+  }
+}
+
+@media (min-width: 1260px) {
+  .shortcuts > li:nth-child(6) {
+    display: block;
+  }
+}
+
+/* The sprite editor has six; other editors have more, so the progression
+   continues past it — without these they would never appear at any width. */
+@media (min-width: 1400px) {
+  .shortcuts > li:nth-child(7) {
+    display: block;
+  }
+}
+
+@media (min-width: 1530px) {
+  .shortcuts > li:nth-child(8) {
+    display: block;
+  }
+}
+
+@media (min-width: 1660px) {
+  .shortcuts > li:nth-child(9) {
+    display: block;
+  }
+}
+
+@media (min-width: 1790px) {
+  .shortcuts > li:nth-child(n + 10) {
+    display: block;
+  }
+}
+
+/* The Actions menu sits with the shortcuts, bottom left, and stays visible
+   at every width — it is the only place the not-yet-revealed ones live. */
+.left {
+  display: flex;
+  align-items: center;
+  gap: var(--block-size);
+}
+
+.buttons {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  margin-left: auto;
 }

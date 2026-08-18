@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { CSSTransition } from "react-transition-group";
 import classNames from "classnames";
 
@@ -28,6 +28,18 @@ const Popover: React.FC<Props> = ({
   className,
   children,
 }) => {
+  // A menu opened with the keyboard has to be dismissable with it too.
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [isOpen, onClose]);
+
   const outerClass = classNames(styles.outer, {
     [styles["-expanded"]]: isOpen,
   });

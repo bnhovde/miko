@@ -3,6 +3,8 @@
   align-items: center;
   font-size: var(--font-size-small);
   border: 0;
+  /* Never let a cramped footer break a label one character per line. */
+  white-space: nowrap;
 }
 .shortcut:hover .badge,
 .shortcut:focus .badge {
@@ -11,6 +13,7 @@
 
 .badge {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   border: 1px solid var(--col-line);

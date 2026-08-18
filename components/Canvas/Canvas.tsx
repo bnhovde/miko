@@ -1,7 +1,7 @@
 import EditorContext from "context/EditorContext";
 import React, { useContext } from "react";
 import { InputEvent } from "types/input";
-import { getDefaultHash, getHashArray, updateHash } from "utils/hash";
+import { getDefaultHash, getHashArray } from "utils/hash";
 
 import styles from "./Canvas.module.css";
 

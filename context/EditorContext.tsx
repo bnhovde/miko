@@ -1,16 +1,12 @@
-import React, { useReducer, useEffect, useContext } from "react";
+import React, { useReducer, useEffect, useContext, useRef } from "react";
+import { useMiko, type Tool } from "@boxworld/miko";
 
 import { EditorState, ViewMode } from "types/editor";
 
 import localStorageKeys from "constants/localStorageKeys";
 import { set } from "utils/localStorage";
 
-import {
-  getDefaultHash,
-  optimiseFrames,
-  updateHash,
-  updateHashSheet,
-} from "utils/hash";
+import { getDefaultHash, updateHashSheet } from "utils/hash";
 import { InputEvent } from "types/input";
 import { Sprite } from "types/sprite";
 import { defaultColors } from "data/palettes";
@@ -36,28 +32,17 @@ import html2canvas from "html2canvas";
  */
 
 enum EditorActionTypes {
-  INIT_SPRITE = "INIT_SPRITE",
   INIT_SHEET = "INIT_SHEET",
   INIT_PACKAGE = "INIT_PACKAGE",
-  CHANGE_SPRITE = "CHANGE_SPRITE",
-  ADD_FRAME = "ADD_FRAME",
-  DELETE_FRAME = "DELETE_FRAME",
-  CHANGE_FRAME = "CHANGE_FRAME",
-  CHANGE_COLOR = "CHANGE_COLOR",
-  CHANGE_TOOL = "CHANGE_TOOL",
+  SET_SPRITE_META = "SET_SPRITE_META",
   CHANGE_TOOL_SHEET = "CHANGE_TOOL_SHEET",
-  START_DRAWING_SPRITE = "START_DRAWING_SPRITE",
   START_DRAWING_SHEET = "START_DRAWING_SHEET",
-  DRAG_DRAWING = "DRAG_DRAWING",
   DRAG_DRAWING_SHEET = "DRAG_DRAWING_SHEET",
-  COMMIT_DRAWING = "COMMIT_DRAWING",
   COMMIT_DRAWING_SHEET = "COMMIT_DRAWING_SHEET",
   REPLACE_PALETTE = "REPLACE_PALETTE",
   LOAD_PALETTE = "LOAD_PALETTE",
   RENAME_PALETTE = "RENAME_PALETTE",
-  UPDATE_COLOR = "UPDATE_COLOR",
-  REORDER_FRAMES = "REORDER_FRAMES",
-  CHANGE_NAME = "CHANGE_NAME",
+  DETACH_PALETTE = "DETACH_PALETTE",
   UPDATE_PACKAGE = "UPDATE_PACKAGE",
   SELECT_SPRITE_FOR_SHEET = "SELECT_SPRITE_FOR_SHEET",
   SELECT_SHEET_CELL = "SELECT_SHEET_CELL",
@@ -90,15 +75,36 @@ type UiAction = {
 };
 
 /**
- * The first colour that is actually paintable, used whenever the selected
- * swatch disappears from under the user.
+ * What this provider still keeps for itself. Everything to do with editing a
+ * sprite — frames, colours, tools, drawing, undo — comes from useMiko, so it
+ * is deliberately absent here; `spriteMeta` holds only the identity fields a
+ * sprite carries that the editor package has no opinion about (id, version,
+ * author, description).
  */
-const firstVisibleColor = (colors: string[]): string =>
-  colors.find((color) => color !== TRANSPARENT) || "000";
+type ProviderState = Omit<
+  EditorState,
+  | "spriteData"
+  | "colors"
+  | "currentColor"
+  | "currentTool"
+  | "currentFrame"
+  | "currentHash"
+  | "unsavedHash"
+  | "undoHistory"
+  | "undoHistoryIndex"
+  | "isDrawingSprite"
+> & {
+  spriteMeta?: Sprite;
+};
+
+/** The tool names this app passes around are plain strings; the hook's are a
+ *  union, so they have to be checked at the boundary. */
+const isTool = (value?: string): value is Tool =>
+  value === "pencil" || value === "eraser" || value === "fill";
 
 /**
- * Stores the working palette so it survives a reload, and returns the
- * palette part of the new state.
+ * Stores the working palette so it survives a reload. The colours themselves
+ * are owned by useMiko now, so this only writes them out.
  */
 const persistPalette = (
   colors: string[],
@@ -110,15 +116,13 @@ const persistPalette = (
     name: paletteName,
     items: colors,
   });
-
-  return { colors, paletteId, paletteName };
 };
 
 /**
  * The built in palette cannot be edited, so changing its colours turns the
  * working palette into an unsaved custom one.
  */
-const detach = (state: EditorState) => ({
+const detach = (state: ProviderState) => ({
   paletteId: isDefaultPalette(state.paletteId) ? undefined : state.paletteId,
   paletteName: isDefaultPalette(state.paletteId)
     ? "Custom palette"
@@ -126,23 +130,12 @@ const detach = (state: EditorState) => ({
 });
 
 /**
- * Keeps painting with the selected colour when the new palette still holds
- * it, otherwise falls back to the first paintable swatch.
+ * Which saved palette is in play belongs to the editor rather than to a
+ * single sprite, so it survives loading another sprite, sheet or package.
  */
-const keepOrResetColor = (colors: string[], currentColor: string): string =>
-  colors.includes(currentColor) && currentColor !== TRANSPARENT
-    ? currentColor
-    : firstVisibleColor(colors);
-
-/**
- * The palette belongs to the editor rather than to a single sprite, so it
- * survives loading another sprite, sheet or package.
- */
-const keepPalette = (state: EditorState) => ({
-  colors: state.colors,
+const keepPalette = (state: ProviderState) => ({
   paletteId: state.paletteId,
   paletteName: state.paletteName,
-  currentColor: state.currentColor,
 });
 
 /**
@@ -150,120 +143,29 @@ const keepPalette = (state: EditorState) => ({
  */
 
 export const uiReducer = (
-  state: EditorState,
+  state: ProviderState,
   action: UiAction
-): EditorState => {
+): ProviderState => {
   switch (action.type) {
-    case EditorActionTypes.INIT_SPRITE:
-      return {
-        ...initialState.state,
-        ...keepPalette(state),
-        spriteData: action.payload?.sprite,
-        currentHash: action.payload?.sprite?.frames[0] || "",
-      };
-    case EditorActionTypes.CHANGE_SPRITE:
+    // The sprite half of this editor — frames, palette, tools, drawing and
+    // undo — now lives in @boxworld/miko's useMiko, so the same state machine
+    // runs here and for anyone embedding the editor. What is left below is
+    // what a package cannot own: spritesheets, packages, and which *saved*
+    // palette the working colours came from.
+    case EditorActionTypes.SET_SPRITE_META:
       return {
         ...state,
-        spriteData: action.payload?.sprite,
-        currentHash: action.payload?.sprite?.frames[0] || "",
-      };
-    case EditorActionTypes.CHANGE_FRAME:
-      return {
-        ...state,
-        currentFrame: action.payload?.index || 0,
-        currentHash:
-          state?.spriteData?.frames[action.payload?.index || 0] || "",
-        unsavedHash: "",
-        undoHistory: [],
-        undoHistoryIndex: 0,
-      };
-    case EditorActionTypes.ADD_FRAME:
-      return {
-        ...state,
-        spriteData: state.spriteData
-          ? {
-              ...state.spriteData,
-              frames: insertAtIndex<string>(
-                state.spriteData?.frames || [],
-                (action.payload?.index !== undefined
-                  ? action.payload?.index
-                  : state.spriteData?.frames?.length || 0) + 1,
-                action.payload?.value || getDefaultHash()
-              ),
-            }
-          : undefined,
-        currentFrame:
-          (action.payload?.index !== undefined
-            ? action.payload?.index
-            : state.spriteData?.frames?.length || 0) + 1,
-        currentHash: action.payload?.value || getDefaultHash(),
-        unsavedHash: "",
-        undoHistory: [],
-        undoHistoryIndex: 0,
-      };
-    case EditorActionTypes.DELETE_FRAME:
-      const newFrames = [
-        ...(state.spriteData?.frames || []).filter(
-          (_hash: string, index: number) => index !== action.payload?.index
-        ),
-      ];
-
-      const newFrameIndex =
-        action.payload?.index !== undefined
-          ? Math.max(action.payload?.index - 1, 0)
-          : state.spriteData?.frames?.length || 0;
-
-      return {
-        ...state,
-        spriteData: state.spriteData
-          ? {
-              ...state.spriteData,
-              frames: newFrames,
-            }
-          : undefined,
-        currentFrame: newFrameIndex,
-        currentHash: state?.spriteData?.frames[newFrameIndex] || "",
-        unsavedHash: "",
-        undoHistory: [],
-        undoHistoryIndex: 0,
-      };
-    case EditorActionTypes.CHANGE_COLOR:
-      return {
-        ...state,
-        currentColor: action.payload?.value || "fff0",
-        currentTool:
-          state.currentTool === "eraser" ? "pencil" : state.currentTool,
-      };
-    case EditorActionTypes.CHANGE_TOOL:
-      return {
-        ...state,
-        currentTool: action.payload?.value || "pencil",
+        spriteMeta: action.payload?.sprite,
       };
     case EditorActionTypes.CHANGE_TOOL_SHEET:
       return {
         ...state,
         currentSpriteTool: action.payload?.value || "paint",
       };
-    case EditorActionTypes.START_DRAWING_SPRITE:
-      return {
-        ...state,
-        isDrawingSprite: !!action.payload?.active,
-      };
     case EditorActionTypes.START_DRAWING_SHEET:
       return {
         ...state,
         isDrawingSheet: !!action.payload?.active,
-      };
-    case EditorActionTypes.DRAG_DRAWING:
-      return {
-        ...state,
-        unsavedHash: action.payload?.value || "",
-        spriteData: state.spriteData
-          ? {
-              ...state.spriteData,
-              palette: action?.payload?.palette || [],
-            }
-          : undefined,
       };
     case EditorActionTypes.DRAG_DRAWING_SHEET:
       return {
@@ -277,23 +179,6 @@ export const uiReducer = (
               sprites: action?.payload?.sprites || [],
             }
           : undefined,
-      };
-    case EditorActionTypes.COMMIT_DRAWING:
-      return {
-        ...state,
-        isDrawingSprite: false,
-        spriteData: state.spriteData
-          ? {
-              ...state.spriteData,
-              frames: action?.payload?.frames || [],
-              palette: action?.payload?.palette || [],
-            }
-          : undefined,
-        undoHistory: action.payload?.newHistory || [],
-        undoHistoryIndex: (action.payload?.newHistory || []).length,
-        currentHash:
-          (action?.payload?.frames || [])[state.currentFrame || 0] || "",
-        unsavedHash: "",
       };
     case EditorActionTypes.COMMIT_DRAWING_SHEET:
       const updatedGrid = action?.payload?.grid || state.sheetData?.grid || [];
@@ -311,125 +196,44 @@ export const uiReducer = (
         currentGrid: updatedGrid[0] || state.currentGrid,
         unsavedGrid: "",
       };
+    // The colours themselves live in useMiko; what stays here is which saved
+    // palette they came from, so "save" knows whether to update or fork.
     case EditorActionTypes.REPLACE_PALETTE:
-      const replacedColors = normalisePalette(
-        action.payload?.palette || defaultColors
-      );
       return {
         ...state,
         // A generated palette is no longer tied to a saved one
-        ...persistPalette(
-          replacedColors,
-          undefined,
-          action.payload?.value || "Custom palette"
-        ),
-        currentColor: firstVisibleColor(replacedColors),
+        paletteId: undefined,
+        paletteName: action.payload?.value || "Custom palette",
       };
 
     case EditorActionTypes.LOAD_PALETTE:
-      const loadedColors = normalisePalette(
-        action.payload?.paletteData?.items || defaultColors
-      );
       return {
         ...state,
-        ...persistPalette(
-          loadedColors,
-          action.payload?.paletteData?.id,
-          action.payload?.paletteData?.name || "Custom palette"
-        ),
-        currentColor: keepOrResetColor(loadedColors, state.currentColor),
+        paletteId: action.payload?.paletteData?.id,
+        paletteName: action.payload?.paletteData?.name || "Custom palette",
       };
     case EditorActionTypes.RENAME_PALETTE:
       return {
         ...state,
-        ...persistPalette(
-          state.colors,
-          detach(state).paletteId,
-          action.payload?.value || "Custom palette"
-        ),
+        ...detach(state),
+        paletteName: action.payload?.value || "Custom palette",
       };
-    case EditorActionTypes.UPDATE_COLOR:
-      const updatedIndex = action.payload?.index ?? -1;
-      const updatedColor = action.payload?.value || "000";
-      const replacedColor = state.colors[updatedIndex];
-
-      // Transparent and black are fixed
-      if (
-        updatedIndex < 0 ||
-        replacedColor === undefined ||
-        isLockedColor(replacedColor)
-      ) {
-        return state;
-      }
-
+    case EditorActionTypes.DETACH_PALETTE:
       return {
         ...state,
-        ...persistPalette(
-          state.colors.map((color, index) =>
-            index === updatedIndex ? updatedColor : color
-          ),
-          detach(state).paletteId,
-          detach(state).paletteName
-        ),
-        // Keep painting with the swatch that was just edited
-        currentColor:
-          state.currentColor === replacedColor
-            ? updatedColor
-            : state.currentColor,
-      };
-    case EditorActionTypes.REORDER_FRAMES:
-      const newIndex =
-        action.payload?.index !== undefined
-          ? action.payload?.index
-          : state.spriteData?.frames?.length || 0;
-
-      const oldIndex =
-        action.payload?.oldIndex !== undefined
-          ? action.payload?.oldIndex
-          : state.spriteData?.frames?.length || 0;
-
-      const reorderedFrames = moveToIndex<string>(
-        state.spriteData?.frames || [],
-        oldIndex,
-        newIndex
-      );
-      return {
-        ...state,
-        spriteData: state.spriteData
-          ? {
-              ...state.spriteData,
-              frames: reorderedFrames,
-            }
-          : undefined,
-        currentFrame: newIndex,
-        currentHash: reorderedFrames[newIndex],
-        unsavedHash: "",
-        undoHistory: [],
-        undoHistoryIndex: 0,
-      };
-    case EditorActionTypes.CHANGE_NAME:
-      return {
-        ...state,
-        spriteData: state.spriteData
-          ? {
-              ...state.spriteData,
-              name: action?.payload?.value || "Blank frame",
-            }
-          : undefined,
+        ...detach(state),
       };
     case EditorActionTypes.INIT_SHEET:
-      const spriteData = action.payload?.spritesheet?.sprites?.[0];
       return {
-        ...initialState.state,
+        ...initialProviderState,
         ...keepPalette(state),
-        spriteData: spriteData,
+        spriteMeta: action.payload?.spritesheet?.sprites?.[0],
         sheetData: action.payload?.spritesheet,
-        currentHash: spriteData?.frames[0] || "",
         currentGrid: action.payload?.spritesheet?.grid?.[0] || getDefaultHash(),
       };
     case EditorActionTypes.INIT_PACKAGE:
       return {
-        ...initialState.state,
+        ...initialProviderState,
         ...keepPalette(state),
         packageData: action.payload?.spritePackage,
       };
@@ -661,6 +465,12 @@ type ContextProps = {
   onTouchStartSheet: (e: InputEvent) => void;
   onDrawEnd: (e: InputEvent) => void;
   onDrawChange: (frameIndex: number, isFirstClick?: boolean) => void;
+  onUndo: () => void;
+  onRedo: () => void;
+  /** Whether there is anything to step back to / forward to. History is kept
+   *  per frame, so both reset when the current frame changes. */
+  canUndo: boolean;
+  canRedo: boolean;
   onDrawChangeSheet: (frameIndex: number, isFirstClick?: boolean) => void;
   onReplacePalette: (newPalette: string[], name?: string) => void;
   onLoadPalette: (palette: Palette) => void;
@@ -679,31 +489,36 @@ type ContextProps = {
   onSetSheetViewMode: (mode: ViewMode) => void;
 };
 
+const initialProviderState: ProviderState = {
+  debug: false,
+  spriteMeta: undefined,
+  sheetData: undefined,
+  paletteId: defaultPalette.id,
+  paletteName: defaultPalette.name,
+  isDrawingSheet: false,
+  currentSpriteTool: "paint",
+  currentGrid: getDefaultHash(),
+  unsavedGrid: "",
+  currentSheetIndex: 0,
+  currentSheetSprite: undefined,
+  currentRotation: 0,
+  currentFlip: undefined,
+  sheetViewMode: "2d",
+};
+
 const initialState: ContextProps = {
   state: {
-    debug: false,
+    ...initialProviderState,
     spriteData: undefined,
-    sheetData: undefined,
     colors: defaultPalette.items,
-    paletteId: defaultPalette.id,
-    paletteName: defaultPalette.name,
     isDrawingSprite: false,
-    isDrawingSheet: false,
     currentFrame: 0,
     currentColor: "000",
     undoHistory: [],
     undoHistoryIndex: 0,
     currentTool: "pencil",
-    currentSpriteTool: "paint",
     currentHash: getDefaultHash(),
-    currentGrid: getDefaultHash(),
     unsavedHash: "",
-    unsavedGrid: "",
-    currentSheetIndex: 0,
-    currentSheetSprite: undefined,
-    currentRotation: 0,
-    currentFlip: undefined,
-    sheetViewMode: "2d",
   },
   initSprite: () => null,
   initSheet: () => null,
@@ -719,6 +534,10 @@ const initialState: ContextProps = {
   onDrawChange: () => null,
   onDrawChangeSheet: () => null,
   onDrawEnd: () => null,
+  onUndo: () => null,
+  onRedo: () => null,
+  canUndo: false,
+  canRedo: false,
   onReplacePalette: () => null,
   onLoadPalette: () => null,
   onRenamePalette: () => null,
@@ -747,7 +566,50 @@ type ProviderProps = {
 };
 
 export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
-  const [state, dispatch] = useReducer(uiReducer, initialState.state);
+  const [providerState, dispatch] = useReducer(uiReducer, initialProviderState);
+
+  // Every sprite edit runs through the same state machine the published
+  // editor uses. Committed edits come back here, where this app — and only
+  // this app — decides they mean "write to localStorage and redraw the
+  // favicon".
+  const miko = useMiko({
+    colors: defaultPalette.items,
+    onChange: (sprite) => {
+      const id = metaRef.current?.id;
+      if (!id) return;
+
+      set(
+        `${localStorageKeys.SPRITE}-${id}`,
+        JSON.stringify({ ...metaRef.current, ...sprite })
+      );
+      setFavicon();
+    },
+  });
+
+  // The identity fields useMiko doesn't model, read inside onChange without
+  // making the callback depend on a re-render.
+  const metaRef = useRef<Sprite | undefined>(providerState.spriteMeta);
+  metaRef.current = providerState.spriteMeta;
+
+  /**
+   * The shape every component in this app already reads. The sprite half is
+   * projected out of useMiko, so there is exactly one source of truth for it.
+   */
+  const state: EditorState = {
+    ...providerState,
+    spriteData: providerState.spriteMeta
+      ? ({ ...providerState.spriteMeta, ...miko.sprite } as Sprite)
+      : undefined,
+    colors: miko.colors,
+    currentColor: miko.color,
+    currentTool: miko.tool,
+    currentFrame: miko.frame,
+    currentHash: miko.hash,
+    unsavedHash: miko.draft,
+    isDrawingSprite: miko.isDrawing,
+    undoHistory: miko.history,
+    undoHistoryIndex: miko.historyIndex,
+  };
 
   // Expose state to window for debugging
   useEffect(() => {
@@ -761,6 +623,7 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
     const palette = getActivePalette();
 
     if (palette) {
+      miko.setColors(palette.items);
       dispatch({
         type: EditorActionTypes.LOAD_PALETTE,
         payload: {
@@ -768,43 +631,29 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
         },
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const getCurrentFrameHash = () => {
-    return state.spriteData?.frames[state.currentFrame] || getDefaultHash();
-  };
-
-  const getUpdatedSpriteFrames = (editedIndex: number, newHash: string) => {
-    const hasFrames = state.spriteData && state.spriteData?.frames?.length > 0;
-
-    if (hasFrames) {
-      return state.spriteData?.frames.map((frame: string, index: number) => {
-        if (index === editedIndex) {
-          return newHash;
-        }
-
-        return frame;
-      });
-    } else {
-      return [newHash];
-    }
-  };
-
-  const initSprite = (sprite: Sprite) =>
+  const initSprite = (sprite: Sprite) => {
     dispatch({
-      type: EditorActionTypes.INIT_SPRITE,
-      payload: {
-        sprite,
-      },
+      type: EditorActionTypes.SET_SPRITE_META,
+      payload: { sprite },
     });
+    miko.loadSprite(sprite);
+  };
 
-  const initSheet = (spritesheet: Spritesheet) =>
+  const initSheet = (spritesheet: Spritesheet) => {
     dispatch({
       type: EditorActionTypes.INIT_SHEET,
       payload: {
         spritesheet,
       },
     });
+
+    // The sheet editor edits the sheet's first sprite in place.
+    const first = spritesheet.sprites?.[0];
+    if (first) miko.loadSprite(first);
+  };
 
   const initPackage = (spritePackage: SpritePackage) =>
     dispatch({
@@ -815,45 +664,18 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
     });
 
   const onAddFrame = (frameIndex: number, frameHash?: string) =>
-    dispatch({
-      type: EditorActionTypes.ADD_FRAME,
-      payload: {
-        value: frameHash,
-        index: frameIndex,
-      },
-    });
+    miko.addFrame(frameIndex, frameHash);
 
-  const onChangeFrame = (frameIndex?: number) =>
-    dispatch({
-      type: EditorActionTypes.CHANGE_FRAME,
-      payload: {
-        index: frameIndex,
-      },
-    });
+  const onChangeFrame = (frameIndex?: number) => miko.setFrame(frameIndex ?? 0);
 
   const onDeleteFrame = (frameIndex?: number) =>
-    dispatch({
-      type: EditorActionTypes.DELETE_FRAME,
-      payload: {
-        index: frameIndex,
-      },
-    });
+    miko.deleteFrame(frameIndex ?? state.currentFrame);
 
   const onSelectColor = (newColor?: string) =>
-    dispatch({
-      type: EditorActionTypes.CHANGE_COLOR,
-      payload: {
-        value: newColor,
-      },
-    });
+    miko.setColor(newColor || TRANSPARENT);
 
   const onSelectTool = (newTool?: string) =>
-    dispatch({
-      type: EditorActionTypes.CHANGE_TOOL,
-      payload: {
-        value: newTool,
-      },
-    });
+    miko.setTool(isTool(newTool) ? newTool : "pencil");
 
   const onSelectToolSheet = (newTool?: string) =>
     dispatch({
@@ -889,43 +711,13 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
   };
 
   const onDrawChange = (frameIndex: number, isFirstClick?: boolean) => {
-    const isFillTool = state.currentTool === "fill";
-
-    // For fill tool, only process on first click
-    if (isFillTool && !isFirstClick) {
-      return;
-    }
-
-    if (!state.isDrawingSprite && !isFirstClick) {
-      console.log("not drawing");
-      return;
-    }
-
+    // The hook decides the rest: `draw` ignores everything outside a stroke,
+    // and the fill tool acts only on the click that began one.
     if (isFirstClick) {
-      console.log("START_DRAWING_SPRITE");
-      dispatch({
-        type: EditorActionTypes.START_DRAWING_SPRITE,
-        payload: {
-          active: true,
-        },
-      });
+      miko.startDrawing(frameIndex);
+    } else {
+      miko.draw(frameIndex);
     }
-
-    const { newHash, newPalette } = updateHash(
-      frameIndex,
-      state.unsavedHash || state.currentHash || getDefaultHash(),
-      state.spriteData?.palette || [],
-      state.currentColor || "",
-      state.currentTool || ""
-    );
-
-    dispatch({
-      type: EditorActionTypes.DRAG_DRAWING,
-      payload: {
-        value: newHash,
-        palette: newPalette,
-      },
-    });
   };
 
   const onDrawChangeSheet = (frameIndex: number, isFirstClick?: boolean) => {
@@ -987,57 +779,9 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
       return;
     }
 
-    // Handle sprite draw end
-    if (state.isDrawingSprite) {
-      // Handle history changes
-      const isFirstPaint = state.undoHistory.length === 0;
-      const isChangingHistory =
-        state.undoHistoryIndex !== state.undoHistory.length;
-      let newHistory = [...state.undoHistory, state.unsavedHash];
-
-      if (isFirstPaint) {
-        newHistory = [getCurrentFrameHash() || "", state.unsavedHash];
-      }
-
-      if (isChangingHistory) {
-        newHistory = [
-          ...state.undoHistory.slice(0, state.undoHistoryIndex + 1),
-          state.unsavedHash,
-        ];
-      }
-
-      // Get updated frames including the current change
-      const updatedFrames =
-        getUpdatedSpriteFrames(state.currentFrame, state.unsavedHash) || [];
-
-      // TO-DO: Update palette and hashes by most used colors
-      const { newFrames, newPalette } = optimiseFrames(
-        updatedFrames,
-        state.spriteData?.palette || []
-      );
-
-      // Store sprite in localstorage
-      set(
-        `${localStorageKeys.SPRITE}-${state.spriteData?.id}`,
-        JSON.stringify({
-          ...state.spriteData,
-          frames: newFrames,
-          palette: newPalette,
-        })
-      );
-
-      // Update favicon
-      setFavicon();
-
-      dispatch({
-        type: EditorActionTypes.COMMIT_DRAWING,
-        payload: {
-          newHistory,
-          frames: newFrames,
-          palette: newPalette,
-        },
-      });
-    }
+    // The sprite half — history, palette compaction and persistence — is the
+    // hook's commit, which calls back into onChange above.
+    miko.endDrawing();
 
     // Handle sheet draw end
     if (state.isDrawingSheet) {
@@ -1061,16 +805,21 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
   };
 
   const onReplacePalette = (newPalette: string[], name?: string) => {
+    const colors = normalisePalette(newPalette);
+    miko.setColors(colors);
+    persistPalette(colors, undefined, name || "Custom palette");
     dispatch({
       type: EditorActionTypes.REPLACE_PALETTE,
       payload: {
-        palette: newPalette,
         value: name,
       },
     });
   };
 
   const onLoadPalette = (palette: Palette) => {
+    const colors = normalisePalette(palette.items);
+    miko.setColors(colors);
+    persistPalette(colors, palette.id, palette.name || "Custom palette");
     dispatch({
       type: EditorActionTypes.LOAD_PALETTE,
       payload: {
@@ -1080,6 +829,11 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
   };
 
   const onRenamePalette = (newName: string) => {
+    persistPalette(
+      state.colors,
+      detach(providerState).paletteId,
+      newName || "Custom palette"
+    );
     dispatch({
       type: EditorActionTypes.RENAME_PALETTE,
       payload: {
@@ -1089,13 +843,19 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
   };
 
   const onUpdateColor = (index: number, hex: string) => {
-    dispatch({
-      type: EditorActionTypes.UPDATE_COLOR,
-      payload: {
-        index,
-        value: hex,
-      },
-    });
+    const replaced = state.colors[index];
+    // Transparent and black are fixed — the hook enforces this too, but the
+    // palette must not be persisted as if something had changed.
+    if (replaced === undefined || isLockedColor(replaced)) return;
+
+    const colors = state.colors.map((color, i) => (i === index ? hex : color));
+    miko.updateColor(index, hex);
+    persistPalette(
+      colors,
+      detach(providerState).paletteId,
+      detach(providerState).paletteName
+    );
+    dispatch({ type: EditorActionTypes.DETACH_PALETTE });
   };
 
   /**
@@ -1120,57 +880,22 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
     return palette;
   };
 
-  const onReorderFrames = (oldIndex: number, newIndex: number) => {
-    dispatch({
-      type: EditorActionTypes.REORDER_FRAMES,
-      payload: {
-        index: newIndex,
-        oldIndex,
-      },
-    });
-  };
+  const onReorderFrames = (oldIndex: number, newIndex: number) =>
+    miko.reorderFrames(oldIndex, newIndex);
 
-  const onChangeName = (newName: string) => {
-    dispatch({
-      type: EditorActionTypes.CHANGE_NAME,
-      payload: {
-        value: newName,
-      },
-    });
-  };
+  const onChangeName = (newName: string) => miko.setName(newName);
 
-  const onChangeSize = (newSize: number) => {
-    if (!state.spriteData) return;
-    const oldSize = state.spriteData.size;
-    const resizeHash = (hash: string): string => {
-      let result = "";
-      for (let row = 0; row < newSize; row++) {
-        for (let col = 0; col < newSize; col++) {
-          result +=
-            row < oldSize && col < oldSize ? hash[row * oldSize + col] : "a";
-        }
-      }
-      return result;
-    };
-    const newFrames = state.spriteData.frames.map(resizeHash);
-    const newSprite = { ...state.spriteData, size: newSize, frames: newFrames };
-    set(
-      `${localStorageKeys.SPRITE}-${state.spriteData.id}`,
-      JSON.stringify(newSprite)
-    );
-    dispatch({
-      type: EditorActionTypes.CHANGE_SPRITE,
-      payload: { sprite: newSprite },
-    });
-  };
+  // Resizing re-lays every frame onto the new grid, keeping the pixels that
+  // still fit — the hook does this and reports the result through onChange,
+  // which is what writes it to storage.
+  const onChangeSize = (newSize: number) => miko.setSize(newSize);
 
   const onChangeSprite = (newSprite: Sprite) => {
     dispatch({
-      type: EditorActionTypes.CHANGE_SPRITE,
-      payload: {
-        sprite: newSprite,
-      },
+      type: EditorActionTypes.SET_SPRITE_META,
+      payload: { sprite: newSprite },
     });
+    miko.loadSprite(newSprite);
   };
 
   const onUpdatePackage = (spritePackage: SpritePackage) => {
@@ -1258,6 +983,10 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
         onDrawChange,
         onDrawChangeSheet,
         onDrawEnd,
+        onUndo: miko.undo,
+        onRedo: miko.redo,
+        canUndo: miko.canUndo,
+        canRedo: miko.canRedo,
         onReplacePalette,
         onLoadPalette,
         onRenamePalette,

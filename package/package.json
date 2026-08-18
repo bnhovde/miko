@@ -1,0 +1,53 @@
+{
+  "name": "@boxworld/miko",
+  "version": "0.1.0",
+  "description": "Embeddable pixel-sprite editor — palette + char-per-pixel frames, the miko sprite format used across the boxworld ecosystem",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bnhovde/miko.git",
+    "directory": "package"
+  },
+  "homepage": "https://github.com/bnhovde/miko/tree/main/package#readme",
+  "bugs": {
+    "url": "https://github.com/bnhovde/miko/issues"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "node scripts/test.mjs",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm run typecheck && npm test && npm run build"
+  },
+  "keywords": [
+    "pixel-art",
+    "sprite-editor",
+    "miko",
+    "boxworld"
+  ],
+  "author": "Bård N. Hovde",
+  "license": "ISC",
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.9.3"
+  }
+}
