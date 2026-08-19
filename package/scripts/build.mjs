@@ -3,6 +3,7 @@
 import esbuild from "esbuild";
 import { rmSync } from "node:fs";
 import { spawnSync } from "node:child_process";
+import { createRequire } from "node:module";
 
 const outdir = "dist";
 rmSync(outdir, { recursive: true, force: true });
@@ -21,7 +22,15 @@ await esbuild.build({
 });
 console.log(`Bundled to ${outdir}/`);
 
-const tsc = spawnSync("npx", ["tsc", "-p", "tsconfig.build.json"], { stdio: "inherit" });
+// Resolved through Node's module resolution rather than `npx`, which picks
+// the first tsc on PATH. When this package is a workspace of an app pinned to
+// an older TypeScript, npm 8 hands `npx` that one instead of ours, and the
+// declaration build dies on `moduleResolution: "bundler"` (TS 5.0+ only).
+const require = createRequire(import.meta.url);
+const tscBin = require.resolve("typescript/bin/tsc");
+const tsc = spawnSync(process.execPath, [tscBin, "-p", "tsconfig.build.json"], {
+  stdio: "inherit",
+});
 if (tsc.status !== 0) {
   console.error("Declaration build failed.");
   process.exit(tsc.status ?? 1);
