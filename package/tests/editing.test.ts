@@ -1,7 +1,14 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 
-import { floodFill, updateHash, getHashArray, getDefaultHash, getRandomPalette } from "../src/editing";
+import {
+  floodFill,
+  updateHash,
+  getHashArray,
+  getDefaultHash,
+  getRandomPalette,
+  optimiseFrames,
+} from "../src/editing";
 
 describe("getDefaultHash", () => {
   it("returns a blank hash (all slot-0) sized to the grid", () => {
@@ -92,5 +99,44 @@ describe("updateHash", () => {
     const hash = getDefaultHash(2); // "aaaa", all one color
     const { newHash } = updateHash(0, hash, palette, "f00", "fill");
     assert.equal(newHash, newHash[0]!.repeat(4), "the whole uniform grid fills");
+  });
+});
+
+describe("optimiseFrames", () => {
+  it("moves the most-used colour into the lowest slot", () => {
+    const palette = ["fff0", "f00", "0f0"];
+    // "0f0" (slot 2) covers six pixels, "f00" (slot 1) two, transparent none.
+    const { newPalette } = optimiseFrames(["cccc", "ccbb"], palette);
+    assert.deepEqual(newPalette, ["0f0", "f00", "fff0"]);
+  });
+
+  it("counts across every frame, not just the first", () => {
+    const palette = ["fff0", "f00", "0f0"];
+    // Frame 1 alone would put "f00" first; frames 2 and 3 outvote it.
+    const { newPalette } = optimiseFrames(["bbbb", "cccc", "cccc"], palette);
+    assert.equal(newPalette[0], "0f0");
+  });
+
+  it("rewrites the frames so the pixels look identical afterwards", () => {
+    const palette = ["fff0", "f00", "0f0"];
+    const frames = ["abca", "cccb"];
+    const before = frames.map((frame) => getHashArray(frame, palette));
+
+    const { newFrames, newPalette } = optimiseFrames(frames, palette);
+    const after = newFrames.map((frame) => getHashArray(frame, newPalette));
+
+    assert.deepEqual(after, before, "compaction is never a visual change");
+  });
+
+  it("keeps unused palette colours rather than dropping them", () => {
+    const palette = ["fff0", "f00", "0f0"];
+    const { newPalette } = optimiseFrames(["bbbb"], palette);
+    assert.equal(newPalette.length, 3);
+    assert.ok(newPalette.includes("0f0"));
+  });
+
+  it("maps a char pointing past the palette down to slot 0", () => {
+    const { newFrames } = optimiseFrames(["zzzz"], ["fff0", "f00"]);
+    assert.equal(newFrames[0], "aaaa", "corrupt data decodes, it does not crash");
   });
 });

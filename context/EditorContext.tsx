@@ -607,7 +607,7 @@ export const EditorProvider: React.FC<ProviderProps> = ({ children }) => {
     currentHash: miko.hash,
     unsavedHash: miko.draft,
     isDrawingSprite: miko.isDrawing,
-    undoHistory: miko.history,
+    undoHistory: miko.history.map((entry) => entry.hash),
     undoHistoryIndex: miko.historyIndex,
   };
 

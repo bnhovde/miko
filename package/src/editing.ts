@@ -134,6 +134,33 @@ export const updateHash = (
   return { newHash, newPalette };
 };
 
+/** Re-encodes a hash written against `fromPalette` so it means the same
+ *  colours under `toPalette`, growing that palette with any colour it lacks.
+ *  Needed because `optimiseFrames` re-sorts the sprite palette on every
+ *  commit: a hash kept from an earlier commit (an undo snapshot) would
+ *  otherwise decode to whatever colours now happen to sit in those slots. */
+export const recodeHash = (
+  hash: string,
+  fromPalette: string[],
+  toPalette: string[]
+): { hash: string; palette: string[] } => {
+  const palette = [...toPalette];
+  let result = "";
+
+  for (let i = 0; i < hash.length; i++) {
+    const color =
+      fromPalette[hash.charCodeAt(i) - 97] ?? fromPalette[0] ?? TRANSPARENT;
+    let index = palette.indexOf(color);
+    if (index === -1) {
+      palette.push(color);
+      index = palette.length - 1;
+    }
+    result += String.fromCharCode(index + 97);
+  }
+
+  return { hash: result, palette };
+};
+
 /** The first swatch that can actually be painted with — used whenever the
  *  selected colour disappears out from under the user. */
 export const firstVisibleColor = (colors: string[]): string =>
@@ -178,16 +205,18 @@ export const optimiseFrames = (
 ): { newFrames: string[]; newPalette: string[] } => {
   const newPalette = [...spritePalette];
 
-  const allColors = frames.reduce(
-    (sum, frame) => [...sum, ...getHashArray(frame, spritePalette)],
-    [] as string[]
-  );
+  // Tallied in one pass. This runs on every committed stroke, so neither the
+  // pixels nor the frame list may be walked more than once: counting inside
+  // the sort comparator re-scanned every pixel per comparison, and building
+  // the tally by spreading into an accumulator re-copied it per frame.
+  const counts = new Map<string, number>();
+  for (const frame of frames) {
+    for (const color of getHashArray(frame, spritePalette)) {
+      counts.set(color, (counts.get(color) ?? 0) + 1);
+    }
+  }
 
-  newPalette.sort((a, b) => {
-    const aCount = allColors.filter((c) => c === a).length;
-    const bCount = allColors.filter((c) => c === b).length;
-    return bCount - aCount;
-  });
+  newPalette.sort((a, b) => (counts.get(b) ?? 0) - (counts.get(a) ?? 0));
 
   const newFrames = frames.map((frame) => {
     let newFrameHash = "";

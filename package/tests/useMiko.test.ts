@@ -2,10 +2,15 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 
 import { mikoReducer, blankSprite, currentHash, type MikoState } from "../src/useMiko";
+
+/** History entries carry the palette they were encoded against. */
+const snapshot = (palette: string[], ...hashes: string[]) =>
+  hashes.map((hash) => ({ hash, palette }));
 import {
   DEFAULT_COLORS,
   TRANSPARENT,
   firstVisibleColor,
+  getHashArray,
   isLockedColor,
   normalisePalette,
 } from "../src/editing";
@@ -122,7 +127,7 @@ describe("drawing", () => {
       type: "DRAW_END",
       frames: ["aaaa", "cccc"],
       palette: [TRANSPARENT, "f00"],
-      history: ["bbbb", "cccc"],
+      history: snapshot([TRANSPARENT, "f00"], "bbbb", "cccc"),
     });
     assert.deepEqual(next.sprite.frames, ["aaaa", "cccc"]);
     assert.equal(next.draft, "", "the draft is cleared on commit");
@@ -133,8 +138,8 @@ describe("drawing", () => {
 describe("undo/redo", () => {
   const drawn = (): MikoState =>
     initial({
-      sprite: { ...blankSprite(2), frames: ["cccc"], palette: [TRANSPARENT, "f00"] },
-      history: ["aaaa", "bbbb", "cccc"],
+      sprite: { ...blankSprite(2), frames: ["cccc"], palette: [TRANSPARENT, "f00", "0f0"] },
+      history: snapshot([TRANSPARENT, "f00", "0f0"], "aaaa", "bbbb", "cccc"),
       historyIndex: 2,
     });
 
@@ -166,11 +171,49 @@ describe("undo/redo", () => {
     assert.deepEqual(next.history, []);
     assert.equal(next.historyIndex, 0);
   });
+
+  it("restores the snapshot's colours after the palette has been re-sorted", () => {
+    // The sprite's palette now puts "0f0" in the slot the snapshot spent on
+    // transparent — a fill is the usual way this happens, since it changes
+    // colour counts enough to reorder the palette on commit.
+    const state = initial({
+      sprite: { ...blankSprite(2), frames: ["aaaa"], palette: ["0f0", "f00", TRANSPARENT] },
+      history: snapshot([TRANSPARENT, "f00"], "abba", "aaaa"),
+      historyIndex: 1,
+    });
+
+    const next = mikoReducer(state, { type: "UNDO" });
+    assert.deepEqual(
+      getHashArray(next.sprite.frames[0] as string, next.sprite.palette),
+      [TRANSPARENT, "f00", "f00", TRANSPARENT]
+    );
+  });
+
+  it("leaves the other frames readable when it restores a snapshot", () => {
+    const state = initial({
+      sprite: { ...blankSprite(2), frames: ["aaaa", "bbbb"], palette: ["0f0", "f00"] },
+      frame: 0,
+      // A snapshot from before "0f0" existed, so its chars mean something else.
+      history: snapshot([TRANSPARENT, "00f"], "abba", "aaaa"),
+      historyIndex: 1,
+    });
+
+    const next = mikoReducer(state, { type: "UNDO" });
+    assert.deepEqual(
+      getHashArray(next.sprite.frames[1] as string, next.sprite.palette),
+      ["f00", "f00", "f00", "f00"],
+      "frame 1 still reads as the colour it was drawn in"
+    );
+    assert.deepEqual(
+      getHashArray(next.sprite.frames[0] as string, next.sprite.palette),
+      [TRANSPARENT, "00f", "00f", TRANSPARENT]
+    );
+  });
 });
 
 describe("sprite", () => {
   it("loading a sprite resets frame and history", () => {
-    const state = initial({ frame: 3, history: ["aaaa"], historyIndex: 1 });
+    const state = initial({ frame: 3, history: snapshot([TRANSPARENT], "aaaa"), historyIndex: 1 });
     const loaded = { ...blankSprite(3), name: "Ghost" };
     const next = mikoReducer(state, { type: "LOAD_SPRITE", sprite: loaded });
     assert.equal(next.sprite.name, "Ghost");

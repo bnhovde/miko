@@ -17,6 +17,7 @@ export {
   currentHash,
   type MikoApi,
   type MikoState,
+  type HistoryEntry,
   type UseMikoOptions,
 } from "./useMiko";
 
@@ -30,6 +31,7 @@ export {
   getRandomColor,
   normalisePalette,
   optimiseFrames,
+  recodeHash,
   firstVisibleColor,
   keepOrResetColor,
   isLockedColor,

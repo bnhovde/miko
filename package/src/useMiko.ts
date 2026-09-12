@@ -18,10 +18,14 @@ import {
   moveToIndex,
   normalisePalette,
   optimiseFrames,
+  recodeHash,
   updateHash,
   type Tool,
 } from "./editing";
 import type { MikoSprite } from "./types";
+
+/** One undo step: a frame's hash plus the palette that decodes it. */
+export type HistoryEntry = { hash: string; palette: string[] };
 
 export type MikoState = {
   /** The sprite as it currently stands, including committed edits. */
@@ -40,8 +44,10 @@ export type MikoState = {
   /** The in-progress hash for the current frame while a stroke is underway.
    *  Empty when nothing is being drawn — read `currentHash` instead of this. */
   draft: string;
-  /** Snapshots of the current frame's hash, oldest first. */
-  history: string[];
+  /** Snapshots of the current frame, oldest first. Each carries the palette
+   *  it was encoded against — `optimiseFrames` re-sorts the sprite palette on
+   *  every commit, so a bare hash stops meaning the same colours. */
+  history: HistoryEntry[];
   historyIndex: number;
 };
 
@@ -57,7 +63,7 @@ type Action =
   | { type: "UPDATE_COLOR"; index: number; color: string }
   | { type: "DRAW_START" }
   | { type: "DRAW_MOVE"; hash: string; palette: string[] }
-  | { type: "DRAW_END"; frames: string[]; palette: string[]; history: string[] }
+  | { type: "DRAW_END"; frames: string[]; palette: string[]; history: HistoryEntry[] }
   | { type: "SET_NAME"; name: string }
   | { type: "SET_SIZE"; size: number }
   | { type: "UNDO" }
@@ -83,9 +89,21 @@ const withFrame = (sprite: MikoSprite, index: number, hash: string): MikoSprite 
     : [hash],
 });
 
+/** Puts a history entry back on the current frame. The entry's hash is
+ *  re-encoded against the sprite's live palette, which the other frames are
+ *  still written in — restoring the snapshot's own palette wholesale would
+ *  scramble them. */
+const restore = (state: MikoState, historyIndex: number): MikoSprite => {
+  const entry = state.history[historyIndex];
+  if (!entry) return state.sprite;
+
+  const { hash, palette } = recodeHash(entry.hash, entry.palette, state.sprite.palette);
+  return { ...withFrame(state.sprite, state.frame, hash), palette };
+};
+
 /** Moving to a different frame abandons the current frame's undo stack —
  *  history is per-frame, not per-sprite. */
-const resetHistory = { draft: "", history: [] as string[], historyIndex: 0 };
+const resetHistory = { draft: "", history: [] as HistoryEntry[], historyIndex: 0 };
 
 /** Re-lays a flat hash string onto a different grid size, anchored top-left:
  *  pixels that still fit are kept, new space is transparent. A hash has no
@@ -232,25 +250,13 @@ export const mikoReducer = (state: MikoState, action: Action): MikoState => {
     case "UNDO": {
       if (state.historyIndex <= 0) return state;
       const historyIndex = state.historyIndex - 1;
-      const hash = state.history[historyIndex] as string;
-      return {
-        ...state,
-        historyIndex,
-        draft: "",
-        sprite: withFrame(state.sprite, state.frame, hash),
-      };
+      return { ...state, historyIndex, draft: "", sprite: restore(state, historyIndex) };
     }
 
     case "REDO": {
       if (state.historyIndex >= state.history.length - 1) return state;
       const historyIndex = state.historyIndex + 1;
-      const hash = state.history[historyIndex] as string;
-      return {
-        ...state,
-        historyIndex,
-        draft: "",
-        sprite: withFrame(state.sprite, state.frame, hash),
-      };
+      return { ...state, historyIndex, draft: "", sprite: restore(state, historyIndex) };
     }
 
     default:
@@ -372,10 +378,16 @@ export const useMiko = ({ value, size, colors, onChange }: UseMikoOptions = {}):
     // undo has somewhere to go. Undoing and then drawing discards the
     // redo tail, as every editor does.
     const base = current.history.length === 0
-      ? [current.sprite.frames[current.frame] ?? getDefaultHash(current.sprite.size)]
+      ? [{
+          hash: current.sprite.frames[current.frame] ?? getDefaultHash(current.sprite.size),
+          palette: current.sprite.palette,
+        }]
       : current.history.slice(0, current.historyIndex + 1);
 
-    const history = [...base, newFrames[current.frame] ?? committed];
+    const history = [
+      ...base,
+      { hash: newFrames[current.frame] ?? committed, palette: newPalette },
+    ];
 
     dispatch({ type: "DRAW_END", frames: newFrames, palette: newPalette, history });
     onChangeRef.current?.({ ...current.sprite, frames: newFrames, palette: newPalette });
@@ -446,14 +458,12 @@ export const useMiko = ({ value, size, colors, onChange }: UseMikoOptions = {}):
       undo: () => {
         if (state.historyIndex <= 0) return;
         dispatch({ type: "UNDO" });
-        const hash = state.history[state.historyIndex - 1] as string;
-        commit(withFrame(state.sprite, state.frame, hash));
+        commit(mikoReducer(state, { type: "UNDO" }).sprite);
       },
       redo: () => {
         if (state.historyIndex >= state.history.length - 1) return;
         dispatch({ type: "REDO" });
-        const hash = state.history[state.historyIndex + 1] as string;
-        commit(withFrame(state.sprite, state.frame, hash));
+        commit(mikoReducer(state, { type: "REDO" }).sprite);
       },
     };
   }, [state, startDrawing, draw, endDrawing, commit]);
