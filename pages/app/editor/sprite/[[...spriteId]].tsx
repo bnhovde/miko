@@ -203,6 +203,18 @@ const Home: NextPage = () => {
               label: "Share",
               onClick: () => onShare(),
             },
+            {
+              label: "Copy to clipboard",
+              onClick: () => {
+                if (!state.spriteData) return;
+                const urlSprite = encodeUrlSprite(state.spriteData);
+                const compressedParams =
+                  LZString.compressToEncodedURIComponent(
+                    JSON.stringify(urlSprite)
+                  );
+                navigator.clipboard.writeText(compressedParams);
+              },
+            },
           ]}
           shortcuts={[
             {
