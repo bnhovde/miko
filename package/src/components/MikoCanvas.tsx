@@ -2,7 +2,7 @@ import { useEffect, type CSSProperties } from "react";
 
 import { useMikoContext } from "../MikoContext";
 import { TRANSPARENT } from "../editing";
-import { swatch } from "./swatch";
+import { CHECKERBOARD, swatch } from "./swatch";
 
 export type MikoCanvasProps = {
   /** Side length of a cell in px. Default 20. */
@@ -82,7 +82,13 @@ export function MikoCanvas({ cellSize = 20, className, style }: MikoCanvasProps)
             padding: 0,
             border: "none",
             cursor: "crosshair",
-            background: swatch(color),
+            // A transparent pixel gets its own checkerboard rather than
+            // just `background: transparent` — otherwise it shows whatever
+            // sits behind the whole canvas (this grid's own --miko-grid-line
+            // fill included), which reads as "filled with a solid colour"
+            // rather than empty. Matches MikoPreview/MikoTimeline, which
+            // already checkerboard transparency the same way.
+            ...(color === TRANSPARENT ? CHECKERBOARD : { background: swatch(color) }),
           }}
         />
       ))}

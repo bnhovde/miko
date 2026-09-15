@@ -1,6 +1,6 @@
 {
   "name": "@boxworld/miko",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Embeddable pixel-sprite editor — palette + char-per-pixel frames, the miko sprite format used across the boxworld ecosystem",
   "repository": {
     "type": "git",
