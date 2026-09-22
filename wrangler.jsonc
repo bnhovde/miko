@@ -6,7 +6,7 @@
   // real one.
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "mikro-paint",
-  "main": "src/worker.ts",
+  "main": "worker/worker.ts",
   "compatibility_date": "2026-09-01",
   "workers_dev": false,
 
