@@ -8,9 +8,11 @@
   "scripts": {
     "dev": "next dev",
     "prebuild": "npm run build -w @boxworld/miko",
-    "build": "next build",
+    "build": "next build && next export",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "deploy": "npm run build && wrangler deploy",
+    "check": "wrangler deploy --dry-run"
   },
   "dependencies": {
     "@boxworld/miko": "*",
@@ -26,6 +28,7 @@
     "string-algorithms": "^1.0.31"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260922.1",
     "@types/node": "18.0.0",
     "@types/react": "18.0.14",
     "@types/react-dom": "18.0.5",
@@ -35,6 +38,7 @@
     "eslint": "8.18.0",
     "eslint-config-next": "12.1.6",
     "eslint-config-prettier": "^8.5.0",
-    "typescript": "4.7.4"
+    "typescript": "4.7.4",
+    "wrangler": "^4.136.2"
   }
 }

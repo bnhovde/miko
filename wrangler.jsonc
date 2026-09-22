@@ -1,0 +1,18 @@
+{
+  // The paint app, mounted at mikro.games/paint. Reached only through the
+  // router Worker's service binding — no route and no workers.dev
+  // hostname of its own, because a second reachable origin would get its
+  // own IndexedDB and anything saved there would be invisible from the
+  // real one.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "mikro-paint",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-09-01",
+  "workers_dev": false,
+
+  "assets": {
+    // `next export` output. Built by `npm run build`.
+    "directory": "./out",
+    "binding": "ASSETS"
+  }
+}
