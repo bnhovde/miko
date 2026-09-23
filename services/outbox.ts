@@ -37,8 +37,11 @@ const openDb = (): Promise<IDBDatabase> =>
 /** Put a sprite in the studio's inbox.
  *
  *  Only the fields the studio's sprite format actually has are sent —
- *  paint's `Sprite` also carries an id, an author and a description, which
- *  are this app's bookkeeping and have no meaning inside a game. */
+ *  paint's `Sprite` also carries an author and a description, which are
+ *  this app's bookkeeping and have no meaning inside a game. The id does
+ *  go: it is how the studio recognises a re-send of the same sprite (or of
+ *  one of its frames, imported separately) and updates it in place rather
+ *  than adding a duplicate. */
 export const sendToStudio = async (sprite: Sprite): Promise<void> => {
   const db = await openDb();
   try {
@@ -47,6 +50,7 @@ export const sendToStudio = async (sprite: Sprite): Promise<void> => {
       tx.objectStore(STORE).put({
         id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         sprite: {
+          id: sprite.id,
           name: sprite.name,
           size: sprite.size,
           fps: sprite.fps,
