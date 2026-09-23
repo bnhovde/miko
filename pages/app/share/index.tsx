@@ -77,7 +77,7 @@ const Home: NextPage = () => {
       <Head>
         <title>{`${spriteData?.name} - Mikro Paint`}</title>
         <meta name="description" content="Pixel editor" />
-        <link rel="icon" type="image/x-icon" id="favicon" />
+        <link rel="icon" type="image/svg+xml" href={`${router.basePath}/favicon.svg`} id="favicon" />
       </Head>
 
       <Header

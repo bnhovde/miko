@@ -22,7 +22,7 @@ import localStorageKeys from "constants/localStorageKeys";
 import { Spritesheet } from "types/sheet";
 
 const Home: NextPage = () => {
-  const { query, push, isReady } = useRouter();
+  const { query, push, isReady, basePath } = useRouter();
   const {
     state,
     onDrawEnd,
@@ -96,7 +96,7 @@ const Home: NextPage = () => {
             name="description"
             content="Spritesheet animator and tilemap maker"
           />
-          <link rel="icon" type="image/x-icon" id="favicon" />
+          <link rel="icon" type="image/svg+xml" href={`${basePath}/favicon.svg`} id="favicon" />
         </Head>
 
         <Header

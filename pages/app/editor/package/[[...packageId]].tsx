@@ -26,7 +26,7 @@ import PackageForm from "components/PackageForm";
 import html2canvas from "html2canvas";
 
 const Home: NextPage = () => {
-  const { query, push, isReady } = useRouter();
+  const { query, push, isReady, basePath } = useRouter();
   const { state, initPackage } = useContext(EditorContext);
   const printRef = useRef();
 
@@ -99,7 +99,7 @@ const Home: NextPage = () => {
           name="description"
           content="Spritesheet animator and tilemap maker"
         />
-        <link rel="icon" type="image/x-icon" id="favicon" />
+        <link rel="icon" type="image/svg+xml" href={`${basePath}/favicon.svg`} id="favicon" />
       </Head>
 
       <Header

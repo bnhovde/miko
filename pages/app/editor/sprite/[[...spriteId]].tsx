@@ -23,7 +23,6 @@ import { get } from "utils/localStorage";
 import localStorageKeys from "constants/localStorageKeys";
 import { Sprite } from "types/sprite";
 import { sendToStudio, announceSend } from "services/outbox";
-import { animateSpriteDeparture } from "utils/favicon";
 import SpriteForm from "components/SpriteForm";
 
 const Home: NextPage = () => {
@@ -108,20 +107,10 @@ const Home: NextPage = () => {
     // Write first: the record is what actually matters, and it should not
     // depend on an animation finishing.
     await sendToStudio(state.spriteData);
-    // Started *before* the state change below. Marking the button as sent
-    // re-renders, and next/head re-applies this page's <link rel="icon">,
-    // which carries no href — so the sprite Header painted into the favicon
-    // is wiped. Reading the icon first means the animation still has it,
-    // and its final restore puts it back.
-    const departure = animateSpriteDeparture();
     // The studio may well be in another tab, so confirm here rather than
     // leaving the click with nothing to show for it.
     setSent(true);
     window.setTimeout(() => setSent(false), 2000);
-    // Only once the sprite has left does the studio get told — so the
-    // arrival there follows the departure here instead of the two playing
-    // over each other.
-    await departure;
     announceSend();
   };
 
@@ -171,7 +160,7 @@ const Home: NextPage = () => {
               throwing away the sprite Header paints into it. A static
               fallback means a re-render costs the sprite, not the icon.
               basePath keeps it correct under /paint. */}
-          <link rel="icon" href={`${basePath}/favicon.ico`} id="favicon" />
+          <link rel="icon" type="image/svg+xml" href={`${basePath}/favicon.svg`} id="favicon" />
         </Head>
 
         <Header
