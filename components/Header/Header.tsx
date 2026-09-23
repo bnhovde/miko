@@ -71,7 +71,7 @@ const Header: React.FC<Props> = ({ title, backUrl, action }) => {
                   palette={randomSprite.palette}
                 />
               </div>
-              miko
+              mikro
             </span>
           </a>
         </Link>

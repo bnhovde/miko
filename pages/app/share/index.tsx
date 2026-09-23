@@ -75,7 +75,7 @@ const Home: NextPage = () => {
   return (
     <Screen>
       <Head>
-        <title>{`${spriteData?.name} - Miko.app`}</title>
+        <title>{`${spriteData?.name} - Mikro Paint`}</title>
         <meta name="description" content="Pixel editor" />
         <link rel="icon" type="image/x-icon" id="favicon" />
       </Head>

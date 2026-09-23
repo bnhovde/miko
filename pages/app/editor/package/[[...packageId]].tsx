@@ -38,7 +38,7 @@ const Home: NextPage = () => {
     id: guid(),
     version: "2.0.0",
     name: "Untitled package",
-    description: "This is a sprite package made with Miko.app",
+    description: "This is a sprite package made with Mikro Paint",
     size: 11,
     sprites: [],
   };
@@ -94,7 +94,7 @@ const Home: NextPage = () => {
   return (
     <Screen scrolling>
       <Head>
-        <title>Miko.app</title>
+        <title>Mikro Paint</title>
         <meta
           name="description"
           content="Spritesheet animator and tilemap maker"

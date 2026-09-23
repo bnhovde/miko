@@ -161,7 +161,7 @@ const Home: NextPage = () => {
     >
       <Screen>
         <Head>
-          <title>{state?.spriteData?.name} - Miko.app</title>
+          <title>{state?.spriteData?.name} - Mikro Paint</title>
           <meta
             name="description"
             content="Sprite animator and tilemap maker"

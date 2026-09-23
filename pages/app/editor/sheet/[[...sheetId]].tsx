@@ -91,7 +91,7 @@ const Home: NextPage = () => {
     >
       <Screen>
         <Head>
-          <title>Miko.app</title>
+          <title>Mikro Paint</title>
           <meta
             name="description"
             content="Spritesheet animator and tilemap maker"
