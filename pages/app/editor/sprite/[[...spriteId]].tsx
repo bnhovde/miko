@@ -27,7 +27,7 @@ import { animateSpriteDeparture } from "utils/favicon";
 import SpriteForm from "components/SpriteForm";
 
 const Home: NextPage = () => {
-  const { query, push, basePath } = useRouter();
+  const { query, push, basePath, isReady } = useRouter();
 
   const {
     state,
@@ -51,6 +51,13 @@ const Home: NextPage = () => {
   }, [query.editMode]);
 
   useEffect(() => {
+    // `query` is empty on the first render after a reload: this route is an
+    // optional catch-all, and a statically exported page has no server to
+    // fill the params in — Next populates them on the client, and isReady
+    // is how it says so. Without this the id reads as undefined on that
+    // first pass and the "nothing requested" branch below replaces what you
+    // reloaded with a blank one.
+    if (!isReady) return;
     if (spriteId) {
       const spriteData = get(`${localStorageKeys.SPRITE}-${spriteId}`);
       if (spriteData) {
@@ -77,7 +84,7 @@ const Home: NextPage = () => {
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [spriteId]);
+  }, [spriteId, isReady]);
 
   const onDeleteCurrentFrame = () =>
     state.spriteData?.frames && onDeleteFrame(state.currentFrame);

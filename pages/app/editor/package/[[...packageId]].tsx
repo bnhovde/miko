@@ -26,7 +26,7 @@ import PackageForm from "components/PackageForm";
 import html2canvas from "html2canvas";
 
 const Home: NextPage = () => {
-  const { query, push } = useRouter();
+  const { query, push, isReady } = useRouter();
   const { state, initPackage } = useContext(EditorContext);
   const printRef = useRef();
 
@@ -44,6 +44,13 @@ const Home: NextPage = () => {
   };
 
   useEffect(() => {
+    // `query` is empty on the first render after a reload: this route is an
+    // optional catch-all, and a statically exported page has no server to
+    // fill the params in — Next populates them on the client, and isReady
+    // is how it says so. Without this the id reads as undefined on that
+    // first pass and the "nothing requested" branch below replaces what you
+    // reloaded with a blank one.
+    if (!isReady) return;
     if (query.packageId) {
       const packageData = get(`${localStorageKeys.PACKAGE}-${query.packageId}`);
       if (packageData) {
@@ -53,7 +60,8 @@ const Home: NextPage = () => {
     } else {
       initPackage(blankSpritePackage);
     }
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query.packageId, isReady]);
 
   const onExport = async () => {
     const element = document.getElementById("package-body");

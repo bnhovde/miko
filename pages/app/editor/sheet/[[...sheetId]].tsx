@@ -22,7 +22,7 @@ import localStorageKeys from "constants/localStorageKeys";
 import { Spritesheet } from "types/sheet";
 
 const Home: NextPage = () => {
-  const { query, push } = useRouter();
+  const { query, push, isReady } = useRouter();
   const {
     state,
     onDrawEnd,
@@ -48,6 +48,13 @@ const Home: NextPage = () => {
   };
 
   useEffect(() => {
+    // `query` is empty on the first render after a reload: this route is an
+    // optional catch-all, and a statically exported page has no server to
+    // fill the params in — Next populates them on the client, and isReady
+    // is how it says so. Without this the id reads as undefined on that
+    // first pass and the "nothing requested" branch below replaces what you
+    // reloaded with a blank one.
+    if (!isReady) return;
     if (query.sheetId) {
       const spriteData = get(
         `${localStorageKeys.SPRITESHEET}-${query.sheetId}`
@@ -64,7 +71,7 @@ const Home: NextPage = () => {
         shallow: true,
       });
     }
-  }, [query]);
+  }, [query, isReady]);
 
   const onShare = () => {
     if (state.spriteData) {

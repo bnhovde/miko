@@ -11,11 +11,18 @@
  *
  *  Timers rather than requestAnimationFrame — the same reason as the
  *  studio's copy: rAF is paused in a tab that isn't being composited, and
- *  a tab losing focus mid-send is exactly the case worth surviving. */
+ *  a tab losing focus mid-send is exactly the case worth surviving.
+ *
+ *  Driven by elapsed time rather than a frame count, for the same reason
+ *  again: a background tab clamps timers to about one tick a second, so
+ *  sleeping SLIDE_MS/FRAMES eight times turned a half-second animation into
+ *  eight seconds. Reading the clock keeps the duration fixed and lets the
+ *  frame rate be whatever the tab can manage. */
 
 const SIZE = 64;
 const SLIDE_MS = 500;
-const FRAMES = 8;
+/** How often to *try* to draw. What lands depends on the tab. */
+const FRAME_MS = 60;
 
 /** cubic-bezier(0.215, 0.610, 0.355, 1) — the studio's easing, solved in
  *  JS because this is canvas rather than CSS. No closed form exists for t
@@ -71,8 +78,10 @@ export const animateSpriteDeparture = async (): Promise<void> => {
     if (el) el.href = href;
   };
 
-  for (let step = 1; step <= FRAMES; step++) {
-    const eased = easeIn(step / FRAMES);
+  const started = performance.now();
+  for (;;) {
+    const progress = Math.min(1, (performance.now() - started) / SLIDE_MS);
+    const eased = easeIn(progress);
     const canvas = document.createElement("canvas");
     canvas.width = SIZE;
     canvas.height = SIZE;
@@ -84,7 +93,8 @@ export const animateSpriteDeparture = async (): Promise<void> => {
     ctx.globalAlpha = 1 - eased;
     ctx.drawImage(art, 0, -SIZE * eased, SIZE, SIZE);
     set(canvas.toDataURL("image/png"));
-    await new Promise((r) => window.setTimeout(r, SLIDE_MS / FRAMES));
+    if (progress >= 1) break;
+    await new Promise((r) => window.setTimeout(r, FRAME_MS));
   }
 
   // Back to the sprite, so the tab looks like itself again. This also
