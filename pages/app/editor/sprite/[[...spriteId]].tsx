@@ -22,6 +22,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { get } from "utils/localStorage";
 import localStorageKeys from "constants/localStorageKeys";
 import { Sprite } from "types/sprite";
+import { sendToStudio } from "services/outbox";
 import SpriteForm from "components/SpriteForm";
 
 const Home: NextPage = () => {
@@ -90,6 +91,19 @@ const Home: NextPage = () => {
     }
   };
 
+  // Sending to the studio is the everyday move now that both apps live on
+  // one origin — Share, which opens a link in a new tab, moved into the
+  // Actions menu behind it.
+  const [sent, setSent] = useState(false);
+  const onSendToStudio = async () => {
+    if (!state.spriteData) return;
+    await sendToStudio(state.spriteData);
+    // The studio may well be in another tab, so confirm here rather than
+    // leaving the click with nothing to show for it.
+    setSent(true);
+    window.setTimeout(() => setSent(false), 2000);
+  };
+
   const onSaveSvg = () => {
     if (!state.spriteData) return;
     const sprite = state.spriteData;
@@ -150,8 +164,8 @@ const Home: NextPage = () => {
 
         <Footer
           button={{
-            text: "Share",
-            onClick: () => onShare(),
+            text: sent ? "Sent ✓" : "Send to studio",
+            onClick: () => void onSendToStudio(),
           }}
           actions={[
             {
