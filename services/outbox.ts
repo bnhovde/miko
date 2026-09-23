@@ -63,9 +63,14 @@ export const sendToStudio = async (sprite: Sprite): Promise<void> => {
     db.close();
   }
 
-  // Nudge a studio that is already open so it notices without polling. The
-  // record is the durable half — a missed message just means the studio
-  // finds it on next load instead.
+};
+
+/** Tell an open studio to look. Separate from the write on purpose: the
+ *  record is the durable half and goes in immediately, while this is timed
+ *  to land after the departure animation, so the sprite appears to leave
+ *  one tab before arriving in the other. A missed message costs nothing —
+ *  the studio finds the record on its next load. */
+export const announceSend = (): void => {
   try {
     const channel = new BroadcastChannel(CHANNEL);
     channel.postMessage({ type: "changed" });
