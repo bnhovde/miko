@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import classNames from "classnames";
 import { CgChevronLeftR } from "react-icons/cg";
 
@@ -9,6 +9,9 @@ import SpritePreview from "components/SpritePreview";
 import ThemeToggle from "components/ThemeToggle";
 import useTheme from "hooks/useTheme";
 import html2canvas from "html2canvas";
+import { useRouter } from "next/router";
+import PopoverMenu from "components/PopoverMenu";
+import { SITE_URL, STUDIO_URL, STUDIO_WINDOW, openApp } from "utils/apps";
 
 type Props = {
   title?: string;
@@ -21,6 +24,8 @@ type Props = {
 
 const Header: React.FC<Props> = ({ title, backUrl, action }) => {
   const { resolved, toggle } = useTheme();
+  const router = useRouter();
+  const [menuOpen, setMenuOpen] = useState(false);
   const headerClass = classNames({
     [styles["header"]]: true,
   });
@@ -61,8 +66,15 @@ const Header: React.FC<Props> = ({ title, backUrl, action }) => {
   return (
     <header className={headerClass}>
       <div className={styles.left}>
-        <Link href={backUrl || "/"}>
-          <a>
+        {/* The logo opens a menu of the other mikro apps, as the studio's
+            does — its old job (back/home) is the menu's first entry. */}
+        <div>
+          <button
+            type="button"
+            className={styles["logo-button"]}
+            onClick={() => setMenuOpen((open) => !open)}
+            aria-expanded={menuOpen}
+          >
             <span className={styles.logo}>
               <div className={styles.avatar}>
                 <SpritePreview
@@ -73,8 +85,19 @@ const Header: React.FC<Props> = ({ title, backUrl, action }) => {
               </div>
               mikro
             </span>
-          </a>
-        </Link>
+          </button>
+          <PopoverMenu
+            isOpen={menuOpen}
+            onClose={() => setMenuOpen(false)}
+            placement={{ vertical: "bottom", horizontal: "left" }}
+            width={220}
+            options={[
+              { label: backUrl ? "Back" : "Paint home", onClick: () => router.push(backUrl || "/") },
+              { label: "Studio ↗", onClick: () => openApp(STUDIO_URL, STUDIO_WINDOW) },
+              { label: "mikro.games", onClick: () => (window.location.href = SITE_URL) },
+            ]}
+          />
+        </div>
       </div>
       <h1 className={styles.title}>{title && title}</h1>
       <div className={styles.right}>

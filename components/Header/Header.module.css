@@ -38,6 +38,15 @@
   font-weight: bold;
 }
 
+.logo-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
 .avatar {
   width: 4rem;
   height: 4rem;
